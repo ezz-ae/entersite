@@ -2,6 +2,21 @@
 
 import { useState } from 'react';
 import { PlusCircle } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { mockPage } from '@/lib/data';
 import type { Block as BlockType, SitePage } from '@/lib/types';
 import { BlockCard } from './block-card';
@@ -17,6 +32,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { BlockGallery } from './block-gallery';
+import { SortableItem } from './sortable-item';
 
 const blockComponents: Record<string, React.ComponentType<any>> = {
   'hero': HeroBlock,
@@ -40,20 +56,76 @@ export function PageBuilder() {
   const [page, setPage] = useState<SitePage>(mockPage);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const addBlock = (blockType: string) => {
-    // This is a placeholder for adding a new block.
-    // In a real scenario, we would generate a unique ID and default data.
-    console.log("Add block of type:", blockType);
+    setPage((currentPage) => {
+      const newBlock: BlockType = {
+        blockId: `block-${Date.now()}`,
+        type: blockType,
+        order: currentPage.blocks.length + 1,
+        data: { // Add default data based on block type
+            headline: "New Headline",
+            subtext: "New subtext",
+            ctaText: "Click me",
+            projects: mockPage.blocks.find(b => b.type === 'listing-grid')?.data.projects.slice(0,1) || [],
+        },
+      };
+      return {
+        ...currentPage,
+        blocks: [...currentPage.blocks, newBlock],
+      };
+    });
     setIsGalleryOpen(false);
+  };
+  
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setPage((currentPage) => {
+        const oldIndex = currentPage.blocks.findIndex((b) => b.blockId === active.id);
+        const newIndex = currentPage.blocks.findIndex((b) => b.blockId === over.id);
+        const newBlocks = arrayMove(currentPage.blocks, oldIndex, newIndex);
+        
+        // Update order property
+        const reorderedBlocks = newBlocks.map((block, index) => ({
+          ...block,
+          order: index + 1,
+        }));
+
+        return {
+          ...currentPage,
+          blocks: reorderedBlocks,
+        };
+      });
+    }
   };
 
   return (
     <div className="space-y-8 p-4 md:p-8 bg-white rounded-lg shadow-inner">
-       {page.blocks.sort((a, b) => a.order - b.order).map((block) => (
-        <BlockCard key={block.blockId} blockType={block.type}>
-          {renderBlock(block)}
-        </BlockCard>
-      ))}
+       <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={page.blocks.map(b => b.blockId)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-8">
+            {page.blocks.sort((a, b) => a.order - b.order).map((block) => (
+              <SortableItem key={block.blockId} id={block.blockId}>
+                <BlockCard blockType={block.type}>
+                  {renderBlock(block)}
+                </BlockCard>
+              </SortableItem>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       <div className="text-center">
         <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
