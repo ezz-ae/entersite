@@ -23,6 +23,7 @@ import { BlockCard } from './block-card';
 import { HeroBlock } from './blocks/hero-block';
 import { ListingGridBlock } from './blocks/listing-grid-block';
 import { CtaFormBlock } from './blocks/cta-form-block';
+import { MapBlock, GalleryBlock, TestimonialBlock, FaqBlock } from './blocks/placeholder-blocks';
 import { Button } from './ui/button';
 import {
   Popover,
@@ -38,6 +39,10 @@ const blockComponents: Record<string, React.ComponentType<any>> = {
   'hero': HeroBlock,
   'listing-grid': ListingGridBlock,
   'cta-form': CtaFormBlock,
+  'map': MapBlock,
+  'gallery': GalleryBlock,
+  'testimonial': TestimonialBlock,
+  'faq': FaqBlock,
 };
 
 const renderBlock = (block: BlockType) => {

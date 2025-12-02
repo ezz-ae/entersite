@@ -9,19 +9,36 @@ const availableBlocks = [
     type: 'hero',
     name: 'Hero Section',
     description: 'A large, attention-grabbing section with a headline and CTA.',
-    previewImage: 'https://picsum.photos/seed/hero/400/200',
   },
   {
     type: 'listing-grid',
     name: 'Listing Grid',
     description: 'A grid to showcase multiple properties.',
-    previewImage: 'https://picsum.photos/seed/grid/400/200',
   },
   {
     type: 'cta-form',
     name: 'Contact Form',
     description: 'A form for users to get in touch.',
-    previewImage: 'https://picsum.photos/seed/form/400/200',
+  },
+  {
+    type: 'map',
+    name: 'Map',
+    description: 'An interactive map to show project locations.',
+  },
+  {
+    type: 'gallery',
+    name: 'Image Gallery',
+    description: 'A gallery to showcase project images.',
+  },
+  {
+    type: 'testimonial',
+    name: 'Testimonials',
+    description: 'Showcase client reviews and feedback.',
+  },
+  {
+    type: 'faq',
+    name: 'FAQ',
+    description: 'An accordion-style FAQ section.',
   },
 ];
 
