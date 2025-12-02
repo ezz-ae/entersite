@@ -1,8 +1,7 @@
 import type { SitePage } from '@/lib/types';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { dubaiProjects } from '@/data/dubai';
+import { allProjects } from '@/lib/projects';
 
-export const mockProjects = dubaiProjects.slice(0,4).map(p => ({
+export const mockProjects = allProjects.slice(0,4).map(p => ({
     ...p,
     id: p.id,
     title: p.name,
@@ -39,7 +38,7 @@ export const mockPage: SitePage = {
       data: {
         headline: "Featured Properties",
         subtext: "Handpicked listings that define luxury living.",
-        projects: dubaiProjects.slice(0, 3).map(p => ({...p, priceLabel: p.price.label })),
+        projects: allProjects.slice(0, 3),
       },
     },
     {

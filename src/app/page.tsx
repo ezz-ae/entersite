@@ -8,7 +8,7 @@ import { PageBuilder } from "@/components/page-builder";
 import { LayoutGrid, Plus, ChevronsUpDown } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandGroup, CommandItem } from '@/components/ui/command';
+import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { availableTemplates, SiteTemplate } from '@/lib/templates';
 import type { SitePage } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -71,16 +71,18 @@ export default function Home() {
                 </PopoverTrigger>
                 <PopoverContent className="w-[250px] p-0">
                   <Command>
-                    <CommandGroup>
-                      {availableTemplates.map((template) => (
-                        <CommandItem
-                          key={template.id}
-                          onSelect={() => handleTemplateChange(template)}
-                        >
-                          {template.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
+                    <CommandList>
+                      <CommandGroup>
+                        {availableTemplates.map((template) => (
+                          <CommandItem
+                            key={template.id}
+                            onSelect={() => handleTemplateChange(template)}
+                          >
+                            {template.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
                   </Command>
                 </PopoverContent>
               </Popover>
@@ -107,7 +109,7 @@ export default function Home() {
                     onClick={() => setActivePageId(page.id)}
                     className={cn(
                       "p-3 rounded-md cursor-pointer transition-colors",
-                      activePageId === page.id ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+                      activePageId === page.id ? "bg-primary text-primary-foreground" : "hover:bg-accent/80"
                     )}
                   >
                     <p className="font-medium">{page.title}</p>
@@ -115,7 +117,7 @@ export default function Home() {
                 ))}
               </div>
                <Button onClick={addPage} className="w-full">
-                  <Plus className="mr-2" />
+                  <Plus className="mr-2 h-4 w-4" />
                   Add New Page
                </Button>
             </SheetContent>

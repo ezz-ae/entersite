@@ -17,7 +17,6 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { mockProjects } from '@/lib/data';
 import type { Block as BlockType, SitePage } from '@/lib/types';
 import { BlockCard } from './block-card';
 import { HeroBlock } from './blocks/hero-block';
@@ -34,6 +33,7 @@ import { BlockGallery } from './block-gallery';
 import { SortableItem } from './sortable-item';
 import { suggestNextBlocks, SuggestNextBlocksOutput } from '@/ai/flows/suggest-next-blocks';
 import { Separator } from './ui/separator';
+import { allProjects } from '@/lib/projects';
 
 const blockComponents: Record<string, React.ComponentType<any>> = {
   'hero': HeroBlock,
@@ -82,7 +82,7 @@ const AddBlockPopover = ({ onSelectBlock, currentBlocks }: { onSelectBlock: (blo
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full bg-background border-2 border-dashed border-primary/50 text-primary/80 hover:bg-primary/10 hover:text-primary">
+        <Button variant="ghost" className="h-10 w-10 rounded-full border-2 border-dashed border-primary/30 text-primary/60 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-300">
           <Plus className="h-5 w-5" />
           <span className="sr-only">Add Block</span>
         </Button>
@@ -92,7 +92,7 @@ const AddBlockPopover = ({ onSelectBlock, currentBlocks }: { onSelectBlock: (blo
           <div>
             <h4 className="font-medium leading-none">Add a New Block</h4>
             <p className="text-sm text-muted-foreground">
-              Choose from the gallery or get AI suggestions.
+              Get AI suggestions or choose from the gallery.
             </p>
           </div>
           <Button onClick={handleSuggest} disabled={loading} className="w-full">
@@ -132,7 +132,6 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
   const [blocks, setBlocks] = useState<BlockType[]>(page.blocks);
 
   useEffect(() => {
-    // When the page prop changes from the outside, update the internal blocks state.
     setBlocks(page.blocks);
   }, [page]);
   
@@ -161,7 +160,7 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
         headline: "New Headline",
         subtext: "New subtext",
         ctaText: "Click me",
-        projects: mockProjects.slice(0, 3)
+        projects: allProjects.slice(0, 3)
       },
     };
     
@@ -205,7 +204,7 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
       >
         <div className="space-y-4">
            {sortedBlocks.length === 0 && (
-             <div className="text-center py-12">
+             <div className="text-center py-12 border-2 border-dashed rounded-lg">
                <h2 className="text-xl font-medium text-muted-foreground">This page is empty.</h2>
                <p className="text-muted-foreground mb-4">Start by adding a block.</p>
                <AddBlockPopover 
@@ -232,7 +231,7 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
                     {renderBlock(block)}
                   </BlockCard>
                 </SortableItem>
-                <div className="flex justify-center opacity-0 group-hover/add-block-area:opacity-100 transition-opacity duration-300">
+                <div className="flex justify-center opacity-0 group-hover/add-block-area:opacity-100 transition-opacity duration-300 -my-2 py-2">
                    <AddBlockPopover 
                       onSelectBlock={(type, content) => addBlock(type, content, index + 1)}
                       currentBlocks={sortedBlocks.map(b => b.type)}

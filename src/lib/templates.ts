@@ -21,7 +21,7 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
       ctaText: "Explore Properties",
     },
   },
-  listingGrid: {
+  'listing-grid': {
     type: 'listing-grid',
     data: {
       headline: "Featured Properties",
@@ -29,7 +29,7 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
       projects: allProjects.slice(0, 3), // Default projects
     },
   },
-  ctaForm: {
+  'cta-form': {
     type: 'cta-form',
     data: {
       headline: "Schedule a Private Viewing",
@@ -65,26 +65,16 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
 const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: { city?: string }): Block => {
     const blockData = { ...defaultBlocks[type] };
 
-    // Dynamically assign projects based on context
-    if (type === 'listingGrid' && context?.city) {
+    if (type === 'listing-grid') {
       let projectsToShow = [];
-      switch (context.city.toLowerCase()) {
-        case 'dubai':
-          projectsToShow = dubaiProjects.slice(0, 3);
-          break;
-        case 'abu dhabi':
-          projectsToShow = abuDhabiProjects.slice(0, 3);
-          break;
-        case 'ras al khaimah':
-          projectsToShow = rasAlKhaimahProjects.slice(0, 3);
-          break;
-        case 'sharjah':
-            projectsToShow = sharjahProjects.slice(0, 3);
-            break;
-        default:
-          projectsToShow = allProjects.slice(0, 3);
-          break;
-      }
+       const city = context?.city?.toLowerCase();
+
+      if (city === 'dubai') projectsToShow = dubaiProjects.slice(0, 3);
+      else if (city === 'abu dhabi') projectsToShow = abuDhabiProjects.slice(0, 3);
+      else if (city === 'ras al khaimah') projectsToShow = rasAlKhaimahProjects.slice(0, 3);
+      else if (city === 'sharjah') projectsToShow = sharjahProjects.slice(0, 3);
+      else projectsToShow = allProjects.slice(0, 3);
+      
       blockData.data.projects = projectsToShow;
     }
 
@@ -120,7 +110,7 @@ export const roadshowTemplate: SiteTemplate = {
   name: 'Dubai Roadshow Page',
   siteType: 'roadshow',
   pages: [
-    createPage('home', 'Event Details', ['hero', 'listingGrid', 'map', 'ctaForm', 'testimonial', 'faq'], { city: 'Dubai' }),
+    createPage('home', 'Event Details', ['hero', 'listing-grid', 'map', 'cta-form', 'testimonial', 'faq'], { city: 'Dubai' }),
   ],
 };
 
@@ -129,9 +119,9 @@ export const developerFocusTemplate: SiteTemplate = {
     name: 'Abu Dhabi Developer',
     siteType: 'developer-focus',
     pages: [
-      createPage('home', 'Home', ['hero', 'listingGrid', 'testimonial'], { city: 'Abu Dhabi' }),
+      createPage('home', 'Home', ['hero', 'listing-grid', 'testimonial'], { city: 'Abu Dhabi' }),
       createPage('about', 'About Us', ['hero']),
-      createPage('contact', 'Contact', ['ctaForm']),
+      createPage('contact', 'Contact', ['cta-form']),
     ],
 };
 
@@ -140,7 +130,7 @@ export const partnerLaunchTemplate: SiteTemplate = {
     name: 'RAK Partner Launch',
     siteType: 'partner-launch',
     pages: [
-        createPage('home', 'Launch Home', ['hero', 'listingGrid', 'map', 'testimonial'], { city: 'Ras Al Khaimah' }),
+        createPage('home', 'Launch Home', ['hero', 'listing-grid', 'map', 'testimonial'], { city: 'Ras Al Khaimah' }),
     ]
 };
 
@@ -149,10 +139,10 @@ export const fullCompanyTemplate: SiteTemplate = {
     name: 'Full Real Estate Company',
     siteType: 'full-company',
     pages: [
-        createPage('home', 'Home', ['hero', 'listingGrid']),
+        createPage('home', 'Home', ['hero', 'listing-grid']),
         createPage('about', 'About Us', ['hero']),
-        createPage('projects', 'Projects', ['listingGrid']),
-        createPage('contact', 'Contact Us', ['ctaForm']),
+        createPage('projects', 'Projects', ['listing-grid']),
+        createPage('contact', 'Contact Us', ['cta-form']),
     ]
 };
 
@@ -161,7 +151,7 @@ export const freelancerTemplate: SiteTemplate = {
     name: 'Freelancer Agent',
     siteType: 'freelancer',
     pages: [
-        createPage('home', 'Home', ['hero', 'listingGrid', 'testimonial', 'ctaForm']),
+        createPage('home', 'Home', ['hero', 'listing-grid', 'testimonial', 'cta-form']),
     ]
 };
 
@@ -170,7 +160,7 @@ export const mapFocusedTemplate: SiteTemplate = {
     name: 'Map-First Search',
     siteType: 'map-focused',
     pages: [
-        createPage('home', 'Map Search', ['map', 'listingGrid']),
+        createPage('home', 'Map Search', ['map', 'listing-grid']),
     ]
 };
 
@@ -179,7 +169,7 @@ export const adsQuickLaunchTemplate: SiteTemplate = {
     name: 'Landing Page + Ads',
     siteType: 'ads-launch',
     pages: [
-        createPage('home', 'Landing Page', ['hero', 'ctaForm', 'faq']),
+        createPage('home', 'Landing Page', ['hero', 'cta-form', 'faq']),
     ]
 };
 
