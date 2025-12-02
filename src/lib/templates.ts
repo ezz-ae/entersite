@@ -1,5 +1,5 @@
 import type { SitePage, Block } from './types';
-import { mockProjects } from './data';
+import { allProjects } from './projects';
 
 export interface SiteTemplate {
   id: string;
@@ -22,7 +22,7 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
     data: {
       headline: "Featured Properties",
       subtext: "Handpicked listings that define luxury living.",
-      projects: mockProjects.slice(0, 3),
+      projects: allProjects.slice(0, 3),
     },
   },
   ctaForm: {

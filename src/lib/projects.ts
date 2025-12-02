@@ -1,0 +1,102 @@
+import type { Project } from '@/lib/types';
+
+export const allProjects: Project[] = [
+  {
+    "id": "skygate-tower",
+    "name": "Skygate Tower",
+    "developer": "Tiger Properties",
+    "area": "Jumeirah Village Triangle",
+    "city": "Dubai",
+    "country": "United Arab Emirates",
+    "status": "Pipeline",
+    "priceFromAED": 638888,
+    "priceLabel": "AED 638.9K",
+    "detailPageUrl": "https://dxboffplan.com/properties/skygate-tower-jvt-dubai/",
+    "mapQuery": "Skygate Tower, Jumeirah Village Triangle, Dubai, United Arab Emirates",
+    "lastVerifiedAt": "2025-10-06"
+  },
+  {
+    "id": "elysian-residence",
+    "name": "Elysian Residence",
+    "developer": "Mfour Development Redefines Modern Living In The Heart Of Dubai",
+    "area": "Jumeirah Garden City",
+    "city": "Dubai",
+    "country": "United Arab Emirates",
+    "status": "Pipeline",
+    "priceFromAED": 1099408,
+    "priceLabel": "AED 1.1M",
+    "detailPageUrl": "https://dxboffplan.com/properties/elysian-residence-jumeirah-garden-city-dubai/",
+    "mapQuery": "Elysian Residence, Jumeirah Garden City, Dubai, United Arab Emirates",
+    "lastVerifiedAt": "2025-10-06"
+  },
+  {
+    "id": "nourelle",
+    "name": "Nourelle",
+    "developer": "Unknown Developer",
+    "area": "Madinat Jumeirah Living",
+    "city": "Dubai",
+    "country": "United Arab Emirates",
+    "status": "Pipeline",
+    "priceFromAED": 3752067,
+    "priceLabel": "AED 3.8M",
+    "detailPageUrl": "https://dxboffplan.com/properties/nourelle-madinat-jumeirah-living-mjl-dubai/",
+    "mapQuery": "Nourelle, Madinat Jumeirah Living, Dubai, United Arab Emirates",
+    "lastVerifiedAt": "2025-10-06"
+  },
+  {
+    "id": "vincitore-wellness-estate",
+    "name": "Vincitore Wellness Estate",
+    "developer": "Unknown Developer",
+    "area": "Majan",
+    "city": "Dubai",
+    "country": "United Arab Emirates",
+    "status": "Pipeline",
+    "priceFromAED": 963313,
+    "priceLabel": "AED 963.3K",
+    "detailPageUrl": "https://dxboffplan.com/properties/vincitore-wellness-estate-majan-dubai/",
+    "mapQuery": "Vincitore Wellness Estate, Majan, Dubai, United Arab Emirates",
+    "lastVerifiedAt": "2025-10-06"
+  },
+  {
+    "id": "sunset-bay-grand",
+    "name": "Sunset Bay Grand",
+    "developer": "Natural Beauty And Urban Convenience",
+    "area": "Dubai Islands",
+    "city": "Dubai",
+    "country": "United Arab Emirates",
+    "status": "Pipeline",
+    "priceFromAED": 1011241,
+    "priceLabel": "AED 1.0M",
+    "detailPageUrl": "https://dxboffplan.com/properties/sunset-bay-grand-dubai-islands/",
+    "mapQuery": "Sunset Bay Grand, Dubai Islands, Dubai, United Arab Emirates",
+    "lastVerifiedAt": "2025-10-06"
+  },
+  {
+    "id": "yas-living",
+    "name": "Yas Living",
+    "developer": "Unknown Developer",
+    "area": "Yas Island",
+    "city": "Abu Dhabi",
+    "country": "United Arab Emirates",
+    "status": "Pipeline",
+    "priceFromAED": 2813047,
+    "priceLabel": "AED 2.8M",
+    "detailPageUrl": "https://dxboffplan.com/properties/yas-living-yas-island-abu-dhabi/",
+    "mapQuery": "Yas Living, Yas Island, Abu Dhabi, United Arab Emirates",
+    "lastVerifiedAt": "2025-10-06"
+  },
+  {
+    "id": "galleria-residence",
+    "name": "Galleria Residence",
+    "developer": "Unknown Developer",
+    "area": "Dubai South",
+    "city": "Dubai",
+    "country": "United Arab Emirates",
+    "status": "Pipeline",
+    "priceFromAED": 650000,
+    "priceLabel": "AED 650.0K",
+    "detailPageUrl": "https://dxboffplan.com/properties/galleria-residence-dubai-south/",
+    "mapQuery": "Galleria Residence, Dubai South, Dubai, United Arab Emirates",
+    "lastVerifiedAt": "2025-10-06"
+  }
+];

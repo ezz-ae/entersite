@@ -19,29 +19,26 @@ export interface User {
 
 export interface Project {
   id: string;
-  title: string;
+  name: string;
   developer: string;
+  area: string;
   city: string;
-  price: number;
-  currency: string;
-  address: {
-    street: string;
-    lat: number;
-    lng: number;
-  };
-  features: {
+  country: string;
+  status: string;
+  priceFromAED: number | null;
+  priceLabel: string;
+  detailPageUrl: string;
+  mapQuery: string;
+  lastVerifiedAt: string | null;
+  images?: string[];
+  features?: {
     beds: number;
     baths: number;
     area: number;
     type: string;
   };
-  images: string[];
-  brochureUrl: string;
-  marketScore: number;
-  source: 'bayut' | 'propertyfinder' | 'dubizzle' | 'manual';
-  createdAt: string;
-  updatedAt: string;
 }
+
 
 export interface Block {
   blockId: string;
