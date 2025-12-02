@@ -1,3 +1,46 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "logo",
+      "description": "EntreSite AI logo",
+      "imageUrl": "https://images.unsplash.com/photo-1547989013-9be9d00dad2e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxsb2dvJTIwbGV0dGVyJTIwRXxlbnwwfHx8fDE3NjQ3MDQyODB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "logo letter E"
+    },
+    {
+      "id": "hero-bg",
+      "description": "A modern building exterior for a hero section background",
+      "imageUrl": "https://images.unsplash.com/photo-1521713362244-1b5e5d150b29?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtb2Rlcm4lMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzY0NjU4NDk1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern architecture"
+    },
+    {
+      "id": "property-1",
+      "description": "A luxury apartment living room",
+      "imageUrl": "https://images.unsplash.com/photo-1580041065738-e72023775cdc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxsdXh1cnklMjBhcGFydG1lbnR8ZW58MHx8fHwxNzY0NjQyMTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "luxury apartment"
+    },
+    {
+      "id": "property-2",
+      "description": "A modern villa with a swimming pool",
+      "imageUrl": "https://images.unsplash.com/photo-1723110994499-df46435aa4b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxtb2Rlcm4lMjB2aWxsYXxlbnwwfHx8fDE3NjQ2MjY1Mjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern villa"
+    },
+    {
+      "id": "property-3",
+      "description": "A stylish kitchen in a penthouse",
+      "imageUrl": "https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBraXRjaGVufGVufDB8fHx8MTc2NDYyMzg3NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern kitchen"
+    },
+    {
+      "id": "property-4",
+      "description": "A bedroom with a view of the city",
+      "imageUrl": "https://images.unsplash.com/photo-1590490359683-658d3d23f972?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YmVkcm9vbSUyMGNpdHl8ZW58MHx8fHwxNzY0NzA0Mjc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bedroom city"
+    },
+    {
+      "id": "user-avatar",
+      "description": "A placeholder for user avatar",
+      "imageUrl": "https://images.unsplash.com/photo-1590086782792-42dd2350140d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjQ2NzYxNTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    }
+  ]
 }
