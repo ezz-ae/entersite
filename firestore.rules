@@ -1,0 +1,226 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict user-ownership model for all user-generated content,
+ * including sites, pages, ads, chats, and jobs. A user has full control over the data they create
+ * but cannot access or modify data belonging to other users.
+ *
+ * Data Structure: The data is organized into two main categories:
+ * 1. User-Owned Data: Stored in user-specific paths like `/users/{userId}` or in collections like
+ *    `/sites/{siteId}` where documents contain a denormalized `ownerUid` field for direct authorization.
+ *    Subcollections for pages, ads, and chats inherit permissions from their parent site.
+ * 2. Global Libraries: Collections like `/projects`, `/blocks`, and `/templates` contain shared, read-only
+ *    data accessible to all authenticated users but not writable by them, ensuring a consistent resource pool.
+ *
+ * Key Security Decisions:
+ * - User Isolation: All rules are designed to prevent users from reading, writing, or listing
+ *   each other's private data. User enumeration is explicitly blocked by disallowing `list` on `/users`.
+ * - Denormalization for Authorization: The `/sites/{siteId}` collection includes an `ownerUid` field
+ *   on each document. This is a critical design choice that allows for simple, performant, and secure
+ *   ownership checks without needing costly `get` calls to other collections.
+ * - Inherited Permissions: Subcollections under `/sites/{siteId}` (e.g., pages, ads) derive their
+ *   permissions by checking the `ownerUid` on their parent site document. This creates a secure data boundary around each site.
+ * - Public vs. Private Content: A site's `status` field ('draft' vs. 'published') determines its read visibility.
+ *   Published sites and their pages are publicly readable, while draft content is restricted to the owner.
+ *   Sensitive subcollections like `/ads` and `/chats` remain private to the owner regardless of site status.
+ * - Secure Listing: Listing is disabled for the top-level `/sites` collection to prevent accidental data leaks.
+ *   Client applications should use a backend Cloud Function to retrieve a list of the current user's sites.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --------------------------------------------------------------------------------
+    // Helper Functions
+    // --------------------------------------------------------------------------------
+
+    /**
+     * Checks if a user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the currently authenticated user's UID matches the provided userId.
+     * Use this for path-based ownership rules (e.g., /users/{userId}).
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks for ownership on an existing document. For update/delete operations.
+     * Enforces that the document must exist before the operation is allowed.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * Checks if the authenticated user is the owner of a site by reading the
+     * denormalized `ownerUid` from the parent /sites/{siteId} document.
+     * This is used to secure all site subcollections.
+     */
+    function isSiteOwner(siteId) {
+      return isSignedIn() && get(/databases/$(database)/documents/sites/$(siteId)).data.ownerUid == request.auth.uid;
+    }
+
+    /**
+     * Checks if a parent site is published.
+     * Allows for public read access on subcollections like pages.
+     */
+    function isSitePublished(siteId) {
+      return get(/databases/$(database)/documents/sites/$(siteId)).data.status == 'published';
+    }
+
+    // --------------------------------------------------------------------------------
+    // User Data Rules
+    // --------------------------------------------------------------------------------
+
+    /**
+     * @description Users can create their own profile and manage it. They cannot see or list other users.
+     * @path /users/{userId}
+     * @allow (create) A new user signing up: auth.uid == 'user_abc', creating doc at /users/user_abc
+     * @deny  (get) An authenticated user trying to read another user's profile.
+     * @principle Restricts access to a user's own data tree and prevents user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    // --------------------------------------------------------------------------------
+    // Global Read-Only Library Rules
+    // --------------------------------------------------------------------------------
+
+    /**
+     * @description Projects are part of a global, read-only library for all authenticated users.
+     * @path /projects/{projectId}
+     * @allow (get) Any authenticated user can read a project's details.
+     * @deny  (create) No client is allowed to create, update, or delete projects.
+     * @principle Provides a secure, read-only data source managed by backend processes.
+     */
+    match /projects/{projectId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Blocks are part of a global, read-only library for all authenticated users.
+     * @path /blocks/{blockId}
+     * @allow (get) Any authenticated user can read a block's details.
+     * @deny  (create) No client is allowed to create, update, or delete blocks.
+     * @principle Provides a secure, read-only data source managed by backend processes.
+     */
+    match /blocks/{blockId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Templates are part of a global, read-only library for all authenticated users.
+     * @path /templates/{templateId}
+     * @allow (get) Any authenticated user can read a template's details.
+     * @deny  (create) No client is allowed to create, update, or delete templates.
+     * @principle Provides a secure, read-only data source managed by backend processes.
+     */
+    match /templates/{templateId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // --------------------------------------------------------------------------------
+    // Site and Subcollection Rules
+    // --------------------------------------------------------------------------------
+
+    /**
+     * @description Users can manage their own sites. Published sites are public-read, drafts are private.
+     * @path /sites/{siteId}
+     * @allow (create) An authenticated user creating a new site with their own UID as ownerUid.
+     * @deny  (update) A user trying to change the ownerUid of an existing site.
+     * @principle Enforces document ownership for writes and conditional public access for reads.
+     */
+    match /sites/{siteId} {
+      allow get: if isOwner(resource.data.ownerUid) || resource.data.status == 'published';
+      allow list: if false; // Denied to prevent leaking all site data. Use a Cloud Function for user-specific listing.
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isExistingOwner(resource.data.ownerUid) && request.resource.data.ownerUid == resource.data.ownerUid;
+      allow delete: if isExistingOwner(resource.data.ownerUid);
+
+      /**
+       * @description Pages inherit permissions from the parent site. Public if site is published.
+       * @path /sites/{siteId}/pages/{pageId}
+       * @allow (get) Any user reading a page from a site with status == 'published'.
+       * @deny  (update) A user trying to edit a page on a site they do not own.
+       * @principle Secures a subcollection based on a denormalized ownership field in the parent document.
+       */
+      match /pages/{pageId} {
+        allow get: if isSiteOwner(siteId) || isSitePublished(siteId);
+        allow list: if isSiteOwner(siteId) || isSitePublished(siteId);
+        allow create: if isSiteOwner(siteId) && request.resource.data.siteId == siteId;
+        allow update: if isSiteOwner(siteId) && resource != null && request.resource.data.siteId == resource.data.siteId;
+        allow delete: if isSiteOwner(siteId) && resource != null;
+      }
+
+      /**
+       * @description Ad campaigns are private and can only be managed by the site owner.
+       * @path /sites/{siteId}/ads/{adId}
+       * @allow (get, list, create) The site owner managing their ad campaigns.
+       * @deny  (get) Any user, including anonymous, trying to read ad data, even for a published site.
+       * @principle Enforces strict ownership for sensitive subcollections, ignoring parent's public status.
+       */
+      match /ads/{adId} {
+        allow get: if isSiteOwner(siteId);
+        allow list: if isSiteOwner(siteId);
+        allow create: if isSiteOwner(siteId) && request.resource.data.siteId == siteId;
+        allow update: if isSiteOwner(siteId) && resource != null && request.resource.data.siteId == resource.data.siteId;
+        allow delete: if isSiteOwner(siteId) && resource != null;
+      }
+
+      /**
+       * @description Chat sessions are private and can only be accessed by the site owner.
+       * @path /sites/{siteId}/chats/{sessionId}
+       * @allow (get, list, create) The site owner accessing their chat logs and sessions.
+       * @deny  (get) Any user trying to read chat data, even for a published site.
+       * @principle Enforces strict ownership for sensitive subcollections, ignoring parent's public status.
+       */
+      match /chats/{sessionId} {
+        allow get: if isSiteOwner(siteId);
+        allow list: if isSiteOwner(siteId);
+        allow create: if isSiteOwner(siteId) && request.resource.data.siteId == siteId;
+        allow update: if isSiteOwner(siteId) && resource != null && request.resource.data.siteId == resource.data.siteId;
+        allow delete: if isSiteOwner(siteId) && resource != null;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    // Job Rules
+    // --------------------------------------------------------------------------------
+
+    /**
+     * @description Users can create and monitor their own asynchronous jobs.
+     * @path /jobs/{userId}/{jobId}
+     * @allow (create) User 'user_abc' creating a job at /jobs/user_abc/job_123.
+     * @deny  (get) User 'user_xyz' trying to read job status from /jobs/user_abc/job_123.
+     * @principle Secures user-specific data using path-based ownership.
+     */
+    match /jobs/{userId}/{jobId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+  }
+}
