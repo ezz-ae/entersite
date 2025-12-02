@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, PlusCircle, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Sparkles } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -17,7 +17,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { mockPage, mockProjects } from '@/lib/data';
+import { mockProjects } from '@/lib/data';
 import type { Block as BlockType, SitePage } from '@/lib/types';
 import { BlockCard } from './block-card';
 import { HeroBlock } from './blocks/hero-block';
@@ -52,7 +52,7 @@ const renderBlock = (block: BlockType) => {
   return <Component {...block.data} />;
 };
 
-const AddBlockPopover = ({ onSelectBlock }: { onSelectBlock: (blockType: string, content?: any) => void }) => {
+const AddBlockPopover = ({ onSelectBlock, currentBlocks }: { onSelectBlock: (blockType: string, content?: any) => void, currentBlocks: string[] }) => {
   const [suggestions, setSuggestions] = useState<SuggestNextBlocksOutput>([]);
   const [loading, setLoading] = useState(false);
 
@@ -60,7 +60,7 @@ const AddBlockPopover = ({ onSelectBlock }: { onSelectBlock: (blockType: string,
     setLoading(true);
     try {
       const result = await suggestNextBlocks({
-        currentBlocks: [],
+        currentBlocks: currentBlocks,
         siteType: 'developer-launch',
         brand: 'Prestige',
         primaryColor: '#002F4B'
@@ -118,9 +118,27 @@ const AddBlockPopover = ({ onSelectBlock }: { onSelectBlock: (blockType: string,
   );
 };
 
+interface PageBuilderProps {
+  page: SitePage;
+  onPageUpdate: (page: SitePage) => void;
+}
 
-export function PageBuilder() {
-  const [page, setPage] = useState<SitePage>(mockPage);
+export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
+  const [blocks, setBlocks] = useState<BlockType[]>(page.blocks);
+
+  useEffect(() => {
+    // When the page prop changes from the outside, update the internal blocks state.
+    setBlocks(page.blocks);
+  }, [page]);
+  
+  const updatePage = (newBlocks: BlockType[]) => {
+    setBlocks(newBlocks);
+    onPageUpdate({
+      ...page,
+      blocks: newBlocks,
+    });
+  };
+
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -142,46 +160,36 @@ export function PageBuilder() {
       },
     };
     
-    setPage((currentPage) => {
-      const newBlocks = [...currentPage.blocks];
-      const targetIndex = index !== undefined ? index : newBlocks.length;
-      newBlocks.splice(targetIndex, 0, newBlock);
+    const newBlocksList = [...blocks];
+    const targetIndex = index !== undefined ? index : newBlocksList.length;
+    newBlocksList.splice(targetIndex, 0, newBlock);
 
-      const reorderedBlocks = newBlocks.map((block, i) => ({
-        ...block,
-        order: i,
-      }));
-
-      return {
-        ...currentPage,
-        blocks: reorderedBlocks,
-      };
-    });
+    const reorderedBlocks = newBlocksList.map((block, i) => ({
+      ...block,
+      order: i,
+    }));
+    
+    updatePage(reorderedBlocks);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      setPage((currentPage) => {
-        const oldIndex = currentPage.blocks.findIndex((b) => b.blockId === active.id);
-        const newIndex = currentPage.blocks.findIndex((b) => b.blockId === over.id);
-        const newBlocks = arrayMove(currentPage.blocks, oldIndex, newIndex);
+        const oldIndex = blocks.findIndex((b) => b.blockId === active.id);
+        const newIndex = blocks.findIndex((b) => b.blockId === over.id);
+        const movedBlocks = arrayMove(blocks, oldIndex, newIndex);
         
-        const reorderedBlocks = newBlocks.map((block, index) => ({
+        const reorderedBlocks = movedBlocks.map((block, index) => ({
           ...block,
           order: index,
         }));
 
-        return {
-          ...currentPage,
-          blocks: reorderedBlocks,
-        };
-      });
+        updatePage(reorderedBlocks);
     }
   };
 
-  const sortedBlocks = page.blocks.sort((a, b) => a.order - b.order);
+  const sortedBlocks = blocks.sort((a, b) => a.order - b.order);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -191,9 +199,25 @@ export function PageBuilder() {
         onDragEnd={handleDragEnd}
       >
         <div className="space-y-4">
-          <div className="flex justify-center">
-            <AddBlockPopover onSelectBlock={(type, content) => addBlock(type, content, 0)} />
-          </div>
+           {sortedBlocks.length === 0 && (
+             <div className="text-center py-12">
+               <h2 className="text-xl font-medium text-muted-foreground">This page is empty.</h2>
+               <p className="text-muted-foreground mb-4">Start by adding a block.</p>
+               <AddBlockPopover 
+                  onSelectBlock={(type, content) => addBlock(type, content, 0)}
+                  currentBlocks={[]}
+                />
+             </div>
+           )}
+
+          {sortedBlocks.length > 0 && (
+            <div className="flex justify-center">
+              <AddBlockPopover 
+                onSelectBlock={(type, content) => addBlock(type, content, 0)}
+                currentBlocks={sortedBlocks.map(b => b.type)}
+              />
+            </div>
+          )}
 
           <SortableContext items={sortedBlocks.map(b => b.blockId)} strategy={verticalListSortingStrategy}>
             {sortedBlocks.map((block, index) => (
@@ -204,7 +228,10 @@ export function PageBuilder() {
                   </BlockCard>
                 </SortableItem>
                 <div className="flex justify-center opacity-0 group-hover/add-block-area:opacity-100 transition-opacity duration-300">
-                   <AddBlockPopover onSelectBlock={(type, content) => addBlock(type, content, index + 1)} />
+                   <AddBlockPopover 
+                      onSelectBlock={(type, content) => addBlock(type, content, index + 1)}
+                      currentBlocks={sortedBlocks.map(b => b.type)}
+                   />
                 </div>
               </div>
             ))}
