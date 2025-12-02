@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PlusCircle } from 'lucide-react';
+import { Plus, PlusCircle, Sparkles } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -17,7 +17,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { mockPage } from '@/lib/data';
+import { mockPage, mockProjects } from '@/lib/data';
 import type { Block as BlockType, SitePage } from '@/lib/types';
 import { BlockCard } from './block-card';
 import { HeroBlock } from './blocks/hero-block';
@@ -25,14 +25,14 @@ import { ListingGridBlock } from './blocks/listing-grid-block';
 import { CtaFormBlock } from './blocks/cta-form-block';
 import { Button } from './ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { BlockGallery } from './block-gallery';
 import { SortableItem } from './sortable-item';
+import { suggestNextBlocks, SuggestNextBlocksOutput } from '@/ai/flows/suggest-next-blocks';
+import { Separator } from './ui/separator';
 
 const blockComponents: Record<string, React.ComponentType<any>> = {
   'hero': HeroBlock,
@@ -52,9 +52,75 @@ const renderBlock = (block: BlockType) => {
   return <Component {...block.data} />;
 };
 
+const AddBlockPopover = ({ onSelectBlock }: { onSelectBlock: (blockType: string, content?: any) => void }) => {
+  const [suggestions, setSuggestions] = useState<SuggestNextBlocksOutput>([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleSuggest = async () => {
+    setLoading(true);
+    try {
+      const result = await suggestNextBlocks({
+        currentBlocks: [],
+        siteType: 'developer-launch',
+        brand: 'Prestige',
+        primaryColor: '#002F4B'
+      });
+      setSuggestions(result);
+    } catch (e) {
+      console.error(e);
+      // Handle error - maybe show a toast
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full bg-background border-2 border-dashed border-primary/50 text-primary/80 hover:bg-primary/10 hover:text-primary">
+          <Plus className="h-5 w-5" />
+          <span className="sr-only">Add Block</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-96 p-4">
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-medium leading-none">Add a New Block</h4>
+            <p className="text-sm text-muted-foreground">
+              Choose from the gallery or get AI suggestions.
+            </p>
+          </div>
+          <Button onClick={handleSuggest} disabled={loading} className="w-full">
+            <Sparkles className="mr-2 h-4 w-4" />
+            {loading ? 'Thinking...' : 'Suggest Blocks'}
+          </Button>
+          {suggestions.length > 0 && (
+             <div className="space-y-2">
+                <Separator />
+                <h5 className="font-medium text-sm">Suggestions</h5>
+                {suggestions.map(suggestion => (
+                    <div
+                        key={suggestion.blockId}
+                        onClick={() => onSelectBlock(suggestion.blockId, suggestion.defaultContent)}
+                        className="p-2 rounded-md hover:bg-accent cursor-pointer"
+                    >
+                        <p className="font-medium text-sm capitalize">{suggestion.blockId.replace('-', ' ')}</p>
+                    </div>
+                ))}
+             </div>
+          )}
+          <Separator />
+          <h5 className="font-medium text-sm">Or choose from gallery</h5>
+          <BlockGallery onSelectBlock={(type) => onSelectBlock(type)} />
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+
 export function PageBuilder() {
   const [page, setPage] = useState<SitePage>(mockPage);
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -63,27 +129,36 @@ export function PageBuilder() {
     })
   );
 
-  const addBlock = (blockType: string) => {
+  const addBlock = (blockType: string, content?: any, index?: number) => {
+    const newBlock: BlockType = {
+      blockId: `${blockType}-${Date.now()}`,
+      type: blockType,
+      order: 0, // Order will be recalculated
+      data: content || {
+        headline: "New Headline",
+        subtext: "New subtext",
+        ctaText: "Click me",
+        projects: mockProjects.slice(0, 3)
+      },
+    };
+    
     setPage((currentPage) => {
-      const newBlock: BlockType = {
-        blockId: `block-${Date.now()}`,
-        type: blockType,
-        order: currentPage.blocks.length + 1,
-        data: { // Add default data based on block type
-            headline: "New Headline",
-            subtext: "New subtext",
-            ctaText: "Click me",
-            projects: mockPage.blocks.find(b => b.type === 'listing-grid')?.data.projects.slice(0,1) || [],
-        },
-      };
+      const newBlocks = [...currentPage.blocks];
+      const targetIndex = index !== undefined ? index : newBlocks.length;
+      newBlocks.splice(targetIndex, 0, newBlock);
+
+      const reorderedBlocks = newBlocks.map((block, i) => ({
+        ...block,
+        order: i,
+      }));
+
       return {
         ...currentPage,
-        blocks: [...currentPage.blocks, newBlock],
+        blocks: reorderedBlocks,
       };
     });
-    setIsGalleryOpen(false);
   };
-  
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -93,10 +168,9 @@ export function PageBuilder() {
         const newIndex = currentPage.blocks.findIndex((b) => b.blockId === over.id);
         const newBlocks = arrayMove(currentPage.blocks, oldIndex, newIndex);
         
-        // Update order property
         const reorderedBlocks = newBlocks.map((block, index) => ({
           ...block,
-          order: index + 1,
+          order: index,
         }));
 
         return {
@@ -107,42 +181,36 @@ export function PageBuilder() {
     }
   };
 
+  const sortedBlocks = page.blocks.sort((a, b) => a.order - b.order);
+
   return (
-    <div className="space-y-8 p-4 md:p-8 bg-white rounded-lg shadow-inner">
-       <DndContext
+    <div className="max-w-4xl mx-auto">
+      <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext items={page.blocks.map(b => b.blockId)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-8">
-            {page.blocks.sort((a, b) => a.order - b.order).map((block) => (
-              <SortableItem key={block.blockId} id={block.blockId}>
-                <BlockCard blockType={block.type}>
-                  {renderBlock(block)}
-                </BlockCard>
-              </SortableItem>
-            ))}
+        <div className="space-y-4">
+          <div className="flex justify-center">
+            <AddBlockPopover onSelectBlock={(type, content) => addBlock(type, content, 0)} />
           </div>
-        </SortableContext>
-      </DndContext>
 
-      <div className="text-center">
-        <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="lg" className="border-dashed">
-                <PlusCircle className="mr-2"/>
-                Add Block
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl h-[80vh]">
-            <DialogHeader>
-              <DialogTitle>Select a block to add</DialogTitle>
-            </DialogHeader>
-            <BlockGallery onSelectBlock={addBlock} />
-          </DialogContent>
-        </Dialog>
-      </div>
+          <SortableContext items={sortedBlocks.map(b => b.blockId)} strategy={verticalListSortingStrategy}>
+            {sortedBlocks.map((block, index) => (
+              <div key={block.blockId} className="space-y-4 group/add-block-area">
+                <SortableItem id={block.blockId}>
+                  <BlockCard blockType={block.type}>
+                    {renderBlock(block)}
+                  </BlockCard>
+                </SortableItem>
+                <div className="flex justify-center opacity-0 group-hover/add-block-area:opacity-100 transition-opacity duration-300">
+                   <AddBlockPopover onSelectBlock={(type, content) => addBlock(type, content, index + 1)} />
+                </div>
+              </div>
+            ))}
+          </SortableContext>
+        </div>
+      </DndContext>
     </div>
   );
 }
