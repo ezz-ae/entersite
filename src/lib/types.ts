@@ -17,28 +17,6 @@ export interface User {
   updatedAt: string;
 }
 
-export interface Project {
-  id: string;
-  name: string;
-  developer: string;
-  area: string;
-  city: string;
-  country: string;
-  status: string;
-  priceFromAED: number | null;
-  priceLabel: string;
-  detailPageUrl: string;
-  mapQuery: string;
-  lastVerifiedAt: string | null;
-  images?: string[];
-  features?: {
-    beds: number;
-    baths: number;
-    area: number;
-    type: string;
-  };
-}
-
 export interface ProjectData {
   id: string;
   name: string;

@@ -1,5 +1,9 @@
 import type { SitePage, Block } from './types';
 import { allProjects } from './projects';
+import { dubaiProjects } from '@/data/dubai';
+import { abuDhabiProjects } from '@/data/abudhabi';
+import { rasAlKhaimahProjects } from '@/data/rasalkhaimah';
+import { sharjahProjects } from '@/data/sharjah';
 
 export interface SiteTemplate {
   id: string;
@@ -22,7 +26,7 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
     data: {
       headline: "Featured Properties",
       subtext: "Handpicked listings that define luxury living.",
-      projects: allProjects.slice(0, 3),
+      projects: allProjects.slice(0, 3), // Default projects
     },
   },
   ctaForm: {
@@ -58,25 +62,46 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   }
 };
 
-const createBlock = (type: keyof typeof defaultBlocks, order: number): Block => {
-    const blockData = defaultBlocks[type] || defaultBlocks['hero'];
+const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: { city?: string }): Block => {
+    const blockData = { ...defaultBlocks[type] };
+
+    // Dynamically assign projects based on context
+    if (type === 'listingGrid' && context?.city) {
+      let projectsToShow = [];
+      switch (context.city.toLowerCase()) {
+        case 'dubai':
+          projectsToShow = dubaiProjects.slice(0, 3);
+          break;
+        case 'abu dhabi':
+          projectsToShow = abuDhabiProjects.slice(0, 3);
+          break;
+        case 'ras al khaimah':
+          projectsToShow = rasAlKhaimahProjects.slice(0, 3);
+          break;
+        case 'sharjah':
+            projectsToShow = sharjahProjects.slice(0, 3);
+            break;
+        default:
+          projectsToShow = allProjects.slice(0, 3);
+          break;
+      }
+      blockData.data.projects = projectsToShow;
+    }
+
+
     return {
         blockId: `${blockData.type}-${Date.now()}-${Math.random()}`,
         type: blockData.type,
         order: order,
-        data: {
-          ...blockData.data,
-          // ensure projects are sliced for listing grid
-          ...(type === 'listingGrid' && { projects: allProjects.slice(0, 3) })
-        }
+        data: blockData.data,
     }
 }
 
-const createPage = (id: string, title: string, blocks: (keyof typeof defaultBlocks)[]): SitePage => {
+const createPage = (id: string, title: string, blocks: (keyof typeof defaultBlocks)[], context?: { city?: string }): SitePage => {
     return {
         id: `page-${id}`,
         title: title,
-        blocks: blocks.map((type, index) => createBlock(type, index + 1)),
+        blocks: blocks.map((type, index) => createBlock(type, index + 1, context)),
         canonicalListings: [],
         brochureUrl: "",
         seo: {
@@ -92,19 +117,19 @@ const createPage = (id: string, title: string, blocks: (keyof typeof defaultBloc
 
 export const roadshowTemplate: SiteTemplate = {
   id: 'template-roadshow',
-  name: 'Roadshow Landing Page',
+  name: 'Dubai Roadshow Page',
   siteType: 'roadshow',
   pages: [
-    createPage('home', 'Event Details', ['hero', 'gallery', 'map', 'ctaForm', 'testimonial', 'faq']),
+    createPage('home', 'Event Details', ['hero', 'listingGrid', 'map', 'ctaForm', 'testimonial', 'faq'], { city: 'Dubai' }),
   ],
 };
 
 export const developerFocusTemplate: SiteTemplate = {
     id: 'template-dev-focus',
-    name: 'Developer Focus',
+    name: 'Abu Dhabi Developer',
     siteType: 'developer-focus',
     pages: [
-      createPage('home', 'Home', ['hero', 'listingGrid', 'testimonial']),
+      createPage('home', 'Home', ['hero', 'listingGrid', 'testimonial'], { city: 'Abu Dhabi' }),
       createPage('about', 'About Us', ['hero']),
       createPage('contact', 'Contact', ['ctaForm']),
     ],
@@ -112,10 +137,10 @@ export const developerFocusTemplate: SiteTemplate = {
 
 export const partnerLaunchTemplate: SiteTemplate = {
     id: 'template-partner-launch',
-    name: 'Partner Launch',
+    name: 'RAK Partner Launch',
     siteType: 'partner-launch',
     pages: [
-        createPage('home', 'Launch Home', ['hero', 'listingGrid', 'map', 'testimonial']),
+        createPage('home', 'Launch Home', ['hero', 'listingGrid', 'map', 'testimonial'], { city: 'Ras Al Khaimah' }),
     ]
 };
 
