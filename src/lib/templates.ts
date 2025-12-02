@@ -57,7 +57,14 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   faq: {
       type: 'faq',
       data: {
-          headline: 'Frequently Asked Questions'
+          headline: 'Frequently Asked Questions',
+          subtext: "Find answers to common questions about our properties and services.",
+          faqItems: [
+              { question: "What types of properties do you offer?", answer: "We offer a wide range of properties including luxury villas, modern apartments, and exclusive townhouses in prime locations." },
+              { question: "Can I schedule a viewing online?", answer: "Yes, you can easily schedule a private viewing through our contact form. One of our agents will get in touch with you to confirm the details." },
+              { question: "Are there financing options available?", answer: "We work with several trusted financial partners to offer you flexible financing options. Please contact us for more information." },
+              { question: "What amenities are included?", answer: "Our properties come with a variety of high-end amenities, which may include private pools, state-of-the-art gyms, community centers, and more. Specific amenities vary by project." }
+          ]
       }
   }
 };

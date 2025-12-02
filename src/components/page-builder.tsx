@@ -23,7 +23,8 @@ import { HeroBlock } from './blocks/hero-block';
 import { ListingGridBlock } from './blocks/listing-grid-block';
 import { CtaFormBlock } from './blocks/cta-form-block';
 import { GalleryBlock } from './blocks/gallery-block';
-import { MapBlock, TestimonialBlock, FaqBlock } from './blocks/placeholder-blocks';
+import { FaqBlock } from './blocks/faq-block';
+import { MapBlock, TestimonialBlock } from './blocks/placeholder-blocks';
 import { Button } from './ui/button';
 import {
   Popover,
