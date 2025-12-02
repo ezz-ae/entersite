@@ -1,3 +1,8 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/firebase';
 import {
   SidebarProvider,
   Sidebar,
@@ -29,8 +34,32 @@ import { UserNav } from "@/components/user-nav";
 import { EntreSiteLogo } from "@/components/icons";
 import { PageBuilder } from "@/components/page-builder";
 import { mockPage } from "@/lib/data";
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isUserLoading, router]);
+
+  if (isUserLoading || !user) {
+    return (
+       <div className="flex items-center justify-center h-screen">
+         <div className="flex items-center space-x-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
+            </div>
+         </div>
+       </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <Sidebar variant="inset" collapsible="icon">
