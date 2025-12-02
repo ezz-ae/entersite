@@ -64,7 +64,11 @@ const createBlock = (type: keyof typeof defaultBlocks, order: number): Block => 
         blockId: `${blockData.type}-${Date.now()}-${Math.random()}`,
         type: blockData.type,
         order: order,
-        data: blockData.data,
+        data: {
+          ...blockData.data,
+          // ensure projects are sliced for listing grid
+          ...(type === 'listingGrid' && { projects: allProjects.slice(0, 3) })
+        }
     }
 }
 

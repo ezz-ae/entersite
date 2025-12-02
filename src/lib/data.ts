@@ -1,20 +1,16 @@
 import type { SitePage } from '@/lib/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { allProjects } from './projects';
+import { dubaiProjects } from '@/data/dubai';
 
-export const mockProjects = allProjects.slice(0,4).map(p => ({
+export const mockProjects = dubaiProjects.slice(0,4).map(p => ({
     ...p,
     id: p.id,
     title: p.name,
-    price: p.priceFromAED || 0,
+    price: p.price.from,
     currency: "AED",
-    address: { street: p.area, lat: 0, lng: 0 },
+    address: { street: p.location.area, lat: 0, lng: 0 },
     features: { beds: 3, baths: 2, area: 1800, type: "apartment" },
-    images: [
-      PlaceHolderImages.find(img => img.id === 'property-1')?.imageUrl || '',
-      PlaceHolderImages.find(img => img.id === 'property-2')?.imageUrl || '',
-      PlaceHolderImages.find(img => img.id === 'property-3')?.imageUrl || ''
-    ],
+    images: p.images,
     brochureUrl: "",
     marketScore: 88,
     source: 'manual',
@@ -43,7 +39,7 @@ export const mockPage: SitePage = {
       data: {
         headline: "Featured Properties",
         subtext: "Handpicked listings that define luxury living.",
-        projects: allProjects.slice(0, 3),
+        projects: dubaiProjects.slice(0, 3).map(p => ({...p, priceLabel: p.price.label })),
       },
     },
     {

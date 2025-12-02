@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { MapPin, Bed, Bath, AreaChart } from 'lucide-react';
-import type { Project } from '@/lib/types';
+import type { ProjectData } from '@/lib/types';
 import {
   Card,
   CardContent,
@@ -13,7 +13,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 interface ListingGridBlockProps {
   headline: string;
   subtext: string;
-  projects: Project[];
+  projects: (ProjectData & {priceLabel?: string})[];
 }
 
 export function ListingGridBlock({ headline, subtext, projects }: ListingGridBlockProps) {
@@ -37,36 +37,17 @@ export function ListingGridBlock({ headline, subtext, projects }: ListingGridBlo
                   className="object-cover"
                   data-ai-hint="luxury property"
                 />
-                 {project.features?.type && <Badge variant="secondary" className="absolute top-3 right-3">{project.features.type}</Badge>}
               </div>
             </CardHeader>
             <CardContent className="p-4 space-y-3">
               <h3 className="text-xl font-semibold truncate">{project.name}</h3>
               <div className="flex items-center text-muted-foreground text-sm">
                 <MapPin className="mr-1.5" />
-                <span>{project.city}</span>
+                <span>{project.location.city}</span>
               </div>
-              {project.features && (
-                <div className="flex justify-between items-center pt-2">
-                  <div className="flex gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <Bed />
-                      <span>{project.features.beds}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Bath />
-                      <span>{project.features.baths}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <AreaChart />
-                      <span>{project.features.area.toLocaleString()} sqft</span>
-                    </div>
-                  </div>
-                </div>
-              )}
                <div className="pt-2">
                 <p className="text-2xl font-bold text-primary">
-                  {project.priceLabel}
+                  {project.price.label}
                 </p>
               </div>
             </CardContent>

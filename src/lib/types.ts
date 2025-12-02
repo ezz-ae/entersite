@@ -39,6 +39,30 @@ export interface Project {
   };
 }
 
+export interface ProjectData {
+  id: string;
+  name: string;
+  developer: string;
+  location: {
+    city: string;
+    area: string;
+    mapQuery: string;
+  };
+  launchYear: number;
+  deliveryYear: number;
+  description: {
+    full: string;
+    short: string;
+  };
+  features: string[];
+  price: {
+    from: number;
+    label: string;
+  };
+  availability: 'Available' | 'Sold Out' | 'Coming Soon';
+  images: string[];
+}
+
 
 export interface Block {
   blockId: string;
