@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Building, Smile, HelpCircle } from "lucide-react";
+import { MapPin, Smile, HelpCircle } from "lucide-react";
 
 const PlaceholderBlock = ({ icon: Icon, title }: { icon: React.ElementType, title: string }) => (
   <Card className="bg-muted/30 border-dashed">
@@ -14,6 +14,5 @@ const PlaceholderBlock = ({ icon: Icon, title }: { icon: React.ElementType, titl
 );
 
 export const MapBlock = () => <PlaceholderBlock icon={MapPin} title="Map" />;
-export const GalleryBlock = () => <PlaceholderBlock icon={Building} title="Gallery" />;
 export const TestimonialBlock = () => <PlaceholderBlock icon={Smile} title="Testimonial" />;
 export const FaqBlock = () => <PlaceholderBlock icon={HelpCircle} title="FAQ" />;
