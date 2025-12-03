@@ -9,7 +9,4 @@ export const allProjects: ProjectData[] = [
   ...abuDhabiProjects,
   ...rasAlKhaimahProjects,
   ...sharjahProjects,
-].map(p => ({
-  ...p,
-  priceLabel: p.price.label,
-}));
+];

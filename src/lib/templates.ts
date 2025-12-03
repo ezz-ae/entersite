@@ -21,6 +21,30 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
       ctaText: "Explore Properties",
     },
   },
+  'launch-hero': {
+      type: 'launch-hero',
+      data: {
+          headline: "The Future of Living Arrives Soon"
+      }
+  },
+  'coming-soon-hero': {
+      type: 'coming-soon-hero',
+      data: {
+          headline: "Something Extraordinary is Coming"
+      }
+  },
+  'hero-lead-form': {
+    type: 'hero-lead-form',
+    data: {
+        headline: "Find Your Dream Home",
+    }
+  },
+  'search-filters': {
+      type: 'search-filters',
+      data: {
+          headline: "Search Properties"
+      }
+  },
   'listing-grid': {
     type: 'listing-grid',
     data: {
@@ -29,12 +53,43 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
       projects: allProjects.slice(0, 3), // Default projects
     },
   },
+  'listing-grid-map': {
+    type: 'listing-grid-map',
+    data: {
+        headline: "Explore Projects on Map",
+        projects: allProjects.slice(0, 5),
+    }
+  },
+  'featured-listing': {
+      type: 'featured-listing',
+      data: {
+          headline: "Property of the Month"
+      }
+  },
   'cta-form': {
     type: 'cta-form',
     data: {
       headline: "Schedule a Private Viewing",
       subtext: "Our experts are ready to assist you.",
     },
+  },
+  'cta-grid': {
+      type: 'cta-grid',
+      data: {
+          headline: "Take the Next Step"
+      }
+  },
+  'banner-cta': {
+      type: 'banner-cta',
+      data: {
+          headline: "Limited Availability"
+      }
+  },
+  'newsletter': {
+      type: 'newsletter',
+      data: {
+          headline: "Stay Ahead of the Market"
+      }
   },
   map: {
     type: 'map',
@@ -66,29 +121,153 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
               { question: "What amenities are included?", answer: "Our properties come with a variety of high-end amenities, which may include private pools, state-of-the-art gyms, community centers, and more. Specific amenities vary by project." }
           ]
       }
+  },
+  roadshow: {
+      type: 'roadshow',
+      data: {
+          eventName: "Dubai Property Show 2025",
+          city: "London",
+          date: "October 15-17, 2025"
+      }
+  },
+  team: {
+      type: 'team',
+      data: {
+          headline: "Meet Our Experts"
+      }
+  },
+  'project-detail': {
+      type: 'project-detail',
+      data: {
+          projectName: "Elysian Residence"
+      }
+  },
+  'brochure-form': {
+      type: 'brochure-form',
+      data: {
+          brochureTitle: "Investor Guide"
+      }
+  },
+  offer: {
+      type: 'offer',
+      data: {
+          headline: "Exclusive Offer"
+      }
+  },
+  'floor-plan': {
+      type: 'floor-plan',
+      data: {
+          headline: "Floor Plans"
+      }
+  },
+  features: {
+      type: 'features',
+      data: {
+          headline: "Key Features"
+      }
+  },
+  launch: {
+      type: 'launch',
+      data: {
+          headline: "Grand Launch"
+      }
+  },
+  'chat-widget': {
+      type: 'chat-widget',
+      data: {
+          agentName: "Sarah - Support"
+      }
+  },
+  'blog-grid': {
+      type: 'blog-grid',
+      data: {
+          headline: "Market Insights"
+      }
+  },
+  'mortgage-calculator': {
+      type: 'mortgage-calculator',
+      data: {
+          headline: "Mortgage Calculator"
+      }
+  },
+  'roi-calculator': {
+      type: 'roi-calculator',
+      data: {
+          headline: "Calculate ROI"
+      }
+  },
+  'payment-plan': {
+      type: 'payment-plan',
+      data: {
+          headline: "Flexible Payment Plan"
+      }
+  },
+  'video': {
+      type: 'video',
+      data: {
+          headline: "Watch Video Tour"
+      }
+  },
+  'split-content': {
+      type: 'split-content',
+      data: {
+          headline: "Experience Waterfront Living"
+      }
+  },
+  'contact-details': {
+      type: 'contact-details',
+      data: {
+          headline: "Contact Us"
+      }
+  },
+  'partners': {
+      type: 'partners',
+      data: {
+          headline: "Our Partners"
+      }
+  },
+  'developers-list': {
+      type: 'developers-list',
+      data: {
+          headline: "Top Developers"
+      }
+  },
+  'stats': {
+      type: 'stats',
+      data: {
+          headline: "Our Achievements"
+      }
+  },
+  'city-guide': {
+      type: 'city-guide',
+      data: {
+          headline: "Why Invest in Dubai?"
+      }
   }
 };
 
 const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: { city?: string }): Block => {
-    const blockData = { ...defaultBlocks[type] };
+    // Create a deep copy of the block data to avoid shared reference issues
+    const blockData = JSON.parse(JSON.stringify(defaultBlocks[type]));
 
-    if (type === 'listing-grid') {
+    if (type === 'listing-grid' || type === 'listing-grid-map') {
       let projectsToShow = [];
        const city = context?.city?.toLowerCase();
 
-      if (city === 'dubai') projectsToShow = dubaiProjects.slice(0, 3);
-      else if (city === 'abu dhabi') projectsToShow = abuDhabiProjects.slice(0, 3);
-      else if (city === 'ras al khaimah') projectsToShow = rasAlKhaimahProjects.slice(0, 3);
-      else if (city === 'sharjah') projectsToShow = sharjahProjects.slice(0, 3);
-      else projectsToShow = allProjects.slice(0, 3);
+      if (city === 'dubai') projectsToShow = dubaiProjects;
+      else if (city === 'abu dhabi') projectsToShow = abuDhabiProjects;
+      else if (city === 'ras al khaimah') projectsToShow = rasAlKhaimahProjects;
+      else if (city === 'sharjah') projectsToShow = sharjahProjects;
+      else projectsToShow = allProjects;
       
-      blockData.data.projects = projectsToShow;
+      // Slice depending on block type
+      blockData.data.projects = type === 'listing-grid' ? projectsToShow.slice(0, 3) : projectsToShow.slice(0, 5);
     }
 
 
     return {
         blockId: `${blockData.type}-${Date.now()}-${Math.random()}`,
-        type: blockData.type,
+        type: type,
         order: order,
         data: blockData.data,
     }
@@ -117,7 +296,7 @@ export const roadshowTemplate: SiteTemplate = {
   name: 'Dubai Roadshow Page',
   siteType: 'roadshow',
   pages: [
-    createPage('home', 'Event Details', ['hero', 'listing-grid', 'map', 'cta-form', 'testimonial', 'faq'], { city: 'Dubai' }),
+    createPage('home', 'Event Details', ['roadshow', 'banner-cta', 'split-content', 'listing-grid', 'brochure-form', 'cta-form', 'faq', 'chat-widget'], { city: 'Dubai' }),
   ],
 };
 
@@ -126,9 +305,9 @@ export const developerFocusTemplate: SiteTemplate = {
     name: 'Abu Dhabi Developer',
     siteType: 'developer-focus',
     pages: [
-      createPage('home', 'Home', ['hero', 'listing-grid', 'testimonial'], { city: 'Abu Dhabi' }),
-      createPage('about', 'About Us', ['hero']),
-      createPage('contact', 'Contact', ['cta-form']),
+      createPage('home', 'Home', ['hero', 'stats', 'listing-grid', 'project-detail', 'features', 'payment-plan', 'team', 'newsletter', 'chat-widget'], { city: 'Abu Dhabi' }),
+      createPage('about', 'About Us', ['hero', 'split-content', 'team', 'video', 'partners']),
+      createPage('contact', 'Contact', ['contact-details', 'cta-form']),
     ],
 };
 
@@ -137,7 +316,7 @@ export const partnerLaunchTemplate: SiteTemplate = {
     name: 'RAK Partner Launch',
     siteType: 'partner-launch',
     pages: [
-        createPage('home', 'Launch Home', ['hero', 'listing-grid', 'map', 'testimonial'], { city: 'Ras Al Khaimah' }),
+        createPage('home', 'Launch Home', ['launch-hero', 'featured-listing', 'listing-grid', 'offer', 'map', 'partners', 'cta-grid', 'chat-widget'], { city: 'Ras Al Khaimah' }),
     ]
 };
 
@@ -146,10 +325,10 @@ export const fullCompanyTemplate: SiteTemplate = {
     name: 'Full Real Estate Company',
     siteType: 'full-company',
     pages: [
-        createPage('home', 'Home', ['hero', 'listing-grid']),
-        createPage('about', 'About Us', ['hero']),
-        createPage('projects', 'Projects', ['listing-grid']),
-        createPage('contact', 'Contact Us', ['cta-form']),
+        createPage('home', 'Home', ['hero-lead-form', 'search-filters', 'partners', 'listing-grid-map', 'featured-listing', 'developers-list', 'city-guide', 'features', 'blog-grid', 'team', 'newsletter', 'chat-widget']),
+        createPage('about', 'About Us', ['hero', 'stats', 'team', 'contact-details']),
+        createPage('projects', 'Projects', ['listing-grid', 'mortgage-calculator', 'roi-calculator']),
+        createPage('contact', 'Contact Us', ['contact-details', 'cta-form']),
     ]
 };
 
@@ -158,7 +337,7 @@ export const freelancerTemplate: SiteTemplate = {
     name: 'Freelancer Agent',
     siteType: 'freelancer',
     pages: [
-        createPage('home', 'Home', ['hero', 'listing-grid', 'testimonial', 'cta-form']),
+        createPage('home', 'Home', ['hero', 'listing-grid', 'blog-grid', 'team', 'cta-grid', 'testimonial', 'chat-widget']),
     ]
 };
 
@@ -167,7 +346,7 @@ export const mapFocusedTemplate: SiteTemplate = {
     name: 'Map-First Search',
     siteType: 'map-focused',
     pages: [
-        createPage('home', 'Map Search', ['map', 'listing-grid']),
+        createPage('home', 'Map Search', ['search-filters', 'listing-grid-map', 'listing-grid', 'chat-widget']),
     ]
 };
 
@@ -176,7 +355,7 @@ export const adsQuickLaunchTemplate: SiteTemplate = {
     name: 'Landing Page + Ads',
     siteType: 'ads-launch',
     pages: [
-        createPage('home', 'Landing Page', ['hero', 'cta-form', 'faq']),
+        createPage('home', 'Landing Page', ['coming-soon-hero', 'project-detail', 'video', 'floor-plan', 'payment-plan', 'offer', 'brochure-form', 'chat-widget']),
     ]
 };
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Sparkles } from 'lucide-react';
+import { Plus, Sparkles, Layout } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -10,6 +10,10 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
+  DropAnimation,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -25,6 +29,35 @@ import { CtaFormBlock } from './blocks/cta-form-block';
 import { GalleryBlock } from './blocks/gallery-block';
 import { FaqBlock } from './blocks/faq-block';
 import { MapBlock, TestimonialBlock } from './blocks/placeholder-blocks';
+import { RoadshowBlock } from './blocks/roadshow-block';
+import { TeamBlock } from './blocks/team-block';
+import { ProjectDetailBlock } from './blocks/project-detail-block';
+import { BrochureFormBlock } from './blocks/forms/brochure-form-block';
+import { OfferBlock } from './blocks/forms/offer-block';
+import { HeroLeadFormBlock } from './blocks/forms/hero-lead-form-block';
+import { FloorPlanBlock } from './blocks/floor-plan-block';
+import { FeaturesBlock } from './blocks/features-block';
+import { LaunchBlock } from './blocks/launch-block';
+import { ListingGridMapBlock } from './blocks/listings/listing-grid-map-block';
+import { ChatWidgetBlock } from './blocks/social/chat-widget-block';
+import { BlogGridBlock } from './blocks/content/blog-grid-block';
+import { MortgageCalculatorBlock } from './blocks/finance/mortgage-calculator-block';
+import { PaymentPlanBlock } from './blocks/finance/payment-plan-block';
+import { VideoBlock } from './blocks/content/video-block';
+import { ContactDetailsBlock } from './blocks/info/contact-details-block';
+import { PartnersBlock } from './blocks/content/partners-block';
+import { StatsBlock } from './blocks/info/stats-block';
+import { NewsletterBlock } from './blocks/forms/newsletter-block';
+import { SplitContentBlock } from './blocks/content/split-content-block';
+import { FeaturedListingBlock } from './blocks/listings/featured-listing-block';
+import { SearchWithFiltersBlock } from './blocks/search/search-with-filters-block';
+import { CityGuideBlock } from './blocks/content/city-guide-block';
+import { RoiCalculatorBlock } from './blocks/finance/roi-calculator-block';
+import { DevelopersListBlock } from './blocks/content/developers-list-block';
+import { LaunchHeroBlock } from './blocks/hero/launch-hero-block';
+import { ComingSoonHeroBlock } from './blocks/hero/coming-soon-hero-block';
+import { CtaGridBlock } from './blocks/cta/cta-grid-block';
+import { BannerCtaBlock } from './blocks/cta/banner-cta-block';
 import { Button } from './ui/button';
 import {
   Popover,
@@ -32,10 +65,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { BlockGallery } from './block-gallery';
-import { SortableItem } from './sortable-item';
+import { SortableItem } from './ui/sortable/sortable-item';
 import { suggestNextBlocks, SuggestNextBlocksOutput } from '@/ai/flows/suggest-next-blocks';
 import { Separator } from './ui/separator';
 import { allProjects } from '@/lib/projects';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const blockComponents: Record<string, React.ComponentType<any>> = {
   'hero': HeroBlock,
@@ -45,6 +79,35 @@ const blockComponents: Record<string, React.ComponentType<any>> = {
   'gallery': GalleryBlock,
   'testimonial': TestimonialBlock,
   'faq': FaqBlock,
+  'roadshow': RoadshowBlock,
+  'team': TeamBlock,
+  'project-detail': ProjectDetailBlock,
+  'brochure-form': BrochureFormBlock,
+  'offer': OfferBlock,
+  'hero-lead-form': HeroLeadFormBlock,
+  'floor-plan': FloorPlanBlock,
+  'features': FeaturesBlock,
+  'launch': LaunchBlock,
+  'listing-grid-map': ListingGridMapBlock,
+  'chat-widget': ChatWidgetBlock,
+  'blog-grid': BlogGridBlock,
+  'mortgage-calculator': MortgageCalculatorBlock,
+  'payment-plan': PaymentPlanBlock,
+  'video': VideoBlock,
+  'contact-details': ContactDetailsBlock,
+  'partners': PartnersBlock,
+  'stats': StatsBlock,
+  'newsletter': NewsletterBlock,
+  'split-content': SplitContentBlock,
+  'featured-listing': FeaturedListingBlock,
+  'search-filters': SearchWithFiltersBlock,
+  'city-guide': CityGuideBlock,
+  'roi-calculator': RoiCalculatorBlock,
+  'developers-list': DevelopersListBlock,
+  'launch-hero': LaunchHeroBlock,
+  'coming-soon-hero': ComingSoonHeroBlock,
+  'cta-grid': CtaGridBlock,
+  'banner-cta': BannerCtaBlock,
 };
 
 const renderBlock = (block: BlockType) => {
@@ -59,9 +122,17 @@ const renderBlock = (block: BlockType) => {
   return <Component {...block.data} />;
 };
 
-const AddBlockPopover = ({ onSelectBlock, currentBlocks }: { onSelectBlock: (blockType: string, content?: any) => void, currentBlocks: string[] }) => {
+const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: { onSelectBlock: (blockType: string, content?: any) => void, currentBlocks: string[], variant?: 'default' | 'mini' }) => {
   const [suggestions, setSuggestions] = useState<SuggestNextBlocksOutput>([]);
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+        setSuggestions([]);
+        setLoading(false);
+    }
+  }, [open]);
 
   const handleSuggest = async () => {
     setLoading(true);
@@ -75,51 +146,105 @@ const AddBlockPopover = ({ onSelectBlock, currentBlocks }: { onSelectBlock: (blo
       setSuggestions(result);
     } catch (e) {
       console.error(e);
-      // Handle error - maybe show a toast
+      setLoading(false);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSelect = (type: string, content?: any) => {
+      onSelectBlock(type, content);
+      setOpen(false);
+  }
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" className="h-10 w-10 rounded-full border-2 border-dashed border-primary/30 text-primary/60 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-300">
-          <Plus className="h-5 w-5" />
-          <span className="sr-only">Add Block</span>
-        </Button>
+        {variant === 'default' ? (
+            <Button variant="ghost" className="h-12 w-full max-w-sm rounded-xl border-2 border-dashed border-primary/20 text-primary/60 hover:bg-primary/5 hover:text-primary hover:border-primary/40 transition-all duration-300 gap-2">
+                <Plus className="h-5 w-5" />
+                <span className="font-medium">Add Block</span>
+            </Button>
+        ) : (
+            <Button size="icon" className="h-8 w-8 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform">
+                <Plus className="h-4 w-4" />
+            </Button>
+        )}
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-4">
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-medium leading-none">Add a New Block</h4>
-            <p className="text-sm text-muted-foreground">
-              Get AI suggestions or choose from the gallery.
+      <PopoverContent className="w-[420px] p-0 rounded-2xl shadow-2xl border-0 overflow-hidden" align="center" sideOffset={10}>
+          <div className="bg-muted/30 p-4 border-b">
+            <h4 className="font-semibold text-sm">Add Content</h4>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Drag and drop blocks to build your page.
             </p>
           </div>
-          <Button onClick={handleSuggest} disabled={loading} className="w-full">
-            <Sparkles className="mr-2 h-4 w-4" />
-            {loading ? 'Thinking...' : 'Suggest Blocks'}
-          </Button>
-          {suggestions.length > 0 && (
-             <div className="space-y-2">
-                <Separator />
-                <h5 className="font-medium text-sm">Suggestions</h5>
-                {suggestions.map(suggestion => (
-                    <div
-                        key={suggestion.blockId}
-                        onClick={() => onSelectBlock(suggestion.blockId, suggestion.defaultContent)}
-                        className="p-2 rounded-md hover:bg-accent cursor-pointer"
-                    >
-                        <p className="font-medium text-sm capitalize">{suggestion.blockId.replace('-', ' ')}</p>
-                    </div>
-                ))}
-             </div>
-          )}
-          <Separator />
-          <h5 className="font-medium text-sm">Or choose from gallery</h5>
-          <BlockGallery onSelectBlock={(type) => onSelectBlock(type)} />
-        </div>
+          
+          <div className="p-4 space-y-4 max-h-[500px] overflow-y-auto">
+               {/* AI Section */}
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-xl p-4 border border-indigo-100 dark:border-indigo-900/50">
+                  <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                           <div className="bg-white dark:bg-white/10 p-1.5 rounded-lg shadow-sm">
+                               <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                           </div>
+                           <span className="text-sm font-semibold text-indigo-900 dark:text-indigo-100">AI Recommendations</span>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        onClick={handleSuggest} 
+                        disabled={loading}
+                        className="h-7 text-xs hover:bg-white/50"
+                      >
+                        {loading ? 'Generating...' : 'Refresh'}
+                      </Button>
+                  </div>
+                  
+                   {loading && (
+                      <div className="space-y-2 animate-pulse mt-2">
+                          <div className="h-10 bg-white/50 rounded-lg w-full"></div>
+                          <div className="h-10 bg-white/50 rounded-lg w-full delay-75"></div>
+                      </div>
+                   )}
+
+                  {suggestions.length > 0 && !loading ? (
+                     <div className="space-y-2 mt-2">
+                        {suggestions.map((suggestion, i) => (
+                            <motion.button
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                key={suggestion.blockId}
+                                onClick={() => handleSelect(suggestion.blockId, suggestion.defaultContent)}
+                                className="w-full text-left p-3 rounded-lg bg-white dark:bg-black/20 hover:shadow-md hover:scale-[1.02] transition-all text-sm flex items-center justify-between group border border-transparent hover:border-indigo-100"
+                            >
+                                <div>
+                                    <span className="font-medium block capitalize text-indigo-950 dark:text-indigo-50">{suggestion.blockId.replace(/-/g, ' ')}</span>
+                                    <span className="text-xs text-muted-foreground block mt-0.5 opacity-80">Recommended for conversion</span>
+                                </div>
+                                <Plus className="h-4 w-4 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </motion.button>
+                        ))}
+                     </div>
+                  ) : !loading && (
+                      <div className="text-center py-4">
+                          <p className="text-xs text-muted-foreground mb-2">
+                              Let AI analyze your page and suggest the perfect next block.
+                          </p>
+                          <Button size="sm" onClick={handleSuggest} className="bg-white text-indigo-600 hover:bg-white/90 shadow-sm border border-indigo-100">
+                              Generate Suggestions
+                          </Button>
+                      </div>
+                  )}
+              </div>
+
+              <Separator className="my-2" />
+              
+              <div>
+                  <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">Library</h5>
+                  <BlockGallery onSelectBlock={(type) => handleSelect(type)} />
+              </div>
+          </div>
       </PopoverContent>
     </Popover>
   );
@@ -132,6 +257,7 @@ interface PageBuilderProps {
 
 export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
   const [blocks, setBlocks] = useState<BlockType[]>(page.blocks);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   useEffect(() => {
     setBlocks(page.blocks);
@@ -145,9 +271,12 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
     });
   };
 
-
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+        activationConstraint: {
+            distance: 5, // Prevent accidental drags
+        },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -157,12 +286,10 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
     const newBlock: BlockType = {
       blockId: `${blockType}-${Date.now()}`,
       type: blockType,
-      order: 0, // Order will be recalculated
+      order: 0,
       data: content || {
         headline: "New Headline",
         subtext: "New subtext",
-        ctaText: "Click me",
-        projects: allProjects.slice(0, 3)
       },
     };
     
@@ -177,9 +304,46 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
     
     updatePage(reorderedBlocks);
   };
+  
+  const updateBlock = (blockId: string, newData: any) => {
+      const updatedBlocks = blocks.map(b => 
+          b.blockId === blockId ? { ...b, data: newData } : b
+      );
+      updatePage(updatedBlocks);
+  };
+
+  const deleteBlock = (blockId: string) => {
+      const updatedBlocks = blocks.filter(b => b.blockId !== blockId).map((block, i) => ({
+          ...block,
+          order: i
+      }));
+      updatePage(updatedBlocks);
+  };
+  
+  const duplicateBlock = (blockId: string) => {
+      const blockIndex = blocks.findIndex(b => b.blockId === blockId);
+      if (blockIndex === -1) return;
+      
+      const blockToClone = blocks[blockIndex];
+      const newBlock = {
+          ...blockToClone,
+          blockId: `${blockToClone.type}-${Date.now()}-copy`,
+          data: { ...blockToClone.data, headline: `${blockToClone.data.headline || ''} (Copy)` }
+      };
+      
+      const newBlocksList = [...blocks];
+      newBlocksList.splice(blockIndex + 1, 0, newBlock);
+      
+      updatePage(newBlocksList.map((b, i) => ({ ...b, order: i })));
+  }
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveId(null);
 
     if (over && active.id !== over.id) {
         const oldIndex = blocks.findIndex((b) => b.blockId === active.id);
@@ -196,28 +360,46 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
   };
 
   const sortedBlocks = blocks.sort((a, b) => a.order - b.order);
+  
+  const dropAnimation: DropAnimation = {
+      sideEffects: defaultDropAnimationSideEffects({
+        styles: {
+          active: {
+            opacity: '0.5',
+          },
+        },
+      }),
+    };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto pb-40 px-4 md:px-0">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="space-y-4">
+        <div className="space-y-6 relative">
            {sortedBlocks.length === 0 && (
-             <div className="text-center py-12 border-2 border-dashed rounded-lg">
-               <h2 className="text-xl font-medium text-muted-foreground">This page is empty.</h2>
-               <p className="text-muted-foreground mb-4">Start by adding a block.</p>
-               <AddBlockPopover 
-                  onSelectBlock={(type, content) => addBlock(type, content, 0)}
-                  currentBlocks={[]}
-                />
+             <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-muted-foreground/10 rounded-3xl bg-muted/5 animate-in fade-in zoom-in duration-500">
+               <div className="bg-background p-6 rounded-full shadow-lg mb-6 ring-4 ring-muted/20">
+                    <Layout className="h-10 w-10 text-muted-foreground" />
+               </div>
+               <h2 className="text-2xl font-bold mb-2 tracking-tight">Start Building Your Page</h2>
+               <p className="text-muted-foreground mb-8 max-w-sm text-center text-lg">
+                   Add your first block to begin creating your real estate masterpiece.
+               </p>
+               <div className="scale-110">
+                   <AddBlockPopover 
+                      onSelectBlock={(type, content) => addBlock(type, content, 0)}
+                      currentBlocks={[]}
+                    />
+               </div>
              </div>
            )}
 
           {sortedBlocks.length > 0 && (
-            <div className="flex justify-center">
+            <div className="flex justify-center py-4">
               <AddBlockPopover 
                 onSelectBlock={(type, content) => addBlock(type, content, 0)}
                 currentBlocks={sortedBlocks.map(b => b.type)}
@@ -227,14 +409,23 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
 
           <SortableContext items={sortedBlocks.map(b => b.blockId)} strategy={verticalListSortingStrategy}>
             {sortedBlocks.map((block, index) => (
-              <div key={block.blockId} className="space-y-4 group/add-block-area">
+              <div key={block.blockId} className="group/add-block-area relative">
                 <SortableItem id={block.blockId}>
-                  <BlockCard blockType={block.type}>
+                  <BlockCard 
+                    blockType={block.type} 
+                    data={block.data}
+                    onUpdate={(newData) => updateBlock(block.blockId, newData)}
+                    onDelete={() => deleteBlock(block.blockId)}
+                    onDuplicate={() => duplicateBlock(block.blockId)}
+                  >
                     {renderBlock(block)}
                   </BlockCard>
                 </SortableItem>
-                <div className="flex justify-center opacity-0 group-hover/add-block-area:opacity-100 transition-opacity duration-300 -my-2 py-2">
+                
+                {/* The "Insert Between" Plus Button */}
+                <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 z-30 opacity-0 group-hover/add-block-area:opacity-100 transition-all duration-200 pointer-events-none group-hover/add-block-area:pointer-events-auto hover:scale-110">
                    <AddBlockPopover 
+                      variant="mini"
                       onSelectBlock={(type, content) => addBlock(type, content, index + 1)}
                       currentBlocks={sortedBlocks.map(b => b.type)}
                    />
@@ -242,6 +433,17 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
               </div>
             ))}
           </SortableContext>
+          
+          <DragOverlay dropAnimation={dropAnimation}>
+              {activeId ? (
+                  <div className="opacity-90 rotate-2 scale-105 cursor-grabbing shadow-2xl rounded-2xl overflow-hidden bg-background ring-2 ring-primary">
+                      {/* We render a simplified preview or the actual block */}
+                      <div className="h-32 bg-muted/20 flex items-center justify-center font-bold text-muted-foreground">
+                          Moving Block...
+                      </div>
+                  </div>
+              ) : null}
+          </DragOverlay>
         </div>
       </DndContext>
     </div>

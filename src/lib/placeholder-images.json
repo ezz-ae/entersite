@@ -1,52 +1,12 @@
 {
-  "placeholderImages": [
-    {
-      "id": "logo",
-      "description": "EntreSite AI logo",
-      "imageUrl": "https://images.unsplash.com/photo-1547989013-9be9d00dad2e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxsb2dvJTIwbGV0dGVyJTIwRXxlbnwwfHx8fDE3NjQ3MDQyODB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "logo letter E"
-    },
-    {
-      "id": "hero-bg",
-      "description": "A modern building exterior for a hero section background",
-      "imageUrl": "https://images.unsplash.com/photo-1521713362244-1b5e5d150b29?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtb2Rlcm4lMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzY0NjU4NDk1fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "modern architecture"
-    },
-    {
-      "id": "user-avatar",
-      "description": "A placeholder for user avatar",
-      "imageUrl": "https://images.unsplash.com/photo-1590086782792-42dd2350140d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjQ2NzYxNTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "person portrait"
-    },
-    {
-      "id": "property-gallery-1",
-      "description": "A stylish living room with a city view",
-      "imageUrl": "https://images.unsplash.com/photo-1618221195710-dd6b41fa2242?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsaXZpbmclMjByb29tfGVufDB8fHx8MTc2NTM4MTAxMHww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "living room"
-    },
-    {
-      "id": "property-gallery-2",
-      "description": "A modern kitchen with clean lines",
-      "imageUrl": "https://images.unsplash.com/photo-1556912173-3bb406ef7e77?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBraXRjaGVufGVufDB8fHx8MTc2NTM4MTAxMHww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "modern kitchen"
-    },
-    {
-      "id": "property-gallery-3",
-      "description": "A serene bedroom with minimalist decor",
-      "imageUrl": "https://images.unsplash.com/photo-1571578887681-76495c0273a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBiZWRyb29tfGVufDB8fHx8MTc2NTM4MTAxMHww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "modern bedroom"
-    },
-    {
-      "id": "property-gallery-4",
-      "description": "A luxurious bathroom with a freestanding tub",
-      "imageUrl": "https://images.unsplash.com/photo-1600607686527-6fb8862922a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBiYXRocm9vbXxlbnwwfHx8fDE3NjUzODEwMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "luxury bathroom"
-    },
-    {
-      "id": "property-gallery-5",
-      "description": "A beautiful outdoor patio with a swimming pool",
-      "imageUrl": "https://images.unsplash.com/photo-1613490493576-7fde63acd811?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxvdXRkb29yJTIwcGF0aW98ZW58MHx8fHwxNzY1MzgwOTc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "outdoor patio"
-    }
+  "images": [
+    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1600596542815-275084988866?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1512453979798-5ea904ac66de?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1582407947304-fd86f028f3a6?auto=format&fit=crop&q=80&w=1000"
   ]
 }

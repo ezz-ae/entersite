@@ -1,39 +1,204 @@
-import { GripVertical, Trash2, Settings } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
+'use client';
+
+import { useState } from 'react';
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Edit2, Trash2, GripVertical, MoreHorizontal, Copy, EyeOff, Layout } from 'lucide-react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ImageUploader } from "@/components/ui/image-uploader";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface BlockCardProps {
   blockType: string;
   children: React.ReactNode;
+  onDelete?: () => void;
+  onUpdate?: (newData: any) => void;
+  onDuplicate?: () => void;
+  data?: any;
 }
 
-export function BlockCard({ blockType, children }: BlockCardProps) {
+export function BlockCard({ blockType, children, onDelete, onUpdate, onDuplicate, data }: BlockCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState(data || {});
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: data?.id || blockType }); // Ensure ID is passed if possible, else fallback
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 1,
+  };
+
+  const handleSave = () => {
+      onUpdate?.(editData);
+      setIsEditing(false);
+  };
+
+  // Simplified edit fields - in a real app, this would be dynamic schema-based
+  const renderEditFields = () => {
+      return (
+          <div className="space-y-6 py-4">
+              <div className="space-y-2">
+                  <Label htmlFor="headline" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Headline</Label>
+                  <Input 
+                    id="headline" 
+                    value={editData.headline || ''} 
+                    onChange={(e) => setEditData({...editData, headline: e.target.value})}
+                    className="h-12 text-lg font-medium"
+                  />
+              </div>
+               <div className="space-y-2">
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Subtext</Label>
+                   <RichTextEditor 
+                        initialValue={editData.subtext} 
+                        onChange={(val) => setEditData({...editData, subtext: val})}
+                        className="min-h-[120px]"
+                   />
+              </div>
+              
+              {/* Dynamic Image Field if 'image' key exists */}
+              {(editData.image || editData.backgroundImage) && (
+                  <div className="space-y-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Visual</Label>
+                      <ImageUploader 
+                        initialImage={editData.image || editData.backgroundImage} 
+                        onImageChange={(url) => setEditData({...editData, [editData.image ? 'image' : 'backgroundImage']: url})}
+                      />
+                  </div>
+              )}
+          </div>
+      )
+  }
+
   return (
-    <div className="relative group">
-      <Card className="overflow-visible">
-        <CardContent className="p-0">
-          {children}
-        </CardContent>
-      </Card>
-      <div className="absolute top-4 right-4 z-10 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <Button variant="secondary" size="icon" className="h-8 w-8 cursor-grab">
-          <GripVertical />
-          <span className="sr-only">Move block</span>
-        </Button>
-        <Button variant="secondary" size="icon" className="h-8 w-8">
-          <Settings />
-          <span className="sr-only">Block settings</span>
-        </Button>
-        <Button variant="destructive" size="icon" className="h-8 w-8">
-          <Trash2 />
-          <span className="sr-only">Delete block</span>
-        </Button>
+    <motion.div
+      ref={setNodeRef}
+      style={style}
+      layoutId={data?.id}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className={cn(
+          "relative group rounded-2xl transition-all duration-300 isolate",
+          isDragging ? "shadow-2xl scale-[1.02] ring-2 ring-primary z-50 cursor-grabbing bg-background" : "hover:ring-1 hover:ring-primary/20 bg-card"
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      
+      {/* Apple-style Action Bar */}
+      <div className={cn(
+          "absolute -top-3 right-4 z-20 flex items-center gap-1 p-1 pl-2 pr-1 rounded-full bg-white/80 backdrop-blur-md shadow-lg border border-black/5 transition-all duration-300 transform origin-right",
+          isHovered ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2 pointer-events-none"
+      )}>
+             <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mr-2">{blockType.replace(/-/g, ' ')}</span>
+             
+             <div className="h-4 w-px bg-border mx-1" />
+
+             <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-black/5 cursor-grab active:cursor-grabbing text-muted-foreground" {...attributes} {...listeners}>
+                <GripVertical className="h-3.5 w-3.5" />
+             </Button>
+            
+             <Dialog open={isEditing} onOpenChange={setIsEditing}>
+                <DialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <Edit2 className="h-3.5 w-3.5" />
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto rounded-2xl p-0 gap-0">
+                    <DialogHeader className="p-6 pb-2 border-b bg-muted/20">
+                        <DialogTitle className="text-xl font-semibold">Edit {blockType.replace(/-/g, ' ')}</DialogTitle>
+                    </DialogHeader>
+                    
+                    <div className="p-6">
+                        <Tabs defaultValue="content" className="w-full">
+                            <TabsList className="w-full grid grid-cols-2 p-1 bg-muted/50 rounded-xl mb-6">
+                                <TabsTrigger value="content" className="rounded-lg">Content</TabsTrigger>
+                                <TabsTrigger value="style" className="rounded-lg">Design</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="content" className="mt-0">
+                                {renderEditFields()}
+                            </TabsContent>
+                            <TabsContent value="style" className="mt-0">
+                                <div className="h-40 flex items-center justify-center text-muted-foreground text-sm bg-muted/10 rounded-xl border border-dashed">
+                                    Style controls coming soon
+                                </div>
+                            </TabsContent>
+                        </Tabs>
+                    </div>
+
+                    <div className="p-4 border-t bg-muted/20 flex justify-end gap-3">
+                        <Button variant="ghost" onClick={() => setIsEditing(false)} className="rounded-xl">Cancel</Button>
+                        <Button onClick={handleSave} className="rounded-xl shadow-lg shadow-primary/20">Save Changes</Button>
+                    </div>
+                </DialogContent>
+             </Dialog>
+
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-black/5">
+                        <MoreHorizontal className="h-3.5 w-3.5" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-xl">
+                    <DropdownMenuLabel className="text-xs text-muted-foreground px-2 py-1.5">Actions</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={onDuplicate} className="rounded-lg gap-2 text-xs font-medium focus:bg-muted">
+                        <Copy className="h-3.5 w-3.5" /> Duplicate
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="rounded-lg gap-2 text-xs font-medium focus:bg-muted">
+                        <Layout className="h-3.5 w-3.5" /> Save as Template
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="rounded-lg gap-2 text-xs font-medium focus:bg-muted">
+                        <EyeOff className="h-3.5 w-3.5" /> Hide Block
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="my-1" />
+                    <DropdownMenuItem onClick={onDelete} className="rounded-lg gap-2 text-xs font-medium text-red-600 focus:text-red-600 focus:bg-red-50">
+                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+             </DropdownMenu>
       </div>
-       <div className="absolute -top-3 left-4 z-10">
-          <span className="px-2 py-1 text-xs font-semibold uppercase rounded-full bg-primary text-primary-foreground">
-            {blockType.replace('-', ' ')}
-          </span>
-       </div>
-    </div>
+
+      {/* Block Content Container */}
+      <div className={cn(
+          "rounded-xl overflow-hidden bg-background shadow-sm border border-transparent transition-all duration-300",
+          isHovered ? "border-black/5 shadow-md" : ""
+      )}>
+           {/* Overlay to prevent interaction while dragging/editing */}
+           <div className="pointer-events-none absolute inset-0 z-10 bg-transparent" /> 
+           <div className={cn("transition-opacity duration-300", isDragging ? "opacity-50" : "opacity-100")}>
+               {children}
+           </div>
+      </div>
+    </motion.div>
   );
 }
