@@ -6,7 +6,7 @@ import { SiteHeader } from '@/components/site-header';
 export function AppHeader() {
   const pathname = usePathname();
 
-  // Define routes where the main site header should be hidden
+  // Define base routes where the main site header should be hidden
   const hiddenHeaderRoutes = [
     '/builder',
     '/dashboard',
@@ -14,6 +14,7 @@ export function AppHeader() {
     '/profile',
   ];
 
+  // Check if the current pathname starts with any of the hidden routes
   const shouldHideHeader = hiddenHeaderRoutes.some(route => pathname.startsWith(route));
 
   if (shouldHideHeader) {
