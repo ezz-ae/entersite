@@ -23,39 +23,3 @@ export function MapBlock({ headline = "Explore the Location" }: { headline?: str
     </section>
   );
 }
-
-// Testimonial Block Placeholder
-export function TestimonialBlock({ headline = "What Our Clients Say" }: { headline?: string }) {
-  return (
-    <section className="py-20 bg-primary/5">
-      <div className="container mx-auto px-4">
-         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">{headline}</h2>
-          <p className="text-muted-foreground">Hear from our satisfied homeowners and investors.</p>
-        </div>
-        <div className="grid md:grid-cols-3 gap-8">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-background p-8 rounded-xl shadow-sm border relative">
-              <div className="text-4xl text-primary/20 font-serif absolute top-4 left-6">"</div>
-              <p className="text-muted-foreground mb-6 relative z-10 italic">
-                "This was the best investment decision I've ever made. The team was incredibly professional and guided me through every step."
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-muted overflow-hidden relative">
-                     {/* Placeholder Avatar */}
-                     <div className="absolute inset-0 bg-primary/20 flex items-center justify-center text-primary font-bold">
-                         U{i}
-                     </div>
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm">Client Name {i}</h4>
-                  <p className="text-xs text-muted-foreground">Homeowner, Dubai</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}

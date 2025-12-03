@@ -1,12 +1,58 @@
 {
-  "images": [
-    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=1000",
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1000",
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1000",
-    "https://images.unsplash.com/photo-1600596542815-275084988866?auto=format&fit=crop&q=80&w=1000",
-    "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=1000",
-    "https://images.unsplash.com/photo-1512453979798-5ea904ac66de?auto=format&fit=crop&q=80&w=1000",
-    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=1000",
-    "https://images.unsplash.com/photo-1582407947304-fd86f028f3a6?auto=format&fit=crop&q=80&w=1000"
+  "placeholderImages": [
+    {
+      "id": "user-avatar",
+      "description": "Default user avatar",
+      "imageUrl": "https://images.unsplash.com/photo-1531123414780-f74242c2b052?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVyc29uJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY0Njc2MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "user-avatar-1",
+      "description": "Testimonial user 1",
+      "imageUrl": "https://images.unsplash.com/photo-1546961329-78bef0414d7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2NDcwNjIzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "user-avatar-2",
+      "description": "Testimonial user 2",
+      "imageUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjQ2Njg4OTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man portrait"
+    },
+    {
+      "id": "user-avatar-3",
+      "description": "Testimonial user 3",
+      "imageUrl": "https://images.unsplash.com/photo-1607529378676-a20456ee2f6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZXJzb24lMjBzbWlsaW5nfGVufDB8fHx8MTc2NDcwNjIzNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person smiling"
+    },
+    {
+      "id": "gallery-1",
+      "description": "Gallery image 1",
+      "imageUrl": "https://images.unsplash.com/photo-1519662978799-2f05096d3636?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzY0NjU4NDk1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern architecture"
+    },
+    {
+      "id": "gallery-2",
+      "description": "Gallery image 2",
+      "imageUrl": "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bHV4dXJ5JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzY0NzIzODk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "luxury interior"
+    },
+    {
+      "id": "gallery-3",
+      "description": "Gallery image 3",
+      "imageUrl": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxsaXZpbmclMjByb29tfGVufDB8fHx8MTc2NDcwODk2OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "living room"
+    },
+    {
+      "id": "gallery-4",
+      "description": "Gallery image 4",
+      "imageUrl": "https://images.unsplash.com/photo-1654625972034-dc41d4ad977b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxiZWRyb29tJTIwdmlld3xlbnwwfHx8fDE3NjQ2NjQ2MTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bedroom view"
+    },
+    {
+      "id": "gallery-5",
+      "description": "Gallery image 5",
+      "imageUrl": "https://images.unsplash.com/photo-1502005097973-6a7082348e28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxraXRjaGVuJTIwZGVzaWdufGVufDB8fHx8MTc2NDc0NTg5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kitchen design"
+    }
   ]
 }

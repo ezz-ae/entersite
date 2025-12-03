@@ -19,6 +19,7 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
       headline: "Discover Unparalleled Luxury",
       subtext: "Explore our exclusive collection of premium properties.",
       ctaText: "Explore Properties",
+      backgroundImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000"
     },
   },
   'launch-hero': {
@@ -100,13 +101,25 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   gallery: {
       type: 'gallery',
       data: {
-          headline: 'Project Gallery'
+          headline: 'Project Gallery',
+          images: [
+            "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=1000",
+            "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1000",
+            "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1000",
+            "https://images.unsplash.com/photo-1600596542815-275084988866?auto=format&fit=crop&q=80&w=1000",
+            "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=1000",
+          ]
       }
   },
   testimonial: {
       type: 'testimonial',
       data: {
-          headline: 'What Our Clients Say'
+          headline: 'What Our Clients Say',
+          testimonials: [
+            { quote: "Working with this team was a game-changer. Their AI-powered platform helped us launch our project website in record time.", author: "Fatima Al-Marzouqi", role: "CEO, Prestige Properties", avatarId: 'user-avatar-1' },
+            { quote: "The automated Google Ads campaigns are incredibly effective. We saw a 200% increase in qualified leads within the first month.", author: "Johnathan Smith", role: "Marketing Director, Skyline Developments", avatarId: 'user-avatar-2' },
+            { quote: "As a boutique agency, we need to be agile. EntreSite allowed us to compete with the big players, giving us a professional web presence without the huge overhead.", author: "Chen Wei", role: "Founder, Urban Nest Realty", avatarId: 'user-avatar-3' },
+          ]
       }
   },
   faq: {
