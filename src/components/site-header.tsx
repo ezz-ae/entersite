@@ -5,14 +5,16 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { EntreSiteLogo } from '@/components/icons';
 import { cn } from '@/lib/utils';
-import { Layout, FileText, Book, User, Sparkles } from 'lucide-react';
+import { Sparkles, User } from 'lucide-react';
 
 export function SiteHeader() {
   const pathname = usePathname();
   
-  // Don't show this header inside the specific builder workspace if it duplicates functionality, 
-  // but for "checking work" it's good to have a global way out.
-  // We'll keep it simple and sleek.
+  const navLinks = [
+    { href: "/trending", label: "Trending" },
+    { href: "/blog", label: "Blog" },
+    { href: "/docs", label: "Docs" },
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-black/80 backdrop-blur supports-[backdrop-filter]:bg-black/60">
@@ -25,37 +27,21 @@ export function SiteHeader() {
             </span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            <Link
-              href="/builder"
-              className={cn(
-                "transition-colors hover:text-white/80",
-                pathname === "/builder" ? "text-white" : "text-white/60"
-              )}
-            >
-              Builder
-            </Link>
-            <Link
-              href="/blog"
-              className={cn(
-                "transition-colors hover:text-white/80",
-                pathname?.startsWith("/blog") ? "text-white" : "text-white/60"
-              )}
-            >
-              Blog
-            </Link>
-            <Link
-              href="/docs"
-              className={cn(
-                "transition-colors hover:text-white/80",
-                pathname?.startsWith("/docs") ? "text-white" : "text-white/60"
-              )}
-            >
-              Docs
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "transition-colors hover:text-white/80",
+                  pathname?.startsWith(link.href) ? "text-white" : "text-white/60"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
         </div>
         
-        {/* Mobile Logo Center (Simplified) */}
         <div className="flex flex-1 items-center justify-between md:justify-end">
             <div className="md:hidden">
                 <Link href="/" className="flex items-center space-x-2">

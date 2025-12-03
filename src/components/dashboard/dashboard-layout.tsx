@@ -14,11 +14,13 @@ import {
   CreditCard, 
   Settings, 
   LogOut, 
-  Search
+  Search,
+  Plus
 } from 'lucide-react';
 import { EntreSiteLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '../ui/input';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -34,12 +36,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'CRM & Leads', href: '/dashboard/leads', icon: Users },
     { name: 'AI Tools', href: '/dashboard/ai-tools', icon: Bot },
     { name: 'Assets', href: '/dashboard/assets', icon: ImageIcon },
+    { name: 'Team', href: '/dashboard/team', icon: Users },
+    { name: 'Jobs', href: '/admin/jobs', icon: Bot },
+  ];
+  
+  const bottomNavigation = [
     { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
-  ];
+  ]
 
   return (
-    <div className="min-h-screen bg-muted/20 flex">
+    <div className="min-h-screen bg-muted/20 flex font-sans">
       {/* Sidebar */}
       <aside className="w-64 bg-background border-r flex flex-col fixed inset-y-0 z-50">
         <div className="h-16 flex items-center px-6 border-b">
@@ -49,7 +56,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </Link>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+        <div className="flex-1 overflow-y-auto py-4 px-4 space-y-1">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -59,7 +66,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
                   isActive 
-                    ? "bg-primary text-primary-foreground" 
+                    ? "bg-primary text-primary-foreground shadow" 
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
@@ -70,8 +77,27 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           })}
         </div>
 
-        <div className="p-4 border-t space-y-4">
-            <div className="bg-muted/50 p-3 rounded-lg flex items-center gap-3">
+        <div className="p-4 border-t space-y-1">
+            {bottomNavigation.map((item) => {
+                 const isActive = pathname === item.href;
+                 return (
+                   <Link
+                     key={item.name}
+                     href={item.href}
+                     className={cn(
+                       "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                       isActive 
+                         ? "bg-muted text-foreground" 
+                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                     )}
+                   >
+                     <item.icon className="h-4 w-4" />
+                     {item.name}
+                   </Link>
+                 );
+            })}
+            
+             <div className="!mt-4 bg-muted/50 p-3 rounded-lg flex items-center gap-3">
                 <Avatar className="h-9 w-9">
                     <AvatarImage src="https://github.com/shadcn.png" />
                     <AvatarFallback>JD</AvatarFallback>
@@ -80,34 +106,34 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     <p className="text-sm font-medium truncate">John Doe</p>
                     <p className="text-xs text-muted-foreground truncate">Pro Plan</p>
                 </div>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-500 hover:bg-red-500/10">
+                  <LogOut className="h-4 w-4" />
+                </Button>
             </div>
-            <Button variant="ghost" className="w-full justify-start gap-2 text-red-600 hover:text-red-600 hover:bg-red-50">
-                <LogOut className="h-4 w-4" />
-                Log Out
-            </Button>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 ml-64 flex flex-col min-w-0">
-        {/* Top Header */}
-        <header className="h-16 border-b bg-background px-8 flex items-center justify-between sticky top-0 z-40">
-            <h1 className="text-lg font-semibold">
-                {navigation.find(n => n.href === pathname)?.name || 'Dashboard'}
-            </h1>
+        <header className="h-16 border-b bg-background/50 backdrop-blur-sm px-6 flex items-center justify-between sticky top-0 z-40">
+            <div className="relative w-full max-w-sm">
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                 <Input placeholder="Search sites, leads, assets..." className="pl-9 bg-muted/50 border-0 focus-visible:ring-primary/20" />
+            </div>
             <div className="flex items-center gap-4">
-                <Button variant="outline" size="sm" className="gap-2 text-muted-foreground">
-                    <Search className="h-4 w-4" />
-                    <span className="hidden sm:inline">Search...</span>
-                    <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                        ⌘K
-                    </kbd>
+                <Button variant="outline" className="gap-2 hidden sm:flex">
+                    Help
                 </Button>
-                <Button>Create New Project</Button>
+                <Link href="/builder">
+                  <Button className="gap-2">
+                      <Plus className="h-4 w-4" />
+                      New Site
+                  </Button>
+                </Link>
             </div>
         </header>
 
-        <div className="p-8 max-w-7xl mx-auto w-full">
+        <div className="p-6 lg:p-8 max-w-7xl mx-auto w-full">
             {children}
         </div>
       </main>

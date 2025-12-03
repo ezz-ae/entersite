@@ -4,7 +4,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SiteHeader } from '@/components/site-header';
-import { DevNavigation } from '@/components/dev/dev-navigation';
 
 export const metadata: Metadata = {
   title: 'EntreSite AI',
@@ -26,11 +25,8 @@ export default function RootLayout({
       <body className="font-sans antialiased selection:bg-white/20">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <FirebaseClientProvider>
-            {/* The main site header might be hidden on some landing pages, 
-                but for now we keep it. The DevNav sits on top. */}
-            {/* <SiteHeader /> */}
+            <SiteHeader />
             {children}
-            <DevNavigation />
           </FirebaseClientProvider>
           <Toaster />
         </ThemeProvider>

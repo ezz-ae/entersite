@@ -1,6 +1,7 @@
-import { MarketingHero, FeatureGrid } from '@/components/marketing/landing-components';
+import { CuriosityHero } from '@/components/marketing/curiosity-hero';
 import { SiteFooter } from '@/components/site-footer';
 import { Metadata } from 'next';
+import { FeatureGrid } from '@/components/marketing/feature-showcase/builder-showcase';
 
 export const metadata: Metadata = {
   title: 'EntreSite AI | The Real Estate Operating System',
@@ -10,8 +11,7 @@ export const metadata: Metadata = {
 export default function MarketingPage() {
   return (
     <main className="min-h-screen bg-background flex flex-col">
-      <MarketingHero />
-      <FeatureGrid />
+      <CuriosityHero />
       <SiteFooter />
     </main>
   );
