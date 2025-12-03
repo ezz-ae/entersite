@@ -32,17 +32,19 @@ export function CuriosityHero() {
   const [initialBlocks, setInitialBlocks] = useState<any[]>([]);
 
   useEffect(() => {
-    const windowSize = { w: window.innerWidth, h: window.innerHeight };
-    
-    // Scatter blocks across the entire viewport, but only on the client
-    const scatteredBlocks = BLOCKS_DATA.map((b, i) => ({
-      ...b,
-      x: (Math.random() - 0.5) * (windowSize.w * 0.8), // Spread across 80% width
-      y: (Math.random() - 0.5) * (windowSize.h * 0.8), // Spread across 80% height
-      rotate: Math.random() * 20 - 10,
-    }));
+    // This effect runs only on the client
+    if (typeof window !== 'undefined') {
+      const windowSize = { w: window.innerWidth, h: window.innerHeight };
+      
+      const scatteredBlocks = BLOCKS_DATA.map((b, i) => ({
+        ...b,
+        x: (Math.random() - 0.5) * (windowSize.w * 0.8),
+        y: (Math.random() - 0.5) * (windowSize.h * 0.8),
+        rotate: Math.random() * 20 - 10,
+      }));
 
-    setInitialBlocks(scatteredBlocks);
+      setInitialBlocks(scatteredBlocks);
+    }
   }, []);
 
   return (

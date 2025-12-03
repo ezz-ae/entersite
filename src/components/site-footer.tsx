@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border bg-background text-muted-foreground">
+    <footer className="border-t border-border/5 bg-background/50 text-muted-foreground">
       <div className="container mx-auto max-w-[1600px] px-8 py-24">
         
         {/* Top Section: Brand & Newsletter */}

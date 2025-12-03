@@ -133,7 +133,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
         </header>
 
-        <div className="p-6 lg:p-8 max-w-7xl mx-auto w-full">
+        <div className="p-6 lg:p-8 mx-auto w-full">
             {children}
         </div>
       </main>

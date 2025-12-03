@@ -10,7 +10,7 @@ export default function DashboardPage() {
       <div className="space-y-8">
         
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatsCard title="Total Revenue" value="$45,231.89" trend="+20.1%" icon={DollarSign} />
             <StatsCard title="Active Leads" value="2,345" trend="+15%" icon={Users} />
             <StatsCard title="Site Visits" value="12,344" trend="+4%" icon={Globe} />

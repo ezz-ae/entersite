@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, ArrowRight, Building2, Users, Zap, Layout, Search, Clock, TrendingUp, Sparkles, SlidersHorizontal, ChevronRight, Command, Upload } from "lucide-react";
+import { Check, ArrowRight, Building2, Users, Zap, Layout, Search, Clock, TrendingUp, Sparkles, SlidersHorizontal, ChevronRight, Command, Upload, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImageUploader } from "@/components/ui/image-uploader";
 import { Input } from "@/components/ui/input";
@@ -19,33 +19,11 @@ interface OnboardingFlowProps {
 
 const SITE_TYPES = [
   { id: 'landing', icon: <Zap className="h-4 w-4" />, label: 'Landing Page' },
-  { id: 'roadshow', icon: <GlobeIcon className="h-4 w-4" />, label: 'Roadshow' },
+  { id: 'roadshow', icon: <Globe className="h-4 w-4" />, label: 'Roadshow' },
   { id: 'developer', icon: <Building2 className="h-4 w-4" />, label: 'Developer' },
   { id: 'partner', icon: <Users className="h-4 w-4" />, label: 'Partner' },
   { id: 'company', icon: <Layout className="h-4 w-4" />, label: 'Company' },
 ];
-
-// Helper icon component
-function GlobeIcon(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="2" x2="22" y1="12" y2="12" />
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-        </svg>
-    )
-}
 
 const LOCATIONS = [
   { id: 'dubai', label: 'Dubai' },
