@@ -1,5 +1,5 @@
 import type { SitePage, Block } from './types';
-import { allProjects } from './projects';
+import { allProjects } from '@/lib/projects';
 import { dubaiProjects } from '@/data/dubai';
 import { abuDhabiProjects } from '@/data/abudhabi';
 import { rasAlKhaimahProjects } from '@/data/rasalkhaimah';
