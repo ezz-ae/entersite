@@ -193,8 +193,6 @@ export function BlockCard({ blockType, children, onDelete, onUpdate, onDuplicate
           "rounded-xl overflow-hidden bg-background shadow-sm border border-transparent transition-all duration-300",
           isHovered ? "border-black/5 shadow-md" : ""
       )}>
-           {/* Overlay to prevent interaction while dragging/editing */}
-           <div className="pointer-events-none absolute inset-0 z-10 bg-transparent" /> 
            <div className={cn("transition-opacity duration-300", isDragging ? "opacity-50" : "opacity-100")}>
                {children}
            </div>
