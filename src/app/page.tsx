@@ -1,6 +1,5 @@
 import { ProjectDiscoverySection } from '@/components/marketing/project-discovery-section';
 import { SiteFooter } from '@/components/site-footer';
-import { SiteHeader } from '@/components/site-header'; // Assuming a marketing site header is needed
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -11,8 +10,6 @@ export const metadata: Metadata = {
 export default function MarketingPage() {
   return (
     <main className="min-h-screen bg-background flex flex-col">
-      {/* A marketing header, distinct from the app header */}
-      <SiteHeader /> 
       <ProjectDiscoverySection />
       <SiteFooter />
     </main>
