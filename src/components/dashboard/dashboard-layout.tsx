@@ -115,25 +115,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main Content */}
       <main className="flex-1 ml-64 flex flex-col min-w-0">
-        <header className="h-16 border-b bg-background/50 backdrop-blur-sm px-6 flex items-center justify-between sticky top-0 z-40">
-            <div className="relative w-full max-w-sm">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                 <Input placeholder="Search sites, leads, assets..." className="pl-9 bg-muted/50 border-0 focus-visible:ring-primary/20" />
-            </div>
-            <div className="flex items-center gap-4">
-                <Button variant="outline" className="gap-2 hidden sm:flex">
-                    Help
-                </Button>
-                <Link href="/builder">
-                  <Button className="gap-2">
-                      <Plus className="h-4 w-4" />
-                      New Site
-                  </Button>
-                </Link>
-            </div>
-        </header>
-
-        <div className="p-6 lg:p-8 mx-auto w-full">
+        <div className="p-6 lg:p-8 mx-auto w-full max-w-7xl">
             {children}
         </div>
       </main>
