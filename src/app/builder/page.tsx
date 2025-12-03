@@ -14,10 +14,10 @@ import { availableTemplates, SiteTemplate, roadshowTemplate, developerFocusTempl
 import { OnboardingFlow } from '@/components/onboarding-flow';
 import { SeoSettingsDialog } from '@/components/seo-settings-dialog';
 import { PublishSuccessDialog } from '@/components/publish-success-dialog';
-import type { SitePage } from '@/lib/types';
+import type { SitePage, Block } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/theme-provider';
-import { fetchRealAssets } from '@/lib/media-scraper'; // Import Scraper
+import { verifyAndFetchAssets } from '@/lib/media-scraper'; // Import Scraper
 
 // Components
 import { EditorHeader } from '@/components/editor/editor-header';
@@ -63,7 +63,7 @@ export default function BuilderPage() {
           console.log("Generating site from prompt:", prompt);
           
           // 1. Fetch Real Assets based on prompt keywords
-          const assets = await fetchRealAssets(prompt);
+          const assets = await verifyAndFetchAssets(prompt);
           console.log("Scraped Assets:", assets);
 
           // 2. Generate Custom Template (Simulated AI logic)
