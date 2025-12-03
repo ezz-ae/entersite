@@ -121,7 +121,6 @@ const renderBlock = (block: BlockType) => {
       </div>
     );
   }
-  // Pass readonly prop if needed, or handle interactions in wrapper
   return <Component {...block.data} />;
 };
 
@@ -442,8 +441,6 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
                           </div>
                       )}
 
-                      {/* We reuse BlockCard but disable internal editing logic if we want pure sidebar editing */}
-                      {/* For now, we keep BlockCard for its visual container, but we might want to strip the internal Dialog */}
                       <BlockCard 
                         blockType={block.type} 
                         data={block.data}
@@ -451,9 +448,7 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
                         onDelete={() => deleteBlock(block.blockId)}
                         onDuplicate={() => duplicateBlock(block.blockId)}
                       >
-                        <div className="pointer-events-none">
-                            {renderBlock(block)}
-                        </div>
+                        {renderBlock(block)}
                       </BlockCard>
                   </div>
                 </SortableItem>
