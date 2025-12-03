@@ -28,7 +28,6 @@ import { ListingGridBlock } from './blocks/listing-grid-block';
 import { CtaFormBlock } from './blocks/cta-form-block';
 import { GalleryBlock } from './blocks/gallery-block';
 import { FaqBlock } from './blocks/faq-block';
-import { MapBlock } from './blocks/placeholder-blocks';
 import { TestimonialBlock } from './blocks/testimonial-block';
 import { RoadshowBlock } from './blocks/roadshow-block';
 import { TeamBlock } from './blocks/team-block';
@@ -71,6 +70,7 @@ import { suggestNextBlocks, SuggestNextBlocksOutput } from '@/ai/flows/suggest-n
 import { Separator } from './ui/separator';
 import { allProjects } from '@/lib/projects';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MapBlock } from './blocks/map-block';
 
 const blockComponents: Record<string, React.ComponentType<any>> = {
   'hero': HeroBlock,

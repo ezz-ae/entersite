@@ -7,7 +7,6 @@ import { ListingGridBlock } from './blocks/listing-grid-block';
 import { CtaFormBlock } from './blocks/cta-form-block';
 import { GalleryBlock } from './blocks/gallery-block';
 import { FaqBlock } from './blocks/faq-block';
-import { MapBlock } from './blocks/placeholder-blocks';
 import { TestimonialBlock } from './blocks/testimonial-block';
 import { RoadshowBlock } from './blocks/roadshow-block';
 import { TeamBlock } from './blocks/team-block';
@@ -38,6 +37,7 @@ import { LaunchHeroBlock } from './blocks/hero/launch-hero-block';
 import { ComingSoonHeroBlock } from './blocks/hero/coming-soon-hero-block';
 import { CtaGridBlock } from './blocks/cta/cta-grid-block';
 import { BannerCtaBlock } from './blocks/cta/banner-cta-block';
+import { MapBlock } from './blocks/map-block';
 
 const blockComponents: Record<string, React.ComponentType<any>> = {
   'hero': HeroBlock,
