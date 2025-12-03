@@ -1,20 +1,29 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { UserNav } from "@/components/user-nav";
+import { EntreSiteLogo } from "@/components/icons";
+import { PageBuilder } from "@/components/page-builder";
+import { PageRenderer } from "@/components/page-renderer";
+import { LayoutGrid, Plus, ChevronsUpDown, Eye, Edit3, Settings, Rocket } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
+import { availableTemplates, SiteTemplate, roadshowTemplate, developerFocusTemplate, partnerLaunchTemplate, fullCompanyTemplate, adsQuickLaunchTemplate } from '@/lib/templates';
 import { OnboardingFlow } from '@/components/onboarding-flow';
-import type { SitePage, Block } from '@/lib/types';
+import { SeoSettingsDialog } from '@/components/seo-settings-dialog';
+import { PublishSuccessDialog } from '@/components/publish-success-dialog';
+import type { SitePage } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/theme-provider';
-import { availableTemplates, SiteTemplate, fullCompanyTemplate, roadshowTemplate, developerFocusTemplate, partnerLaunchTemplate, adsQuickLaunchTemplate } from '@/lib/templates';
+import { fetchRealAssets } from '@/lib/media-scraper'; // Import Scraper
 
 // Components
 import { EditorHeader } from '@/components/editor/editor-header';
 import { SidebarNav } from '@/components/editor/sidebar/sidebar-nav';
 import { InspectorPanel } from '@/components/editor/inspector/inspector-panel';
-import { ThemePanel } from '@/components/editor/sidebar/theme-panel'; // New
-import { PageBuilder } from '@/components/page-builder';
-import { PageRenderer } from '@/components/page-renderer';
-import { PublishSuccessDialog } from '@/components/publish-success-dialog';
+import { ThemePanel } from '@/components/editor/sidebar/theme-panel';
 
 export default function BuilderPage() {
   const [showOnboarding, setShowOnboarding] = useState(true);
@@ -26,10 +35,10 @@ export default function BuilderPage() {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   
   // UI State
-  const [activeView, setActiveView] = useState<string | null>(null); // Controls left panel
+  const [activeView, setActiveView] = useState<string | null>(null); 
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
-  const [canvasWidth, setCanvasWidth] = useState('100%'); // For device preview
+  const [canvasWidth, setCanvasWidth] = useState('100%'); 
 
   const { setBrandColor } = useTheme();
 
@@ -44,15 +53,84 @@ export default function BuilderPage() {
     setActivePageId(template.pages[0]?.id || '');
   };
 
-  const handleOnboardingComplete = (data: any) => {
+  const handleOnboardingComplete = async (data: any) => {
       if (data['brand-color']) {
           setBrandColor(data['brand-color']);
       }
 
       if (data.method === 'prompt') {
-          console.log("Prompt:", data['user-prompt']);
-          handleTemplateChange(fullCompanyTemplate);
+          const prompt = data['user-prompt'];
+          console.log("Generating site from prompt:", prompt);
+          
+          // 1. Fetch Real Assets based on prompt keywords
+          const assets = await fetchRealAssets(prompt);
+          console.log("Scraped Assets:", assets);
+
+          // 2. Generate Custom Template (Simulated AI logic)
+          // In a real app, this JSON structure would come from the Vertex Agent
+          // We inject the scraped assets into the blocks here
+          const customTemplate: SiteTemplate = {
+              id: `ai-gen-${Date.now()}`,
+              name: 'AI Custom Build',
+              siteType: 'custom',
+              pages: [{
+                  id: 'home',
+                  title: 'Home',
+                  blocks: [
+                      {
+                          blockId: 'hero-1',
+                          type: 'hero',
+                          order: 0,
+                          data: {
+                              headline: "Exclusive Living Redefined",
+                              subtext: "Experience the pinnacle of luxury in this premier development.",
+                              backgroundImage: assets.heroImages[0], // INJECTED REAL ASSET
+                              ctaText: "Register Interest"
+                          }
+                      },
+                      {
+                          blockId: 'stats-1',
+                          type: 'stats',
+                          order: 1,
+                          data: {
+                              headline: "Project Highlights",
+                              stats: [
+                                  { value: "10%", label: "Down Payment" },
+                                  { value: "Q4 2026", label: "Handover" },
+                                  { value: "7%", label: "ROI" }
+                              ]
+                          }
+                      },
+                      {
+                          blockId: 'grid-1',
+                          type: 'listing-grid',
+                          order: 2,
+                          data: {
+                              headline: "Available Units",
+                              // Logic to filter real projects would go here
+                          }
+                      },
+                      {
+                          blockId: 'cta-1',
+                          type: 'cta-form',
+                          order: 3,
+                          data: {
+                              headline: "Book a Private Tour",
+                              subtext: "Our agents are ready to show you the property."
+                          }
+                      }
+                  ],
+                  canonicalListings: [],
+                  brochureUrl: assets.brochureUrl || "",
+                  seo: { title: "Luxury Real Estate", description: "Generated Site", keywords: [] },
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+              }]
+          };
+
+          handleTemplateChange(customTemplate);
       } else {
+          // Logic for Wizard selections (unchanged)
           let selectedTemplate = availableTemplates[0];
           if (data['site-type'] === 'roadshow') selectedTemplate = roadshowTemplate;
           else if (data['site-type'] === 'developer') selectedTemplate = developerFocusTemplate;
@@ -62,6 +140,7 @@ export default function BuilderPage() {
 
           handleTemplateChange(selectedTemplate);
       }
+
       setShowOnboarding(false);
   };
 
@@ -79,17 +158,14 @@ export default function BuilderPage() {
 
   const handleSelectBlock = (block: Block | null) => {
       setSelectedBlockId(block?.blockId || null);
-      // Close other panels when selecting a block to focus on inspector
       if (block) setActiveView(null);
   };
 
   const handleViewChange = (view: string) => {
-      // Toggle view
       if (activeView === view) {
           setActiveView(null);
       } else {
           setActiveView(view);
-          // Deselect block to focus on left panel
           setSelectedBlockId(null);
       }
   }

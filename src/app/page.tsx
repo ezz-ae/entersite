@@ -1,17 +1,19 @@
-import { CuriosityHero } from '@/components/marketing/curiosity-hero';
+import { ProjectDiscoverySection } from '@/components/marketing/project-discovery-section';
 import { SiteFooter } from '@/components/site-footer';
+import { SiteHeader } from '@/components/site-header'; // Assuming a marketing site header is needed
 import { Metadata } from 'next';
-import { FeatureGrid } from '@/components/marketing/feature-showcase/builder-showcase';
 
 export const metadata: Metadata = {
-  title: 'EntreSite AI | The Real Estate Operating System',
-  description: 'Build high-converting real estate websites in seconds with AI.',
+  title: 'EntreSite AI | Real Estate OS - Discover & Build',
+  description: 'Leverage 3,750+ verified real estate projects and AI agents to build, market, and manage your digital empire.',
 };
 
 export default function MarketingPage() {
   return (
     <main className="min-h-screen bg-background flex flex-col">
-      <CuriosityHero />
+      {/* A marketing header, distinct from the app header */}
+      <SiteHeader /> 
+      <ProjectDiscoverySection />
       <SiteFooter />
     </main>
   );

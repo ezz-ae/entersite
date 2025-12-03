@@ -1,5 +1,5 @@
 import type { SitePage, Block } from './types';
-import { allProjects } from '@/lib/projects';
+import { allProjects } from './projects';
 import { dubaiProjects } from '@/data/dubai';
 import { abuDhabiProjects } from '@/data/abudhabi';
 import { rasAlKhaimahProjects } from '@/data/rasalkhaimah';
@@ -8,8 +8,10 @@ import { sharjahProjects } from '@/data/sharjah';
 export interface SiteTemplate {
   id: string;
   name: string;
-  siteType: 'roadshow' | 'developer-focus' | 'partner-launch' | 'full-company' | 'freelancer' | 'map-focused' | 'ads-launch';
+  siteType: 'roadshow' | 'developer-focus' | 'partner-launch' | 'full-company' | 'freelancer' | 'map-focused' | 'ads-launch' | 'ready-made';
   pages: SitePage[];
+  thumbnail?: string;
+  description?: string;
 }
 
 const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
@@ -19,7 +21,6 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
       headline: "Discover Unparalleled Luxury",
       subtext: "Explore our exclusive collection of premium properties.",
       ctaText: "Explore Properties",
-      backgroundImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000"
     },
   },
   'launch-hero': {
@@ -51,7 +52,7 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
     data: {
       headline: "Featured Properties",
       subtext: "Handpicked listings that define luxury living.",
-      projects: allProjects.slice(0, 3), // Default projects
+      projects: allProjects.slice(0, 3), 
     },
   },
   'listing-grid-map': {
@@ -101,25 +102,13 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   gallery: {
       type: 'gallery',
       data: {
-          headline: 'Project Gallery',
-          images: [
-            "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=1000",
-            "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1000",
-            "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1000",
-            "https://images.unsplash.com/photo-1600596542815-275084988866?auto=format&fit=crop&q=80&w=1000",
-            "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=1000",
-          ]
+          headline: 'Project Gallery'
       }
   },
   testimonial: {
       type: 'testimonial',
       data: {
-          headline: 'What Our Clients Say',
-          testimonials: [
-            { quote: "Working with this team was a game-changer. Their AI-powered platform helped us launch our project website in record time.", author: "Fatima Al-Marzouqi", role: "CEO, Prestige Properties", avatarId: 'user-avatar-1' },
-            { quote: "The automated Google Ads campaigns are incredibly effective. We saw a 200% increase in qualified leads within the first month.", author: "Johnathan Smith", role: "Marketing Director, Skyline Developments", avatarId: 'user-avatar-2' },
-            { quote: "As a boutique agency, we need to be agile. EntreSite allowed us to compete with the big players, giving us a professional web presence without the huge overhead.", author: "Chen Wei", role: "Founder, Urban Nest Realty", avatarId: 'user-avatar-3' },
-          ]
+          headline: 'What Our Clients Say'
       }
   },
   faq: {
@@ -259,8 +248,7 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   }
 };
 
-const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: { city?: string }): Block => {
-    // Create a deep copy of the block data to avoid shared reference issues
+const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: { city?: string, overrides?: any }): Block => {
     const blockData = JSON.parse(JSON.stringify(defaultBlocks[type]));
 
     if (type === 'listing-grid' || type === 'listing-grid-map') {
@@ -273,10 +261,13 @@ const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: 
       else if (city === 'sharjah') projectsToShow = sharjahProjects;
       else projectsToShow = allProjects;
       
-      // Slice depending on block type
       blockData.data.projects = type === 'listing-grid' ? projectsToShow.slice(0, 3) : projectsToShow.slice(0, 5);
     }
 
+    // Apply manual overrides for ready-made templates
+    if (context?.overrides) {
+        Object.assign(blockData.data, context.overrides);
+    }
 
     return {
         blockId: `${blockData.type}-${Date.now()}-${Math.random()}`,
@@ -286,11 +277,15 @@ const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: 
     }
 }
 
-const createPage = (id: string, title: string, blocks: (keyof typeof defaultBlocks)[], context?: { city?: string }): SitePage => {
+const createPage = (id: string, title: string, blocks: (keyof typeof defaultBlocks | { type: keyof typeof defaultBlocks, overrides: any })[], context?: { city?: string }): SitePage => {
     return {
         id: `page-${id}`,
         title: title,
-        blocks: blocks.map((type, index) => createBlock(type, index + 1, context)),
+        blocks: blocks.map((blockDef, index) => {
+            const type = typeof blockDef === 'string' ? blockDef : blockDef.type;
+            const overrides = typeof blockDef === 'string' ? {} : blockDef.overrides;
+            return createBlock(type, index + 1, { ...context, overrides });
+        }),
         canonicalListings: [],
         brochureUrl: "",
         seo: {
@@ -350,7 +345,7 @@ export const freelancerTemplate: SiteTemplate = {
     name: 'Freelancer Agent',
     siteType: 'freelancer',
     pages: [
-        createPage('home', 'Home', ['hero', 'listing-grid', 'blog-grid', 'team', 'cta-grid', 'testimonial', 'chat-widget']),
+        createPage('home', 'Home', ['hero', 'listing-grid', 'blog-grid', 'team', 'testimonial', 'cta-form', 'chat-widget']),
     ]
 };
 
@@ -372,6 +367,58 @@ export const adsQuickLaunchTemplate: SiteTemplate = {
     ]
 };
 
+// --- Ready-Made Templates ---
+
+export const dubaiLuxuryTemplate: SiteTemplate = {
+    id: 'template-dubai-luxury',
+    name: 'Dubai Luxury Collection',
+    siteType: 'ready-made',
+    description: 'High-end portfolio for Jumeirah & Marina properties.',
+    pages: [
+        createPage('home', 'Luxury Collection', [
+            { type: 'hero', overrides: { headline: "Dubai's Finest Addresses", subtext: "Exclusive waterfront apartments and villas.", backgroundImage: "https://images.unsplash.com/photo-1512453979798-5ea904ac66de?auto=format&fit=crop&q=80&w=2000" } },
+            { type: 'featured-listing', overrides: { headline: "Penthouse of the Month", listingTitle: "Palm Royale Penthouse", price: "AED 45,000,000" } },
+            'listing-grid',
+            { type: 'city-guide', overrides: { city: "Dubai", headline: "Invest in the Future" } },
+            'roi-calculator',
+            'cta-form'
+        ], { city: 'Dubai' })
+    ]
+}
+
+export const emaarLaunchTemplate: SiteTemplate = {
+    id: 'template-emaar-launch',
+    name: 'Emaar Beachfront Launch',
+    siteType: 'ready-made',
+    description: 'Conversion-focused page for Emaar new releases.',
+    pages: [
+        createPage('home', 'Launch Event', [
+            { type: 'launch-hero', overrides: { headline: "Emaar Beachfront", subtext: "Private Beach Living. Launching Soon.", launchDate: "Dec 2025" } },
+            { type: 'banner-cta', overrides: { headline: "50/50 Payment Plan", subtext: "Pay 50% during construction, 50% on handover." } },
+            { type: 'project-detail', overrides: { projectName: "Beach Isle", developer: "Emaar" } },
+            'video',
+            'payment-plan',
+            'brochure-form'
+        ], { city: 'Dubai' })
+    ]
+}
+
+export const rakInvestmentTemplate: SiteTemplate = {
+    id: 'template-rak-invest',
+    name: 'RAK Casino Investment',
+    siteType: 'ready-made',
+    description: 'Targeting investors for the upcoming Wynn Resort area.',
+    pages: [
+        createPage('home', 'Investment Opportunity', [
+            { type: 'hero-lead-form', overrides: { headline: "Invest in Al Marjan Island", subtext: "Home of the upcoming Wynn Casino Resort." } },
+            { type: 'stats', overrides: { headline: "The Next Vegas", stats: [{ value: "20M", label: "Annual Tourists" }, { value: "15%", label: "Exp. Yield" }] } },
+            'listing-grid',
+            { type: 'offer', overrides: { headline: "Founder's Special", subtext: "Get 4% DLD Waiver + Free Furnishing" } },
+            'cta-grid'
+        ], { city: 'Ras Al Khaimah' })
+    ]
+}
+
 
 export const availableTemplates: SiteTemplate[] = [
     roadshowTemplate,
@@ -381,4 +428,8 @@ export const availableTemplates: SiteTemplate[] = [
     freelancerTemplate,
     mapFocusedTemplate,
     adsQuickLaunchTemplate,
+    // Ready Made
+    dubaiLuxuryTemplate,
+    emaarLaunchTemplate,
+    rakInvestmentTemplate
 ];
