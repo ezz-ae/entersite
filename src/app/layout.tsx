@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from '@/components/theme-provider';
-import { SiteHeader } from '@/components/site-header';
+import { AppHeader } from '@/components/app-header';
 
 export const metadata: Metadata = {
   title: 'EntreSite AI',
@@ -25,7 +25,7 @@ export default function RootLayout({
       <body className="font-sans antialiased selection:bg-white/20">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <FirebaseClientProvider>
-            <SiteHeader />
+            <AppHeader />
             {children}
           </FirebaseClientProvider>
           <Toaster />
