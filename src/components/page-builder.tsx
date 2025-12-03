@@ -124,7 +124,6 @@ const renderBlock = (block: BlockType) => {
   return <Component {...block.data} />;
 };
 
-// ... AddBlockPopover component remains the same ...
 const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: { onSelectBlock: (blockType: string, content?: any) => void, currentBlocks: string[], variant?: 'default' | 'mini' }) => {
   const [suggestions, setSuggestions] = useState<SuggestNextBlocksOutput>([]);
   const [loading, setLoading] = useState(false);
@@ -149,7 +148,6 @@ const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: 
       setSuggestions(result);
     } catch (e) {
       console.error(e);
-      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -178,12 +176,11 @@ const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: 
           <div className="bg-muted/30 p-4 border-b">
             <h4 className="font-semibold text-sm">Add Content</h4>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Drag and drop blocks to build your page.
+              Select a block to add it to your page.
             </p>
           </div>
           
           <div className="p-4 space-y-4 max-h-[500px] overflow-y-auto">
-               {/* AI Section */}
               <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-xl p-4 border border-indigo-100 dark:border-indigo-900/50">
                   <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -279,7 +276,7 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
   const sensors = useSensors(
     useSensor(PointerSensor, {
         activationConstraint: {
-            distance: 5, // Prevent accidental drags
+            distance: 5,
         },
     }),
     useSensor(KeyboardSensor, {
@@ -347,7 +344,6 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
-    // Optional: Select the block being dragged
     const block = blocks.find(b => b.blockId === event.active.id);
     if (block && onSelectBlock) onSelectBlock(block);
   };
@@ -434,7 +430,6 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
                             : "ring-transparent hover:ring-primary/20"
                     )}
                   >
-                      {/* Active Label */}
                       {selectedBlockId === block.blockId && (
                           <div className="absolute -top-3 left-4 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider z-20 shadow-sm animate-in fade-in zoom-in duration-200">
                               Selected
@@ -453,8 +448,7 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
                   </div>
                 </SortableItem>
                 
-                {/* The "Insert Between" Plus Button */}
-                <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 z-30 opacity-0 group-hover/add-block-area:opacity-100 transition-all duration-200 pointer-events-none group-hover/add-block-area:pointer-events-auto hover:scale-110">
+                <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 z-30 opacity-0 group-hover/add-block-area:opacity-100 transition-all duration-200 group-hover/add-block-area:pointer-events-auto hover:scale-110">
                    <AddBlockPopover 
                       variant="mini"
                       onSelectBlock={(type, content) => addBlock(type, content, index + 1)}

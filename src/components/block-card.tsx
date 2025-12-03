@@ -28,6 +28,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useSortableItem } from './ui/sortable/sortable-item';
 
 interface BlockCardProps {
   blockType: string;
@@ -43,27 +44,13 @@ export function BlockCard({ blockType, children, onDelete, onUpdate, onDuplicate
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(data || {});
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: data?.id || blockType }); // Ensure ID is passed if possible, else fallback
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 50 : 1,
-  };
+  const { attributes, listeners, isDragging } = useSortableItem();
 
   const handleSave = () => {
       onUpdate?.(editData);
       setIsEditing(false);
   };
 
-  // Simplified edit fields - in a real app, this would be dynamic schema-based
   const renderEditFields = () => {
       return (
           <div className="space-y-6 py-4">
@@ -85,7 +72,6 @@ export function BlockCard({ blockType, children, onDelete, onUpdate, onDuplicate
                    />
               </div>
               
-              {/* Dynamic Image Field if 'image' key exists */}
               {(editData.image || editData.backgroundImage) && (
                   <div className="space-y-2">
                       <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Visual</Label>
@@ -101,8 +87,6 @@ export function BlockCard({ blockType, children, onDelete, onUpdate, onDuplicate
 
   return (
     <motion.div
-      ref={setNodeRef}
-      style={style}
       layoutId={data?.id}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -115,18 +99,17 @@ export function BlockCard({ blockType, children, onDelete, onUpdate, onDuplicate
       onMouseLeave={() => setIsHovered(false)}
     >
       
-      {/* Apple-style Action Bar */}
       <div className={cn(
           "absolute -top-3 right-4 z-20 flex items-center gap-1 p-1 pl-2 pr-1 rounded-full bg-white/80 backdrop-blur-md shadow-lg border border-black/5 transition-all duration-300 transform origin-right",
-          isHovered ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2 pointer-events-none"
+          isHovered || isDragging ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2 pointer-events-none"
       )}>
              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mr-2">{blockType.replace(/-/g, ' ')}</span>
              
              <div className="h-4 w-px bg-border mx-1" />
 
-             <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-black/5 cursor-grab active:cursor-grabbing text-muted-foreground" {...attributes} {...listeners}>
+             <button {...attributes} {...listeners} className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-black/5 cursor-grab active:cursor-grabbing text-muted-foreground">
                 <GripVertical className="h-3.5 w-3.5" />
-             </Button>
+             </button>
             
              <Dialog open={isEditing} onOpenChange={setIsEditing}>
                 <DialogTrigger asChild>
@@ -188,12 +171,11 @@ export function BlockCard({ blockType, children, onDelete, onUpdate, onDuplicate
              </DropdownMenu>
       </div>
 
-      {/* Block Content Container */}
       <div className={cn(
           "rounded-xl overflow-hidden bg-background shadow-sm border border-transparent transition-all duration-300",
           isHovered ? "border-black/5 shadow-md" : ""
       )}>
-           <div className={cn("transition-opacity duration-300", isDragging ? "opacity-50" : "opacity-100")}>
+           <div className={cn("transition-opacity duration-300", isDragging ? "opacity-30" : "opacity-100")}>
                {children}
            </div>
       </div>
