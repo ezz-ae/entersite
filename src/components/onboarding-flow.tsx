@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, ArrowRight, Building2, Map, Users, Zap, Layout, Search, Clock, TrendingUp, Sparkles, SlidersHorizontal, ChevronRight, Command } from "lucide-react";
+import { Check, ArrowRight, Building2, Users, Zap, Layout, Search, Clock, TrendingUp, Sparkles, SlidersHorizontal, ChevronRight, Command, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImageUploader } from "@/components/ui/image-uploader";
 import { Input } from "@/components/ui/input";
