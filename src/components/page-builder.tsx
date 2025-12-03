@@ -28,7 +28,7 @@ import { ListingGridBlock } from './blocks/listing-grid-block';
 import { CtaFormBlock } from './blocks/cta-form-block';
 import { GalleryBlock } from './blocks/gallery-block';
 import { FaqBlock } from './blocks/faq-block';
-import { TestimonialBlock } from './blocks/testimonial-block';
+import { MapBlock, TestimonialBlock } from './blocks/placeholder-blocks';
 import { RoadshowBlock } from './blocks/roadshow-block';
 import { TeamBlock } from './blocks/team-block';
 import { ProjectDetailBlock } from './blocks/project-detail-block';
@@ -70,7 +70,7 @@ import { suggestNextBlocks, SuggestNextBlocksOutput } from '@/ai/flows/suggest-n
 import { Separator } from './ui/separator';
 import { allProjects } from '@/lib/projects';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapBlock } from './blocks/map-block';
+import { cn } from '@/lib/utils';
 
 const blockComponents: Record<string, React.ComponentType<any>> = {
   'hero': HeroBlock,
@@ -120,9 +120,11 @@ const renderBlock = (block: BlockType) => {
       </div>
     );
   }
+  // Pass readonly prop if needed, or handle interactions in wrapper
   return <Component {...block.data} />;
 };
 
+// ... AddBlockPopover component remains the same ...
 const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: { onSelectBlock: (blockType: string, content?: any) => void, currentBlocks: string[], variant?: 'default' | 'mini' }) => {
   const [suggestions, setSuggestions] = useState<SuggestNextBlocksOutput>([]);
   const [loading, setLoading] = useState(false);
@@ -254,9 +256,11 @@ const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: 
 interface PageBuilderProps {
   page: SitePage;
   onPageUpdate: (page: SitePage) => void;
+  selectedBlockId?: string | null;
+  onSelectBlock?: (block: BlockType | null) => void;
 }
 
-export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
+export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock }: PageBuilderProps) {
   const [blocks, setBlocks] = useState<BlockType[]>(page.blocks);
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -319,6 +323,9 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
           order: i
       }));
       updatePage(updatedBlocks);
+      if (onSelectBlock && selectedBlockId === blockId) {
+          onSelectBlock(null);
+      }
   };
   
   const duplicateBlock = (blockId: string) => {
@@ -336,10 +343,13 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
       newBlocksList.splice(blockIndex + 1, 0, newBlock);
       
       updatePage(newBlocksList.map((b, i) => ({ ...b, order: i })));
-  }
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
+    // Optional: Select the block being dragged
+    const block = blocks.find(b => b.blockId === event.active.id);
+    if (block && onSelectBlock) onSelectBlock(block);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -412,15 +422,39 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
             {sortedBlocks.map((block, index) => (
               <div key={block.blockId} className="group/add-block-area relative">
                 <SortableItem id={block.blockId}>
-                  <BlockCard 
-                    blockType={block.type} 
-                    data={block.data}
-                    onUpdate={(newData) => updateBlock(block.blockId, newData)}
-                    onDelete={() => deleteBlock(block.blockId)}
-                    onDuplicate={() => duplicateBlock(block.blockId)}
+                  <div 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (onSelectBlock) onSelectBlock(block);
+                    }}
+                    className={cn(
+                        "relative transition-all duration-200 ring-2 rounded-2xl cursor-pointer",
+                        selectedBlockId === block.blockId 
+                            ? "ring-primary shadow-xl scale-[1.01] z-10" 
+                            : "ring-transparent hover:ring-primary/20"
+                    )}
                   >
-                    {renderBlock(block)}
-                  </BlockCard>
+                      {/* Active Label */}
+                      {selectedBlockId === block.blockId && (
+                          <div className="absolute -top-3 left-4 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider z-20 shadow-sm animate-in fade-in zoom-in duration-200">
+                              Selected
+                          </div>
+                      )}
+
+                      {/* We reuse BlockCard but disable internal editing logic if we want pure sidebar editing */}
+                      {/* For now, we keep BlockCard for its visual container, but we might want to strip the internal Dialog */}
+                      <BlockCard 
+                        blockType={block.type} 
+                        data={block.data}
+                        onUpdate={(newData) => updateBlock(block.blockId, newData)}
+                        onDelete={() => deleteBlock(block.blockId)}
+                        onDuplicate={() => duplicateBlock(block.blockId)}
+                      >
+                        <div className="pointer-events-none">
+                            {renderBlock(block)}
+                        </div>
+                      </BlockCard>
+                  </div>
                 </SortableItem>
                 
                 {/* The "Insert Between" Plus Button */}
@@ -438,7 +472,6 @@ export function PageBuilder({ page, onPageUpdate }: PageBuilderProps) {
           <DragOverlay dropAnimation={dropAnimation}>
               {activeId ? (
                   <div className="opacity-90 rotate-2 scale-105 cursor-grabbing shadow-2xl rounded-2xl overflow-hidden bg-background ring-2 ring-primary">
-                      {/* We render a simplified preview or the actual block */}
                       <div className="h-32 bg-muted/20 flex items-center justify-center font-bold text-muted-foreground">
                           Moving Block...
                       </div>
