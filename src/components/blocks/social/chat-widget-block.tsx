@@ -5,17 +5,18 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, X, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 interface ChatWidgetBlockProps {
   agentName?: string;
-  agentImage?: string;
+  agentImageId?: string;
   welcomeMessage?: string;
   whatsappNumber?: string;
 }
 
 export function ChatWidgetBlock({
   agentName = "Sarah - Real Estate Expert",
-  agentImage = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200",
+  agentImageId = "user-avatar-1",
   welcomeMessage = "Hi there! 👋 I can help you find the best investment properties in Dubai. Ask me anything!",
   whatsappNumber = "+971500000000"
 }: ChatWidgetBlockProps) {
@@ -24,6 +25,8 @@ export function ChatWidgetBlock({
       { role: 'agent', text: welcomeMessage }
   ]);
   const [input, setInput] = useState("");
+
+  const agentImage = PlaceHolderImages.find(p => p.id === agentImageId);
 
   const handleSend = () => {
       if (!input.trim()) return;
@@ -49,7 +52,7 @@ export function ChatWidgetBlock({
                 <div className="flex items-center gap-3">
                     <div className="relative">
                         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/20">
-                            <Image src={agentImage} alt={agentName} fill className="object-cover" />
+                            {agentImage && <Image src={agentImage.imageUrl} alt={agentName} width={agentImage.width} height={agentImage.height} className="object-cover" />}
                         </div>
                         <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-primary"></div>
                     </div>

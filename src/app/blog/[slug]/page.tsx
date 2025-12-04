@@ -3,15 +3,18 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, User, Share2 } from 'lucide-react';
+import { ArrowLeft, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/site-footer';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
   // In a real app, we'd fetch data based on params.slug
   // For now, we'll render a generic high-quality article template
+  const authorImage = PlaceHolderImages.find(p => p.id === 'user-avatar-4');
+  const coverImage = PlaceHolderImages.find(p => p.id === 'blog-cover-1');
   
   return (
     <main className="min-h-screen bg-background flex flex-col">
@@ -34,9 +37,11 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                 </h1>
                 <div className="flex items-center justify-between pt-4 border-t border-border/40">
                     <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-muted overflow-hidden">
-                            <Image src="https://github.com/shadcn.png" alt="Author" width={40} height={40} />
-                        </div>
+                        {authorImage && (
+                            <div className="h-10 w-10 rounded-full bg-muted overflow-hidden">
+                                <Image src={authorImage.imageUrl} alt="Author" width={authorImage.width} height={authorImage.height} />
+                            </div>
+                        )}
                         <div className="text-sm">
                             <p className="font-medium text-foreground">Sarah Jenkins</p>
                             <p className="text-muted-foreground">Oct 12, 2025 • 5 min read</p>
@@ -48,14 +53,18 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                 </div>
             </div>
 
-            <div className="relative aspect-video rounded-2xl overflow-hidden mb-12 bg-muted">
-                <Image 
-                    src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200" 
-                    alt="Blog Cover" 
-                    fill 
-                    className="object-cover"
-                />
-            </div>
+            {coverImage && (
+                <div className="relative aspect-video rounded-2xl overflow-hidden mb-12 bg-muted">
+                    <Image 
+                        src={coverImage.imageUrl} 
+                        alt="Blog Cover" 
+                        fill 
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority
+                    />
+                </div>
+            )}
 
             <div className="prose prose-lg dark:prose-invert max-w-none text-muted-foreground">
                 <p className="lead text-xl text-foreground font-medium">

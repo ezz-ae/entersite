@@ -1,8 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, ArrowRight } from 'lucide-react';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export const metadata: Metadata = {
   title: 'Blog | EntreSite AI',
@@ -17,7 +19,7 @@ const POSTS = [
     author: 'Sarah Jenkins',
     date: 'Oct 12, 2025',
     category: 'Technology',
-    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800'
+    imageId: 'blog-cover-1'
   },
   {
     id: 'high-conversion-landing-pages',
@@ -26,7 +28,7 @@ const POSTS = [
     author: 'David Chen',
     date: 'Oct 08, 2025',
     category: 'Marketing',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800'
+    imageId: 'blog-cover-2'
   },
   {
     id: 'seo-for-real-estate',
@@ -35,7 +37,7 @@ const POSTS = [
     author: 'Maria Rodriguez',
     date: 'Sep 28, 2025',
     category: 'SEO',
-    image: 'https://images.unsplash.com/photo-1572021335469-31706a17aaef?auto=format&fit=crop&q=80&w=800'
+    imageId: 'blog-cover-3'
   },
   {
     id: 'google-ads-strategy',
@@ -44,7 +46,7 @@ const POSTS = [
     author: 'James Wilson',
     date: 'Sep 15, 2025',
     category: 'Ads',
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800'
+    imageId: 'blog-cover-4'
   }
 ];
 
@@ -61,16 +63,23 @@ export default function BlogPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {POSTS.map((post) => (
+            {POSTS.map((post) => {
+              const image = PlaceHolderImages.find(p => p.id === post.imageId);
+              return (
                 <Link key={post.id} href={`/blog/${post.id}`} className="group">
                     <Card className="h-full overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="aspect-video relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gray-200 animate-pulse" /> {/* Placeholder while loading */}
-                            <img 
-                                src={post.image} 
-                                alt={post.title} 
-                                className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                            />
+                            {image ? (
+                              <Image 
+                                  src={image.imageUrl} 
+                                  alt={post.title} 
+                                  fill
+                                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                  className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                              />
+                            ) : (
+                               <div className="absolute inset-0 bg-gray-200 animate-pulse" /> 
+                            )}
                             <Badge className="absolute top-4 left-4 bg-background/90 text-foreground hover:bg-background">{post.category}</Badge>
                         </div>
                         <CardContent className="p-6 flex flex-col h-full">
@@ -96,7 +105,7 @@ export default function BlogPage() {
                         </CardContent>
                     </Card>
                 </Link>
-            ))}
+            )})}
         </div>
 
       </div>
