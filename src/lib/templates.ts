@@ -8,7 +8,7 @@ import { sharjahProjects } from '@/data/sharjah';
 export interface SiteTemplate {
   id: string;
   name: string;
-  siteType: 'roadshow' | 'developer-focus' | 'partner-launch' | 'full-company' | 'freelancer' | 'map-focused' | 'ads-launch' | 'ready-made';
+  siteType: 'roadshow' | 'developer-focus' | 'partner-launch' | 'full-company' | 'freelancer' | 'map-focused' | 'ads-launch' | 'ready-made' | 'agent-portfolio';
   pages: SitePage[];
   thumbnail?: string;
   description?: string;
@@ -52,7 +52,7 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
     data: {
       headline: "Featured Properties",
       subtext: "Handpicked listings that define luxury living.",
-      projects: allProjects.slice(0, 3), 
+      projects: allProjects.slice(0, 3), // Default projects
     },
   },
   'listing-grid-map': {
@@ -299,6 +299,7 @@ const createPage = (id: string, title: string, blocks: (keyof typeof defaultBloc
 }
 
 
+// --- BASE TEMPLATES ---
 export const roadshowTemplate: SiteTemplate = {
   id: 'template-roadshow',
   name: 'Dubai Roadshow Page',
@@ -367,8 +368,75 @@ export const adsQuickLaunchTemplate: SiteTemplate = {
     ]
 };
 
-// --- Ready-Made Templates ---
+// --- NEW AGENT PORTFOLIO TEMPLATES ---
 
+export const luxuryAgentTemplate: SiteTemplate = {
+    id: 'luxury_agent_portfolio',
+    name: 'Luxury Agent Portfolio',
+    siteType: 'agent-portfolio',
+    description: 'Premium showcase for high-net-worth clients.',
+    pages: [
+        createPage('home', 'Home', [
+            { type: 'hero', overrides: { headline: "Discreet Luxury Real Estate", subtext: "Exclusive off-market listings for the discerning investor.", backgroundImage: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=2000" } },
+            { type: 'featured-listing', overrides: { headline: "Signature Listing" } },
+            { type: 'split-content', overrides: { headline: "About Your Advisor", subtext: "15 years of experience managing high-value portfolios.", imagePosition: "left" } },
+            { type: 'listing-grid', overrides: { headline: "Curated Collection" } },
+            'testimonial',
+            { type: 'cta-form', overrides: { headline: "Private Consultation" } }
+        ], { city: 'Dubai' })
+    ]
+};
+
+export const offPlanSpecialistTemplate: SiteTemplate = {
+    id: 'offplan_specialist_page',
+    name: 'Off-Plan Specialist',
+    siteType: 'agent-portfolio',
+    description: 'Dedicated funnel for new project launches.',
+    pages: [
+        createPage('home', 'Home', [
+            { type: 'launch-hero', overrides: { headline: "First Access to Dubai's Launches", subtext: "Don't miss the next big opportunity. Get pre-launch pricing." } },
+            'developers-list',
+            { type: 'listing-grid', overrides: { headline: "Launching Soon" } },
+            'payment-plan',
+            'roi-calculator',
+            'cta-grid'
+        ], { city: 'Dubai' })
+    ]
+};
+
+export const internationalBuyerTemplate: SiteTemplate = {
+    id: 'international_buyer_landing',
+    name: 'International Buyer Guide',
+    siteType: 'agent-portfolio',
+    description: 'Trust-building site for overseas investors.',
+    pages: [
+        createPage('home', 'Home', [
+            { type: 'hero-lead-form', overrides: { headline: "Invest in Dubai from Anywhere", subtext: "Your trusted partner for safe, remote property acquisition." } },
+            'city-guide',
+            { type: 'stats', overrides: { headline: "Why Invest Now?" } },
+            { type: 'listing-grid', overrides: { headline: "Investment Opportunities" } },
+            'faq',
+            { type: 'chat-widget', overrides: { welcomeMessage: "Hi! I can help with Golden Visa & Remote Buying questions." } }
+        ], { city: 'Dubai' })
+    ]
+};
+
+export const whatsappLeadTemplate: SiteTemplate = {
+    id: 'whatsapp_only_lead_page',
+    name: 'WhatsApp Quick Lead',
+    siteType: 'agent-portfolio',
+    description: 'Minimalist page to drive chat conversions.',
+    pages: [
+        createPage('home', 'Chat Now', [
+            { type: 'hero', overrides: { headline: "Find Your Dream Home Today", subtext: "Chat with a specialist instantly for live availability.", ctaText: "WhatsApp Now" } },
+            { type: 'featured-listing', overrides: { headline: "Hot Deal of the Week" } },
+            'chat-widget' // This handles the floating button, but hero CTA also drives action
+        ], { city: 'Dubai' })
+    ]
+};
+
+
+// --- READY-MADE TEMPLATES (Existing) ---
 export const dubaiLuxuryTemplate: SiteTemplate = {
     id: 'template-dubai-luxury',
     name: 'Dubai Luxury Collection',
@@ -421,6 +489,18 @@ export const rakInvestmentTemplate: SiteTemplate = {
 
 
 export const availableTemplates: SiteTemplate[] = [
+    // New Agent Portfolio Templates
+    luxuryAgentTemplate,
+    offPlanSpecialistTemplate,
+    internationalBuyerTemplate,
+    whatsappLeadTemplate,
+
+    // Ready Made
+    dubaiLuxuryTemplate,
+    emaarLaunchTemplate,
+    rakInvestmentTemplate,
+
+    // Classic Templates
     roadshowTemplate,
     developerFocusTemplate,
     partnerLaunchTemplate,
@@ -428,8 +508,4 @@ export const availableTemplates: SiteTemplate[] = [
     freelancerTemplate,
     mapFocusedTemplate,
     adsQuickLaunchTemplate,
-    // Ready Made
-    dubaiLuxuryTemplate,
-    emaarLaunchTemplate,
-    rakInvestmentTemplate
 ];

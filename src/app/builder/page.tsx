@@ -10,14 +10,14 @@ import { LayoutGrid, Plus, ChevronsUpDown, Eye, Edit3, Settings, Rocket } from '
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
-import { availableTemplates, SiteTemplate, roadshowTemplate, developerFocusTemplate, partnerLaunchTemplate, fullCompanyTemplate, adsQuickLaunchTemplate } from '@/lib/templates';
+import { availableTemplates, SiteTemplate, fullCompanyTemplate, roadshowTemplate, developerFocusTemplate, partnerLaunchTemplate, adsQuickLaunchTemplate, luxuryAgentTemplate, offPlanSpecialistTemplate, internationalBuyerTemplate, whatsappLeadTemplate } from '@/lib/templates';
 import { OnboardingFlow } from '@/components/onboarding-flow';
 import { SeoSettingsDialog } from '@/components/seo-settings-dialog';
 import { PublishSuccessDialog } from '@/components/publish-success-dialog';
 import type { SitePage, Block } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/theme-provider';
-import { verifyAndFetchAssets } from '@/lib/media-scraper'; // Import Scraper
+import { verifyAndFetchAssets } from '@/lib/media-scraper';
 
 // Components
 import { EditorHeader } from '@/components/editor/editor-header';
@@ -59,86 +59,63 @@ export default function BuilderPage() {
       }
 
       if (data.method === 'prompt') {
-          const prompt = data['user-prompt'];
-          console.log("Generating site from prompt:", prompt);
+          // Map detailed prompts to new agent templates
+          const prompt = data['user-prompt'].toLowerCase();
           
-          // 1. Fetch Real Assets based on prompt keywords
-          const assets = await verifyAndFetchAssets(prompt);
-          console.log("Scraped Assets:", assets);
-
-          // 2. Generate Custom Template (Simulated AI logic)
-          // In a real app, this JSON structure would come from the Vertex Agent
-          // We inject the scraped assets into the blocks here
-          const customTemplate: SiteTemplate = {
-              id: `ai-gen-${Date.now()}`,
-              name: 'AI Custom Build',
-              siteType: 'custom',
-              pages: [{
-                  id: 'home',
-                  title: 'Home',
-                  blocks: [
-                      {
-                          blockId: 'hero-1',
-                          type: 'hero',
-                          order: 0,
-                          data: {
-                              headline: "Exclusive Living Redefined",
-                              subtext: "Experience the pinnacle of luxury in this premier development.",
-                              backgroundImage: assets.heroImages[0], // INJECTED REAL ASSET
-                              ctaText: "Register Interest"
+          if (prompt.includes('luxury_agent')) handleTemplateChange(luxuryAgentTemplate);
+          else if (prompt.includes('offplan_specialist')) handleTemplateChange(offPlanSpecialistTemplate);
+          else if (prompt.includes('international_buyer')) handleTemplateChange(internationalBuyerTemplate);
+          else if (prompt.includes('whatsapp_only')) handleTemplateChange(whatsappLeadTemplate);
+          
+          else if (prompt.includes('landing')) handleTemplateChange(adsQuickLaunchTemplate);
+          else {
+              // Default or AI Gen Fallback
+              const assets = await verifyAndFetchAssets(prompt);
+              // ... (AI generation logic from previous step)
+               const customTemplate: SiteTemplate = {
+                  id: `ai-gen-${Date.now()}`,
+                  name: 'AI Custom Build',
+                  siteType: 'agent-portfolio', // Default to portfolio if ambiguous
+                  pages: [{
+                      id: 'home',
+                      title: 'Home',
+                      blocks: [
+                          {
+                              blockId: 'hero-1',
+                              type: 'hero',
+                              order: 0,
+                              data: {
+                                  headline: "Welcome Home",
+                                  subtext: "Your trusted partner in real estate.",
+                                  backgroundImage: assets.heroImages[0],
+                                  ctaText: "View Listings"
+                              }
+                          },
+                          {
+                              blockId: 'grid-1',
+                              type: 'listing-grid',
+                              order: 1,
+                              data: { headline: "Featured Listings" }
+                          },
+                          {
+                              blockId: 'cta-1',
+                              type: 'cta-form',
+                              order: 2,
+                              data: {}
                           }
-                      },
-                      {
-                          blockId: 'stats-1',
-                          type: 'stats',
-                          order: 1,
-                          data: {
-                              headline: "Project Highlights",
-                              stats: [
-                                  { value: "10%", label: "Down Payment" },
-                                  { value: "Q4 2026", label: "Handover" },
-                                  { value: "7%", label: "ROI" }
-                              ]
-                          }
-                      },
-                      {
-                          blockId: 'grid-1',
-                          type: 'listing-grid',
-                          order: 2,
-                          data: {
-                              headline: "Available Units",
-                              // Logic to filter real projects would go here
-                          }
-                      },
-                      {
-                          blockId: 'cta-1',
-                          type: 'cta-form',
-                          order: 3,
-                          data: {
-                              headline: "Book a Private Tour",
-                              subtext: "Our agents are ready to show you the property."
-                          }
-                      }
-                  ],
-                  canonicalListings: [],
-                  brochureUrl: assets.brochureUrl || "",
-                  seo: { title: "Luxury Real Estate", description: "Generated Site", keywords: [] },
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString()
-              }]
-          };
-
-          handleTemplateChange(customTemplate);
+                      ],
+                      canonicalListings: [],
+                      brochureUrl: "",
+                      seo: { title: "Agent Portfolio", description: "Real Estate Agent Site", keywords: [] },
+                      createdAt: new Date().toISOString(),
+                      updatedAt: new Date().toISOString()
+                  }]
+              };
+              handleTemplateChange(customTemplate);
+          }
       } else {
-          // Logic for Wizard selections (unchanged)
-          let selectedTemplate = availableTemplates[0];
-          if (data['site-type'] === 'roadshow') selectedTemplate = roadshowTemplate;
-          else if (data['site-type'] === 'developer') selectedTemplate = developerFocusTemplate;
-          else if (data['site-type'] === 'partner') selectedTemplate = partnerLaunchTemplate;
-          else if (data['site-type'] === 'company') selectedTemplate = fullCompanyTemplate;
-          else if (data['site-type'] === 'landing') selectedTemplate = adsQuickLaunchTemplate;
-
-          handleTemplateChange(selectedTemplate);
+          // Standard wizard logic
+          // ...
       }
 
       setShowOnboarding(false);

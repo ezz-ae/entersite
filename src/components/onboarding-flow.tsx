@@ -1,268 +1,165 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Wand2, Briefcase, Zap, User, Search, Pyramid, TrendingUp, Sparkles } from "lucide-react";
-import { cn } from '@/lib/utils';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { Textarea } from '@/components/ui/textarea';
-
-interface OnboardingFlowProps {
-  onComplete: (data: any) => void;
-}
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const promptCategories = [
-    {
-        id: 'company-hub',
-        name: 'Company Hub',
-        description: 'Full websites for agencies and brokerages.',
-        prompts: [
-            { 
-                title: 'Describe Your Vision', 
-                description: 'Use our AI Architect to refine your idea, choose a style, and generate the perfect site structure.', 
-                isFreeform: true 
-            },
-            { title: 'Full Company Site', description: 'Build a complete website with listings, agent profiles, and contact pages.', prompt: 'Build me a full company website with listings, agents, and contact pages.' },
-            { title: 'Corporate Site with Insights', description: 'A corporate real estate website with project portfolios and market insights.', prompt: 'Create a corporate real estate website with project portfolios and market insights.' },
-            { title: 'Brokerage-Style Site', description: 'A professional site for a brokerage featuring projects and an interactive map.', prompt: 'I want a brokerage-style site with featured projects and a map.' },
-            { title: 'Luxury Property Agency', description: 'A premium website tailored for a luxury property agency.', prompt: 'I want a website for a luxury property agency.' },
-            { title: 'Bilingual Website (EN/AR)', description: 'Make a bilingual real estate company website (English + Arabic).', prompt: 'Make a bilingual real estate company website (English + Arabic).' },
-            { title: 'Investment Consultancy Site', description: 'Create a site that positions my company as a premium investment consultant.', prompt: 'Create a site that positions my company as a premium investment consultant.' },
-        ]
-    },
-    {
-        id: 'project-launchpad',
-        name: 'Project Launchpad',
-        description: 'High-conversion landing pages.',
-        prompts: [
-            { title: 'High-Conversion Landing Page', description: 'Create a landing page for a new launch project, optimized for lead capture.', prompt: 'Create a high-conversion landing page for a new launch project.' },
-            { title: 'Launch with Countdown', description: 'A project launch page featuring a countdown timer and lead form.', prompt: 'Make a project launch page with countdown timer and lead form.' },
-            { title: 'Roadshow Event Page', description: 'Build a page for a roadshow with RSVP and event details.', prompt: 'Build a roadshow launch page with RSVP and event details.' },
-            { title: 'Full Launch Microsite', description: 'Create a new project launch page with gallery, map, payment plan, and CTA.', prompt: 'Create a new project launch page with gallery, map, payment plan, and CTA.' }
-        ]
-    },
-    {
-        id: 'agent-portfolio',
-        name: 'Agent Portfolio',
-        description: 'Personal sites for agents & freelancers.',
-        prompts: [
-            { title: 'Personal Agent Portfolio', description: 'A clean, professional site to showcase your identity, experience, and listings.', prompt: 'Create a personal portfolio site for a real estate agent.' },
-            { title: 'Modern Agent Site', description: 'A contemporary, minimal design with featured listings and WhatsApp-first communication.', prompt: 'Make a modern agent website with featured listings and WhatsApp contact.' },
-            { title: 'Social Media Landing Page', description: 'Perfect for agents linking from TikTok, Instagram, and YouTube.', prompt: 'I want a social media-driven personal landing page for real estate, perfect for a link-in-bio.' },
-            { title: 'Luxury Agent Portfolio', description: 'A premium, black-and-gold showcase site for agents targeting high-net-worth buyers.', prompt: 'Build a luxury agent portfolio with a black and gold theme for high-net-worth clients.' },
-            { title: 'Off-Plan Specialist Page', description: 'A dedicated funnel for agents selling new-launch off-plan projects.', prompt: 'Create a sales funnel page for an agent specializing in off-plan properties.' },
-            { title: 'Rent-to-Own Specialist Site', description: 'A niche positioning site with calculators, guides, and lead-optimized forms.', prompt: 'Build a niche website for a Rent-to-Own specialist with calculators and guides.' },
-            { title: 'International Buyer Landing Page', description: 'A trust-building page for overseas investors with FAQ, guides, and WhatsApp CTA.', prompt: 'Make a landing page for international buyers with FAQs and trust-building elements.' },
-            { title: 'WhatsApp-Only Lead Page', description: 'Ultra-lightweight page designed purely to convert into WhatsApp chats.', prompt: 'Create a minimal, fast-loading page with the sole purpose of starting a WhatsApp conversation.' },
-            { title: 'Team Agent Site (2–10 Agents)', description: 'A multi-agent portfolio with individual pages, shared listings, and team branding.', prompt: 'Build a website for a small real estate team of 5 agents, with shared listings and individual profiles.' },
-            { title: 'Top Agent Reputation Page', description: 'A credibility-heavy page with awards, testimonials, certifications, and reviews.', prompt: 'Design a reputation-focused page for a top agent, featuring awards, testimonials, and media mentions.' },
-            { title: 'Exclusive Listing Showcase', description: 'A page dedicated to ONE special listing that the agent wants to push hard.', prompt: 'Create a high-impact showcase page for a single, exclusive property listing.' },
-            { title: 'Pre-Qualification Funnel Site', description: 'A mini-funnel with lead scoring, budget selector, and automated WhatsApp follow-up.', prompt: 'Build a lead pre-qualification funnel with a budget selector and automated follow-up.' },
-            { title: 'Agent Press & Media Kit Page', description: 'For agents doing PR, interviews, or public branding — downloadable materials included.', prompt: 'Make a press & media kit page for a real estate agent with downloadable assets.' },
-            { title: 'Area Specialist Page', description: 'Hyper-local branding: “Downtown Dubai Specialist” / “Palm Jumeirah Expert”.', prompt: 'Create a hyper-local landing page for an agent specializing in Downtown Dubai.' },
-            { title: 'Lead Magnet Mini-Site', description: 'For agents offering PDF guides, market reports, or WhatsApp newsletters.', prompt: 'Build a lead magnet mini-site to capture emails in exchange for a market report PDF.' },
-        ]
-    },
-    {
-        id: 'listing-sites',
-        name: 'Listing Sites',
-        description: 'Map, Grid, and Search-based sites.',
-        prompts: [
-            { title: 'Map-Based Search', description: 'Build a full real estate website centered around an interactive map with filters.', prompt: 'Build a map-based real estate website with filters.' },
-            { title: 'Listings Marketplace', description: 'Create a directory-style site to showcase all your available properties.', prompt: 'Create a listings marketplace using my available properties.' },
-            { title: 'Single Property Showcase', description: 'A focused landing page to maximize leads for one specific, high-end property.', prompt: 'Create a landing page for one property only — maximize leads.' },
-        ]
-    },
-    {
-        id: 'developer-pages',
-        name: 'Developer Pages',
-        description: 'Showcase portfolios and brands.',
-        prompts: [
-            { title: 'Developer Portfolio', description: 'Build a website for a developer showcasing all their past, current, and future projects.', prompt: 'Build a website for a developer showcasing all their projects.' },
-            { title: 'Co-Branded Launch Page', description: 'Create a collaborative launch page for a developer and broker partnership.', prompt: 'Create a co-branded launch page for developer + broker partnership.' },
-        ]
-    },
-    {
-        id: 'lead-gen',
-        name: 'Lead Funnels',
-        description: 'Funnels optimized for conversion.',
-        prompts: [
-            { title: 'Google Ads Funnel', description: 'A high-performance funnel page optimized for paid Google Ads traffic.', prompt: 'Build a funnel page optimized for Google Ads.' },
-            { title: 'WhatsApp-Only Landing Page', description: 'A minimal, fast-loading page with the sole goal of starting a WhatsApp conversation.', prompt: 'Create a WhatsApp-only landing page with minimal content.' },
-            { title: 'Brochure Download Funnel', description: 'A funnel designed to capture leads in exchange for a project brochure download.', prompt: 'Make a brochure-download funnel.' },
-            { title: 'RSVP Funnel for Events', description: 'Create a registration funnel for a roadshow or developer launch event.', prompt: 'Create an RSVP funnel for a roadshow event.' }
-        ]
-    },
-     {
-        id: 'branding-prompts',
-        name: 'Branding',
-        description: 'Prompts based on brand themes.',
-        prompts: [
-            { title: 'Luxury Black & Gold', description: 'Generate a site with a black and gold, luxury-style theme.', prompt: 'Make my site black and gold, luxury-style.' },
-            { title: 'Minimalist White & Grey', description: 'Build a site in minimalist white with soft grey tones.', prompt: 'Build a site in minimalist white with soft grey tones.' },
-            { title: 'Bold & Colorful', description: 'Create a bold, colorful website with high-energy visuals.', prompt: 'Create a bold, colorful website with high-energy visuals.' },
-            { title: 'Apple-Inspired Design', description: 'Make a site inspired by Apple’s clean design.', prompt: 'Make a site inspired by Apple’s clean design.' }
-        ]
-    },
-    {
-        id: 'advanced-prompts',
-        name: 'Advanced',
-        description: 'Prompts for power users.',
-        prompts: [
-            { title: 'Live Chat Layout', description: 'Generate a site with listings on the left and a live chat on the right.', prompt: 'Generate a site with listings on the left and a live chat on the right.' },
-            { title: 'Custom Block Sequence', description: 'Create a landing page using a specific block sequence.', prompt: 'Create a landing page using block sequence: hero -> listing -> gallery -> form.' },
-            { title: 'WhatsApp Automation', description: 'Build a multi-step lead capture flow with WhatsApp automation.', prompt: 'Build a multi-step lead capture flow with WhatsApp automation.' }
-        ]
-    },
+  {
+    name: "General & Vision",
+    prompts: [
+      { id: "vision-luxury", title: "Luxury & Premium", description: "Black/gold, feels like a high-end brand." },
+      { id: "vision-minimal", title: "Minimal & Modern", description: "Clean, white-space, for international investors." },
+      { id: "vision-countdown", title: "Launch Countdown", description: "A site that builds hype for a future release." },
+    ]
+  },
+  {
+    name: "Company Hub",
+    prompts: [
+        { id: "company-full", title: "Full Company Website", description: "With listings, agents, and contact pages." },
+        { id: "company-luxury", title: "Luxury Property Agency", description: "A premium, black-and-gold showcase site." },
+        { id: "company-bilingual", title: "Bilingual Corporate Site", description: "English + Arabic support." },
+    ]
+  },
+  {
+    name: "Project Launchpad",
+    prompts: [
+        { id: "launch-single", title: "Single Project Launch", description: "High-conversion page for a new off-plan project." },
+        { id: "launch-event", title: "Developer Event Launch", description: "Roadshow page with RSVP and event details." },
+        { id: "launch-ads", title: "Google Ads Funnel", description: "Lean, fast page optimized for paid traffic." },
+    ]
+  },
+  {
+    name: "Agent Portfolio - The Essentials",
+    prompts: [
+        { id: "personal_agent_portfolio", title: "Personal Agent Portfolio", description: "A clean, professional site to showcase your profile, track record, and active listings." },
+        { id: "modern_agent_site", title: "Modern Agent Site", description: "A contemporary site with bold visuals, featured listings, and a prominent WhatsApp contact." },
+        { id: "social_media_landing_page", title: "Social Media Landing Page", description: "Perfect for agents linking from TikTok, Instagram, and YouTube." },
+    ]
+  },
+  {
+    name: "Agent - High Performance & Niche",
+    prompts: [
+        { id: "luxury_agent_portfolio", title: "Luxury Agent Portfolio", description: "A premium, black-and-gold showcase site for agents targeting high-net-worth buyers." },
+        { id: "offplan_specialist_page", title: "Off-Plan Specialist Page", description: "A dedicated funnel for agents selling new-launch off-plan projects." },
+        { id: "rent_to_own_specialist_site", title: "Rent-to-Own Specialist Site", description: "A niche positioning site with calculators, guides, and lead-optimized forms." },
+        { id: "international_buyer_landing", title: "International Buyer Landing Page", description: "A trust-building page for overseas investors with FAQ, guides, and WhatsApp CTA." },
+        { id: "whatsapp_only_lead_page", title: "WhatsApp-Only Lead Page", description: "Ultra-lightweight page designed purely to convert into WhatsApp chats." },
+    ]
+  },
+  {
+    name: "Agent - Brand & Authority",
+    prompts: [
+        { id: "team_agent_site", title: "Team Agent Site (2-10 Agents)", description: "A multi-agent portfolio with individual pages, shared listings, and team branding." },
+        { id: "top_agent_reputation_page", title: "Top Agent Reputation Page", description: "A credibility-heavy page with awards, testimonials, certifications, and reviews." },
+        { id: "exclusive_listing_showcase", title: "Exclusive Listing Showcase", description: "A page dedicated to ONE special listing that the agent wants to push hard." },
+        { id: "prequalification_funnel_site", title: "Pre-Qualification Funnel Site", description: "A mini-funnel with lead scoring, budget selector, and automated WhatsApp follow-up." },
+        { id: "agent_press_media_kit", title: "Agent Press & Media Kit Page", description: "For agents doing PR, interviews, or public branding — downloadable materials included." },
+        { id: "area_specialist_page", title: "Area Specialist Page", description: "Hyper-local branding: 'Downtown Dubai Specialist' / 'Palm Jumeirah Expert'." },
+        { id: "lead_magnet_mini_site", title: "Lead Magnet Mini-Site", description: "For agents offering PDF guides, market reports, or WhatsApp newsletters." },
+    ]
+  },
+  {
+    name: "Lead Generation",
+    prompts: [
+        { id: "lead-whatsapp", title: "WhatsApp-Only Lead Page", description: "Ultra-lightweight page to convert into chats." },
+        { id: "lead-brochure", title: "Brochure Download Funnel", description: "Capture leads in exchange for a downloadable guide." },
+        { id: "lead-prequalify", title: "Pre-Qualification Funnel", description: "Mini-funnel with lead scoring and budget selector." },
+    ]
+  }
 ];
 
-export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
-  const [activeTab, setActiveTab] = useState('company-hub');
-  const [showFreeform, setShowFreeform] = useState(false);
-  const [freeformPrompt, setFreeformPrompt] = useState('');
 
-  const handlePresetClick = (prompt: string) => {
+export function OnboardingFlow({ onComplete }: { onComplete: (data: any) => void; }) {
+  const [prompt, setPrompt] = useState('');
+
+  const handlePromptSubmit = () => {
+    if (!prompt.trim()) return;
     onComplete({
       method: 'prompt',
       'user-prompt': prompt,
     });
   };
 
-  const handleFreeformSubmit = () => {
-    if (!freeformPrompt.trim()) return;
-    onComplete({
-        method: 'prompt',
-        'user-prompt': freeformPrompt,
-    });
+  const handlePresetClick = (presetPrompt: string) => {
+    setPrompt(presetPrompt);
   };
-  
-  if (showFreeform) {
-    return (
-      <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-3xl mx-auto"
-        >
-          <div className="relative bg-card border rounded-2xl shadow-2xl p-4 group transition-all duration-300 focus-within:ring-2 focus-within:ring-primary">
-            <Textarea
-              placeholder="e.g., A luxury real estate site with a video hero, featured listings, and a simple lead form."
-              className="min-h-[120px] text-lg p-4 resize-none border-0 focus-visible:ring-0 bg-transparent placeholder:text-muted-foreground/50"
-              value={freeformPrompt}
-              onChange={(e) => setFreeformPrompt(e.target.value)}
-              autoFocus
-            />
-            <div className="absolute bottom-4 right-4">
-              <Button 
-                size="lg" 
-                className="h-12 px-6 rounded-full text-base font-semibold shadow-lg hover:scale-105 transition-transform" 
-                disabled={!freeformPrompt.trim()}
-                onClick={handleFreeformSubmit}
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                Generate Site
-              </Button>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-4 text-center">
-            Describe your vision in detail. Press <kbd className="px-1.5 py-0.5 border bg-muted rounded font-mono text-[10px]">Enter</kbd> to generate.
-          </p>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center p-4">
-      <div className="text-center space-y-4 my-12">
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight">How would you like to start?</h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Choose a starting point, or describe your vision to our AI architect.
-        </p>
-      </div>
+    <div className="fixed inset-0 z-[100] bg-background flex items-center justify-center p-4 md:p-8">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-6xl h-[80vh] bg-card border rounded-2xl shadow-2xl flex overflow-hidden"
+      >
+        {/* Left Side: Prompt Input */}
+        <div className="w-1/2 flex flex-col p-8">
+           <div className="mb-8">
+              <h1 className="text-2xl font-bold tracking-tight mb-2">Describe the website you want to build</h1>
+              <p className="text-muted-foreground">
+                Be as descriptive as possible, or choose a starting point from our library.
+              </p>
+           </div>
+           
+           <div className="flex-grow flex flex-col">
+              <Textarea
+                placeholder="e.g., A luxury real estate site for Emaar with a video hero, featured listings, and a simple lead form..."
+                className="flex-grow text-base p-4 resize-none border rounded-lg bg-muted/20 focus-visible:ring-primary"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                autoFocus
+              />
+           </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-7xl">
-        <div className="flex justify-center mb-8">
-            <TabsList className="h-auto p-1.5 bg-muted/50 space-x-1 rounded-xl">
-                {promptCategories.map(cat => (
-                    <TabsTrigger 
-                        key={cat.id} 
-                        value={cat.id} 
-                        className="px-4 py-2 text-sm font-semibold flex items-center gap-2 rounded-lg"
-                    >
-                        {cat.name}
-                    </TabsTrigger>
-                ))}
-            </TabsList>
+            <div className="mt-6">
+                <Button 
+                    size="lg" 
+                    className="w-full h-12 text-base font-semibold" 
+                    disabled={!prompt.trim()}
+                    onClick={handlePromptSubmit}
+                >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Generate Site
+                </Button>
+            </div>
         </div>
 
-        <AnimatePresence mode="wait">
-            <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-            >
-                {promptCategories.map(cat => (
-                    <TabsContent key={cat.id} value={cat.id}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {cat.prompts.map((p, i) => {
-                                if (p.isFreeform) {
-                                    return (
-                                        <motion.div
-                                            key="freeform"
-                                            initial={{ opacity: 0, scale: 0.95 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ delay: i * 0.05 }}
-                                            className="md:col-span-2 lg:col-span-2 xl:col-span-2 bg-card border rounded-2xl p-6 text-left flex flex-col justify-between shadow-2xl relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-transparent cursor-pointer group"
-                                            onClick={() => setShowFreeform(true)}
-                                        >
-                                             <div className="absolute -inset-px bg-gradient-to-r from-orange-400 via-red-500 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-70 transition-opacity duration-300 blur-lg" />
-                                             <div className="relative z-10 flex flex-col h-full">
-                                                <div className="flex-grow">
-                                                    <h3 className="font-bold text-lg text-foreground mb-2">{p.title}</h3>
-                                                </div>
-                                                <div className="mt-8 flex justify-end">
-                                                    <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-                                                        <ArrowRight className="h-5 w-5" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    )
-                                }
-                                return (
-                                    <motion.div
-                                        key={i}
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: i * 0.05 }}
-                                        className="bg-card border rounded-2xl p-6 text-left flex flex-col justify-between shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full group relative overflow-hidden"
-                                        onClick={() => p.prompt && handlePresetClick(p.prompt)}
+        {/* Right Side: Prompt Library */}
+        <div className="w-1/2 bg-muted/30 border-l flex flex-col">
+            <div className="p-8 pb-4">
+                 <h2 className="text-xl font-bold">Inspiration Gallery</h2>
+                 <p className="text-muted-foreground text-sm mt-1">Click any prompt to start.</p>
+            </div>
+            <ScrollArea className="flex-1 px-8 pb-8">
+                <div className="space-y-6">
+                    {promptCategories.map(category => (
+                        <div key={category.name}>
+                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">{category.name}</h3>
+                            <div className="space-y-2">
+                                {category.prompts.map(p => (
+                                    <div
+                                        key={p.id}
+                                        onClick={() => handlePresetClick(p.description)}
+                                        className="p-3 rounded-lg border bg-background hover:bg-muted hover:border-primary/50 transition-all cursor-pointer group"
                                     >
-                                        <div className="absolute -inset-px bg-gradient-to-r from-orange-400/20 via-red-500/20 to-purple-600/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                        <div className="relative z-10 flex flex-col h-full">
-                                          <div className="flex-grow">
-                                              <h3 className="font-bold text-lg text-foreground mb-2">{p.title}</h3>
-                                              <p className="text-sm text-muted-foreground">{p.description}</p>
-                                          </div>
-                                          <div className="mt-8 flex justify-end">
-                                              <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors duration-300">
-                                                  <ArrowRight className="h-4 w-4" />
-                                              </div>
-                                          </div>
+                                        <div className="flex justify-between items-center">
+                                            <p className="font-medium text-sm">{p.title}</p>
+                                            <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                         </div>
-                                    </motion.div>
-                                )
-                            })}
+                                        <p className="text-xs text-muted-foreground mt-1 opacity-70 line-clamp-2">{p.description}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </TabsContent>
-                ))}
-            </motion.div>
-        </AnimatePresence>
-      </Tabs>
+                    ))}
+                </div>
+            </ScrollArea>
+        </div>
+      </motion.div>
     </div>
   );
 }
