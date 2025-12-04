@@ -16,7 +16,8 @@ const PROJECTS = [
         category: "Full Website",
         developer: "Multi-Developer",
         bgColor: "from-blue-900 to-sky-700",
-        imageUrl: null,
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/studio-7730943652-a28e0.firebasestorage.app/o/the-palace-downtown-dubai-view-from-the-poolside-900.jpg?alt=media&token=45ef0994-1111-4f85-a500-c470c85c3785",
+        imageOnHover: true,
     },
     {
         id: 'template-damac-islands',
@@ -32,7 +33,8 @@ const PROJECTS = [
         category: "Search Engine",
         developer: "All Projects",
         bgColor: "from-emerald-900 to-green-700",
-        imageUrl: null,
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/studio-7730943652-a28e0.firebasestorage.app/o/U10759_EXT_ZED739.webp?alt=media&token=be7418eb-0f7f-4df3-8c89-8fa5b070a7aa",
+        imageOnHover: true,
     },
     {
         id: 'template-palm-jebel-ali',
