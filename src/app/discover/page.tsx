@@ -1,6 +1,6 @@
 import { ProjectDiscoverySection } from '@/components/marketing/project-discovery-section';
 import { SiteFooter } from '@/components/site-footer';
-import { SiteHeader } from '@/components/site-header';
+import { SiteHeader } from '@/components/layout/site-header'; // Assuming this location based on previous steps
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
