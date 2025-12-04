@@ -27,6 +27,8 @@ const promptCategories = [
             { title: 'Corporate Site with Insights', description: 'A corporate real estate website with project portfolios and market insights.', prompt: 'Create a corporate real estate website with project portfolios and market insights.' },
             { title: 'Brokerage-Style Site', description: 'A professional site for a brokerage featuring projects and an interactive map.', prompt: 'I want a brokerage-style site with featured projects and a map.' },
             { title: 'Luxury Property Agency', description: 'A premium website tailored for a luxury property agency.', prompt: 'I want a website for a luxury property agency.' },
+            { title: 'Bilingual Website (EN/AR)', description: 'Make a bilingual real estate company website (English + Arabic).', prompt: 'Make a bilingual real estate company website (English + Arabic).' },
+            { title: 'Investment Consultancy Site', description: 'Create a site that positions my company as a premium investment consultant.', prompt: 'Create a site that positions my company as a premium investment consultant.' },
         ]
     },
     {
@@ -37,7 +39,7 @@ const promptCategories = [
             { title: 'High-Conversion Landing Page', description: 'Create a landing page for a new launch project, optimized for lead capture.', prompt: 'Create a high-conversion landing page for a new launch project.' },
             { title: 'Launch with Countdown', description: 'A project launch page featuring a countdown timer and lead form.', prompt: 'Make a project launch page with countdown timer and lead form.' },
             { title: 'Roadshow Event Page', description: 'Build a page for a roadshow with RSVP and event details.', prompt: 'Build a roadshow launch page with RSVP and event details.' },
-            { title: 'Google Ads Funnel', description: 'A fast-loading page designed specifically for performance ad campaigns.', prompt: 'Build a landing page designed ONLY for Google Ads and WhatsApp leads.' }
+            { title: 'Full Launch Microsite', description: 'Create a new project launch page with gallery, map, payment plan, and CTA.', prompt: 'Create a new project launch page with gallery, map, payment plan, and CTA.' }
         ]
     },
     {
@@ -48,6 +50,7 @@ const promptCategories = [
             { title: 'Personal Agent Portfolio', description: 'Create a personal portfolio site to showcase your profile and listings.', prompt: 'Create a personal portfolio site for a real estate agent.' },
             { title: 'Modern Agent Site', description: 'A contemporary website with featured listings and a prominent WhatsApp contact.', prompt: 'Make a modern agent website with featured listings and WhatsApp contact.' },
             { title: 'Social Media Landing Page', description: 'A one-page site perfect for linking from your social media profiles.', prompt: 'I want a social media-driven personal landing page for real estate.' },
+            { title: 'Team Showcase', description: 'Build a sleek personal brand site for me with testimonials and listings.', prompt: 'Build a sleek personal brand site for me with testimonials and listings.' },
         ]
     },
     {
@@ -74,7 +77,7 @@ const promptCategories = [
         name: 'Lead Funnels',
         description: 'Funnels optimized for conversion.',
         prompts: [
-            { title: 'Google Ads Funnel', description: 'A high-performance funnel page optimized specifically for paid Google Ads traffic.', prompt: 'Build a funnel page optimized for Google Ads.' },
+            { title: 'Google Ads Funnel', description: 'A high-performance funnel page optimized for paid Google Ads traffic.', prompt: 'Build a funnel page optimized for Google Ads.' },
             { title: 'WhatsApp-Only Landing Page', description: 'A minimal, fast-loading page with the sole goal of starting a WhatsApp conversation.', prompt: 'Create a WhatsApp-only landing page with minimal content.' },
             { title: 'Brochure Download Funnel', description: 'A funnel designed to capture leads in exchange for a project brochure download.', prompt: 'Make a brochure-download funnel.' },
             { title: 'RSVP Funnel for Events', description: 'Create a registration funnel for a roadshow or developer launch event.', prompt: 'Create an RSVP funnel for a roadshow event.' }
@@ -97,7 +100,7 @@ const promptCategories = [
         description: 'Prompts for power users.',
         prompts: [
             { title: 'Live Chat Layout', description: 'Generate a site with listings on the left and a live chat on the right.', prompt: 'Generate a site with listings on the left and a live chat on the right.' },
-            { title: 'Custom Block Sequence', description: 'Create a landing page using a specific block sequence.', prompt: 'Create a landing page using block sequence: hero → listing → gallery → form.' },
+            { title: 'Custom Block Sequence', description: 'Create a landing page using a specific block sequence.', prompt: 'Create a landing page using block sequence: hero -> listing -> gallery -> form.' },
             { title: 'WhatsApp Automation', description: 'Build a multi-step lead capture flow with WhatsApp automation.', prompt: 'Build a multi-step lead capture flow with WhatsApp automation.' }
         ]
     },
@@ -105,6 +108,7 @@ const promptCategories = [
 
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [activeTab, setActiveTab] = useState('company-hub');
+  const [showFreeform, setShowFreeform] = useState(false);
   const [freeformPrompt, setFreeformPrompt] = useState('');
 
   const handlePresetClick = (prompt: string) => {
@@ -121,6 +125,42 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         'user-prompt': freeformPrompt,
     });
   };
+  
+  if (showFreeform) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-3xl mx-auto"
+        >
+          <div className="relative bg-card border rounded-2xl shadow-2xl p-4 group transition-all duration-300 focus-within:ring-2 focus-within:ring-primary">
+            <Textarea
+              placeholder="e.g., A luxury real estate site with a video hero, featured listings, and a simple lead form."
+              className="min-h-[120px] text-lg p-4 resize-none border-0 focus-visible:ring-0 bg-transparent placeholder:text-muted-foreground/50"
+              value={freeformPrompt}
+              onChange={(e) => setFreeformPrompt(e.target.value)}
+              autoFocus
+            />
+            <div className="absolute bottom-4 right-4">
+              <Button 
+                size="lg" 
+                className="h-12 px-6 rounded-full text-base font-semibold shadow-lg hover:scale-105 transition-transform" 
+                disabled={!freeformPrompt.trim()}
+                onClick={handleFreeformSubmit}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Generate Site
+              </Button>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-4 text-center">
+            Describe your vision in detail. Press <kbd className="px-1.5 py-0.5 border bg-muted rounded font-mono text-[10px]">Enter</kbd> to generate.
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center p-4">
@@ -165,30 +205,18 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                                             initial={{ opacity: 0, scale: 0.95 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             transition={{ delay: i * 0.05 }}
-                                            className="md:col-span-2 lg:col-span-2 xl:col-span-2 bg-card border rounded-2xl p-6 text-left flex flex-col justify-between shadow-2xl relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-transparent"
+                                            className="md:col-span-2 lg:col-span-2 xl:col-span-2 bg-card border rounded-2xl p-6 text-left flex flex-col justify-between shadow-2xl relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-transparent cursor-pointer group"
+                                            onClick={() => setShowFreeform(true)}
                                         >
-                                             <div className="absolute -inset-px bg-gradient-to-r from-orange-400 via-red-500 to-purple-600 rounded-2xl opacity-70 blur-lg" />
+                                             <div className="absolute -inset-px bg-gradient-to-r from-orange-400 via-red-500 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-70 transition-opacity duration-300 blur-lg" />
                                              <div className="relative z-10 flex flex-col h-full">
                                                 <div className="flex-grow">
                                                     <h3 className="font-bold text-lg text-foreground mb-2">{p.title}</h3>
-                                                    <p className="text-sm text-muted-foreground mb-4">{p.description}</p>
-                                                    <Textarea
-                                                        placeholder="e.g., A luxury real estate site with a video hero, featured listings, and a simple lead form."
-                                                        className="w-full min-h-[80px] text-base p-3 resize-none border-border/20 focus-visible:ring-primary bg-background/50 placeholder:text-muted-foreground/60 rounded-xl"
-                                                        value={freeformPrompt}
-                                                        onChange={(e) => setFreeformPrompt(e.target.value)}
-                                                    />
                                                 </div>
-                                                <div className="mt-4 flex justify-end">
-                                                    <Button 
-                                                        size="lg" 
-                                                        className="h-12 rounded-xl text-base font-semibold shadow-lg hover:scale-105 transition-transform" 
-                                                        disabled={!freeformPrompt.trim()}
-                                                        onClick={handleFreeformSubmit}
-                                                    >
-                                                        <Sparkles className="mr-2 h-4 w-4" />
-                                                        Generate Site
-                                                    </Button>
+                                                <div className="mt-8 flex justify-end">
+                                                    <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                                                        <ArrowRight className="h-5 w-5" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </motion.div>
