@@ -25,7 +25,8 @@ const PROJECTS = [
         category: "Lead Gen",
         developer: "Damac",
         bgColor: "from-purple-900 to-indigo-700",
-        imageUrl: "https://firebasestorage.googleapis.com/v0/b/studio-7730943652-a28e0.firebasestorage.app/o/palm%20jabal%20ali.jpg?alt=media&token=330bf527-eb1b-4709-ad57-59b7023fa1d3",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/studio-7730943652-a28e0.firebasestorage.app/o/DAMAC_Islands-Gallery-00.jpg?alt=media&token=c51b483f-dd32-42ce-85e5-b06beb78c41f",
+        imageOnHover: true,
     },
     {
         id: 'template-listing-portal',
