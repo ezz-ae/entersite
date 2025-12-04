@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const PROJECTS = [
     {
@@ -15,6 +16,7 @@ const PROJECTS = [
         category: "Full Website",
         developer: "Multi-Developer",
         bgColor: "from-blue-900 to-sky-700",
+        imageUrl: null,
     },
     {
         id: 'template-damac-islands',
@@ -22,6 +24,7 @@ const PROJECTS = [
         category: "Lead Gen",
         developer: "Damac",
         bgColor: "from-purple-900 to-indigo-700",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/studio-7730943652-a28e0.firebasestorage.app/o/DAMAC_Islands-Gallery-00.jpg?alt=media&token=c51b483f-dd32-42ce-85e5-b06beb78c4f1",
     },
     {
         id: 'template-listing-portal',
@@ -29,6 +32,7 @@ const PROJECTS = [
         category: "Search Engine",
         developer: "All Projects",
         bgColor: "from-emerald-900 to-green-700",
+        imageUrl: null,
     },
     {
         id: 'template-palm-jebel-ali',
@@ -36,6 +40,7 @@ const PROJECTS = [
         category: "Luxury Landing",
         developer: "Nakheel",
         bgColor: "from-rose-900 to-pink-700",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/studio-7730943652-a28e0.firebasestorage.app/o/palm%20jabal%20ali.jpg?alt=media&token=330bf527-eb1b-4709-ad57-59b7023fa1d3",
     },
     {
         id: 'template-dubai-roadshow',
@@ -43,6 +48,8 @@ const PROJECTS = [
         category: "Event",
         developer: "Dubai Holding",
         bgColor: "from-amber-900 to-yellow-700",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/studio-7730943652-a28e0.firebasestorage.app/o/images.jpeg?alt=media&token=bbb2903e-7751-4d53-9fab-42163541dd5c",
+        imageOnHover: true,
     }
 ];
 
@@ -78,6 +85,15 @@ export function ReadyBuilds() {
                     >
                         <div className={`relative aspect-[4/5] rounded-3xl overflow-hidden mb-6 bg-gradient-to-br ${project.bgColor} border border-white/10 shadow-sm transition-all duration-500 group-hover:shadow-2xl group-hover:scale-[1.02]`}>
                             <div className="absolute inset-0 bg-grid-pattern opacity-10" />
+                            {project.imageUrl && (
+                                <Image 
+                                    src={project.imageUrl} 
+                                    alt={project.title}
+                                    fill
+                                    className={`object-cover transition-opacity duration-300 ${project.imageOnHover ? 'opacity-0 group-hover:opacity-100' : ''}`}
+                                    sizes="(max-width: 768px) 100vw, 20vw"
+                                />
+                            )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                             
                             <div className="absolute top-5 left-5 flex flex-col gap-2">
