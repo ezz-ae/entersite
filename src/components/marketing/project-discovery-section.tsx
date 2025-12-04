@@ -54,16 +54,13 @@ export function ProjectDiscoverySection() {
 
   // This agent is for Q&A, not site generation, so we don't need onSiteConfigReady here.
   const handleAgentDiscoveryResponse = (config: any) => {
-      // This is where the AI Expert Agent would provide data-driven answers
       console.log("AI Expert Agent Responded with:", config);
-      // The AgentChat component itself handles displaying the text response.
   }
 
   return (
     <section className="bg-background text-foreground py-24">
       <div className="container mx-auto px-4 max-w-7xl">
         
-        {/* Hero Section: Data & AI Value Proposition */}
         <div className="text-center max-w-5xl mx-auto mb-20 space-y-8">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
@@ -88,7 +85,6 @@ export function ProjectDiscoverySection() {
             </Link>
         </div>
 
-        {/* Project Discovery Section */}
         <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -158,7 +154,6 @@ export function ProjectDiscoverySection() {
           )}
         </motion.div>
 
-        {/* How It Works Section (Builder Screenshots) */}
         <div className="py-20 text-center space-y-12 bg-muted/10 rounded-3xl border border-border/50 shadow-inner overflow-hidden">
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight max-w-4xl mx-auto leading-[1.1]">
                 Build Your Digital Presence in <br/>
@@ -169,12 +164,10 @@ export function ProjectDiscoverySection() {
             </p>
             
             <div className="relative w-full aspect-[16/9] max-w-6xl mx-auto rounded-xl shadow-2xl border border-border/50 overflow-hidden bg-background">
-                <Image 
-                    src="/mock-builder-ui-1.png" 
-                    alt="Builder UI Screenshot"
-                    fill
-                    className="object-cover"
-                />
+                {/* Placeholder for screenshot */}
+                 <div className="absolute inset-0 bg-zinc-200 flex items-center justify-center text-muted-foreground">
+                    Builder UI Screenshot Here
+                 </div>
                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 bg-background/80 backdrop-blur-md p-4 rounded-full border border-border shadow-lg">
                     <div className="flex items-center gap-2 text-primary font-medium">
@@ -190,7 +183,6 @@ export function ProjectDiscoverySection() {
             </div>
         </div>
 
-        {/* AI Expert Agent Showcase */}
         <div className="relative py-20 bg-card rounded-3xl border border-border/50 shadow-xl mt-20 flex flex-col items-center justify-center text-center space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium backdrop-blur-md mb-4">
                 <Bot className="h-4 w-4" />
