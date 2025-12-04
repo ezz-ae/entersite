@@ -15,35 +15,35 @@ const PROJECTS = [
         title: "Off-Plan Brokerage",
         category: "Full Website",
         developer: "Multi-Developer",
-        image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800",
+        image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=800",
     },
     {
         id: 'template-damac-islands',
         title: "Damac Islands Launch",
         category: "Lead Gen",
         developer: "Damac",
-        image: "https://images.unsplash.com/photo-1540575467063-17e6fc48db44?auto=format&fit=crop&q=80&w=800",
+        image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=800",
     },
     {
         id: 'template-listing-portal',
         title: "Market Data Portal",
         category: "Search Engine",
         developer: "All Projects",
-        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
+        image: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?auto=format&fit=crop&q=80&w=800",
     },
     {
         id: 'template-palm-jebel-ali',
         title: "Palm Jebel Ali",
         category: "Luxury Landing",
         developer: "Nakheel",
-        image: "https://images.unsplash.com/photo-1512453979798-5ea904ac66de?auto=format&fit=crop&q=80&w=800",
+        image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&q=80&w=800",
     },
     {
         id: 'template-dubai-roadshow',
         title: "Dubai Roadshow Event",
         category: "Event",
         developer: "Dubai Holding",
-        image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=800",
+        image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
     }
 ];
 
