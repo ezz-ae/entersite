@@ -6,7 +6,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bot, User, Loader2, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { POST as sendAgentRequest } from '@/app/api/agents/marketing/route'; // Mocked direct import
 
 interface AgentChatProps {
   initialPrompt: string;
@@ -55,10 +54,22 @@ export function AgentChat({ initialPrompt, onSiteConfigReady }: AgentChatProps) 
     setInput('');
     setIsLoading(true);
 
-    // Mock API call to our agent endpoint
     try {
-        const fakeReq = { json: async () => ({ message: input, sessionId: 'onboarding-session' }) };
-        const response = await sendAgentRequest(fakeReq as any);
+        const response = await fetch('/api/agents/marketing', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: input,
+                sessionId: 'onboarding-session' 
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`API call failed with status: ${response.status}`);
+        }
+        
         const data = await response.json();
 
         const agentMessage = { role: 'agent', content: data.text };
