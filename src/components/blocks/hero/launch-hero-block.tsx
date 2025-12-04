@@ -4,7 +4,8 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, CalendarDays, Clock } from "lucide-react";
-import Image from "next/image";
+import { ResponsiveImage } from "@/components/ui/responsive-image"; // Use ResponsiveImage
+import { SAFE_IMAGES } from "@/lib/images"; // Import safe images
 import { motion } from "framer-motion";
 
 interface LaunchHeroBlockProps {
@@ -18,7 +19,7 @@ export function LaunchHeroBlock({
   headline = "The Future of Living Arrives Soon",
   subtext = "Be the first to know about our upcoming waterfront masterpiece. Exclusive pre-launch pricing for early registrants.",
   launchDate = "November 15, 2025",
-  backgroundImage = "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=2000"
+  backgroundImage = SAFE_IMAGES.hero[0] // Use safe image
 }: LaunchHeroBlockProps) {
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden bg-black">
@@ -30,11 +31,12 @@ export function LaunchHeroBlock({
                transition={{ duration: 20, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
                className="relative w-full h-full"
              >
-                <Image 
+                <ResponsiveImage 
                     src={backgroundImage} 
                     alt="Launch Background" 
                     fill 
                     className="object-cover opacity-60"
+                    priority
                 />
              </motion.div>
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
