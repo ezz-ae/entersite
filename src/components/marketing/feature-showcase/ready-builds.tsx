@@ -11,7 +11,7 @@ import Image from 'next/image';
 
 const PROJECTS = [
     {
-        id: 'template-offplan-broker',
+        id: 'full-company',
         title: "Off-Plan Brokerage",
         category: "Full Website",
         developer: "Multi-Developer",
