@@ -14,13 +14,12 @@ import {
   CreditCard, 
   Settings, 
   LogOut, 
-  Search,
-  Plus
+  Palette,
+  Briefcase
 } from 'lucide-react';
 import { EntreSiteLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '../ui/input';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -36,8 +35,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'CRM & Leads', href: '/dashboard/leads', icon: Users },
     { name: 'AI Tools', href: '/dashboard/ai-tools', icon: Bot },
     { name: 'Assets', href: '/dashboard/assets', icon: ImageIcon },
+    { name: 'Brand Kit', href: '/dashboard/brand', icon: Palette },
     { name: 'Team', href: '/dashboard/team', icon: Users },
-    { name: 'Jobs', href: '/admin/jobs', icon: Bot },
+    { name: 'Jobs', href: '/admin/jobs', icon: Briefcase },
   ];
   
   const bottomNavigation = [
