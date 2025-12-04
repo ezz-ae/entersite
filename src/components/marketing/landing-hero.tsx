@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, Command } from 'lucide-react';
+import { ArrowRight, Sparkles, Command, Zap } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import Link from 'next/link';
 
@@ -11,77 +11,83 @@ export function LandingHero() {
   const [prompt, setPrompt] = useState('');
 
   return (
-    <section className="relative min-h-[85vh] flex flex-col items-center justify-center bg-black text-white overflow-hidden pt-16 md:pt-24">
+    <section className="relative min-h-[95vh] flex flex-col items-center justify-center bg-black text-white overflow-hidden pt-24">
       
-      {/* Fire Gradient Background */}
+      {/* Fire Gradient Background - Enhanced */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-          <div className="absolute top-[-20%] left-[10%] w-[600px] h-[600px] bg-orange-600/15 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '5s' }} />
-          <div className="absolute bottom-[-20%] right-[10%] w-[500px] h-[500px] bg-purple-700/15 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '8s' }} />
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+          <div className="absolute top-[-20%] left-[15%] w-[800px] h-[800px] bg-orange-600/20 rounded-full blur-[150px] mix-blend-screen animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute bottom-[-20%] right-[15%] w-[700px] h-[700px] bg-purple-700/20 rounded-full blur-[150px] mix-blend-screen animate-pulse" style={{ animationDuration: '7s' }} />
+          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-125 contrast-150 mix-blend-overlay"></div>
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 container mx-auto px-6 max-w-5xl text-center space-y-12">
+      <div className="relative z-10 container mx-auto px-6 max-w-[1800px] text-center space-y-16">
         
         <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="space-y-8"
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-10"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-medium uppercase tracking-widest text-white/60 mb-2 backdrop-blur-md">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_10px_#f97316] animate-pulse" />
+          <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-white/80 mb-6 backdrop-blur-xl shadow-[0_0_20px_-5px_rgba(255,255,255,0.1)] hover:bg-white/10 transition-colors cursor-default">
+            <Zap className="h-3 w-3 text-orange-500 fill-orange-500" />
             EntreSite OS 2.0
           </div>
           
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05] bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
-            A complete real estate website <br />
-            in just 15 minutes.
+          <h1 className="text-7xl md:text-[9rem] font-bold tracking-tighter leading-[0.85] bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/40 select-none">
+            Build your <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-600">Digital Empire.</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-white/50 max-w-2xl mx-auto leading-relaxed font-light">
-             Full project data. Live Google Ads. Zero code. <br/>
-             The operating system for high-growth developers.
+          <p className="text-2xl md:text-3xl text-zinc-400 max-w-5xl mx-auto leading-relaxed font-light tracking-wide">
+             The first AI Operating System for real estate. <br/>
+             <span className="text-white">3,750+ Projects.</span> Live Ads. Zero Code.
           </p>
         </motion.div>
 
-        {/* The "Brain" Prompt Box */}
+        {/* The "Brain" Prompt Box - Enhanced */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-3xl mx-auto relative group"
+          transition={{ duration: 0.7, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-5xl mx-auto relative group"
         >
-          <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 via-purple-500 to-orange-500 rounded-2xl blur-lg opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
-          <div className="relative bg-black/90 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl p-3 flex flex-col md:flex-row items-start gap-3">
+          {/* Glowing Border */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500 via-purple-500 to-orange-500 rounded-[2rem] blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+          
+          <div className="relative bg-black/80 border border-white/10 rounded-[2rem] shadow-2xl backdrop-blur-2xl p-2 md:p-3 flex flex-col md:flex-row items-start gap-0 overflow-hidden">
             
-            <div className="flex-1 w-full text-left">
-                <div className="flex items-center gap-2 px-4 pt-2 text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                    <Sparkles className="h-3 w-3 text-orange-400" />
-                    AI Architect
+            {/* Input Area */}
+            <div className="flex-1 w-full relative">
+                <div className="absolute top-4 left-6 flex items-center gap-2 pointer-events-none">
+                    <Sparkles className="h-4 w-4 text-orange-500 animate-pulse" />
+                    <span className="text-[10px] font-bold text-orange-500/80 uppercase tracking-widest">AI Architect</span>
                 </div>
                 <Textarea
-                placeholder="Start by writing your company name, or which project you want to create a landing page for?"
-                className="min-h-[60px] text-lg p-4 resize-none border-0 focus-visible:ring-0 bg-transparent placeholder:text-white/20 text-white leading-relaxed w-full"
+                placeholder="Describe your vision... (e.g. A dark-mode luxury landing page for Emaar Beachfront with a video hero...)"
+                className="min-h-[120px] md:min-h-[80px] text-xl md:text-2xl p-6 pt-10 resize-none border-0 focus-visible:ring-0 bg-transparent placeholder:text-white/20 text-white leading-relaxed w-full font-light"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
+                spellCheck={false}
                 />
             </div>
 
-            <div className="p-1 w-full md:w-auto self-end md:self-center">
+            {/* Action Area */}
+            <div className="p-2 w-full md:w-auto self-end md:self-center flex-shrink-0">
               <Link href={`/builder?prompt=${encodeURIComponent(prompt)}`}>
-                <Button size="lg" className="h-12 w-full md:w-auto px-8 rounded-xl text-base font-bold shadow-[0_0_20px_-5px_#f97316] hover:shadow-[0_0_30px_-5px_#f97316] transition-all hover:scale-105 bg-white text-black hover:bg-white" disabled={!prompt}>
+                <Button size="lg" className="h-16 w-full md:w-auto px-10 rounded-2xl text-lg font-bold shadow-[0_0_40px_-10px_#f97316] hover:shadow-[0_0_60px_-10px_#f97316] transition-all hover:scale-[1.02] active:scale-[0.98] bg-white text-black hover:bg-white" disabled={!prompt}>
                   Let's Create
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
               </Link>
             </div>
           </div>
           
-          <div className="flex flex-wrap justify-center gap-6 md:gap-12 mt-8 text-[10px] text-white/30 uppercase tracking-widest font-bold">
-             <span className="flex items-center gap-2"><Command className="h-3 w-3" /> 3,750+ Projects</span>
-             <span className="flex items-center gap-2"><Command className="h-3 w-3" /> Google Ads Ready</span>
-             <span className="flex items-center gap-2"><Command className="h-3 w-3" /> Instant Deploy</span>
+          {/* Feature Badges */}
+          <div className="flex flex-wrap justify-center gap-6 md:gap-12 mt-10 text-xs text-zinc-500 uppercase tracking-widest font-bold">
+             <span className="flex items-center gap-3 hover:text-white transition-colors cursor-default"><Command className="h-4 w-4" /> Instant Generation</span>
+             <span className="flex items-center gap-3 hover:text-white transition-colors cursor-default"><Command className="h-4 w-4" /> Real Market Data</span>
+             <span className="flex items-center gap-3 hover:text-white transition-colors cursor-default"><Command className="h-4 w-4" /> Google Ads Integration</span>
           </div>
         </motion.div>
       </div>

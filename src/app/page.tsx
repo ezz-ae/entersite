@@ -17,7 +17,8 @@ export const metadata: Metadata = {
 
 export default function MarketingPage() {
   return (
-    <main className="min-h-screen bg-black flex flex-col font-sans">
+    <main className="min-h-screen bg-black flex flex-col font-sans selection:bg-orange-500/30">
+      {/* Header is included here to ensure it's part of the marketing layout */}
       <SiteHeader />
       
       {/* 1. The Brain: AI Generation */}
@@ -30,15 +31,24 @@ export default function MarketingPage() {
       <ReadyBuilds />
       
       {/* 4. The Growth Engine: Marketing Tools */}
-      <div className="space-y-0 bg-background text-foreground">
-        <AdsShowcase />
-        <SeoShowcase />
-        <ChatAgentShowcase />
+      <div className="space-y-0 bg-background text-foreground relative z-10">
+        <div className="border-t border-border/40">
+            <AdsShowcase />
+        </div>
+        <div className="border-t border-border/40">
+            <SeoShowcase />
+        </div>
+        <div className="border-t border-border/40">
+            <ChatAgentShowcase />
+        </div>
       </div>
 
       {/* 5. The Polish: Templates & Domains */}
       <TemplateShowcase headline="Design That Converts" subtext="Award-winning layouts for every niche." />
-      <DomainSearchBlock />
+      
+      <div className="bg-background border-t border-border/40">
+        <DomainSearchBlock />
+      </div>
       
       <SiteFooter />
     </main>

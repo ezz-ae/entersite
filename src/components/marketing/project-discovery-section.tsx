@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Building2, DollarSign, Loader2, Rocket, Bot, Sparkles, Layout, Code, ArrowRight } from "lucide-react";
-import { AgentChat } from '@/components/onboarding/agent-chat';
 import { ListingGridBlock } from '@/components/blocks/listing-grid-block';
 import { searchProjects, getDevelopers, getLocations } from '@/lib/project-service';
 import type { ProjectData } from '@/lib/types';
@@ -203,9 +202,8 @@ export function ProjectDiscoverySection() {
                 Ask about market trends, project details, or investment opportunities. Our AI provides data-driven answers, not generic chat.
             </p>
             
-            <div className="relative w-full max-w-3xl mx-auto h-[600px] overflow-hidden rounded-2xl border shadow-2xl bg-background mt-12">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/50 z-10 pointer-events-none" />
-                 <AgentChat onSiteConfigReady={handleAgentDiscoveryResponse} initialPrompt="Tell me about the latest luxury villas in Dubai Marina."/>
+            <div className="relative w-full max-w-3xl mx-auto h-[600px] overflow-hidden rounded-2xl border shadow-2xl bg-background mt-12 flex items-center justify-center">
+                 <p className="text-muted-foreground">AI Chat Agent Coming Soon</p>
             </div>
 
             <Button size="lg" className="h-14 px-8 rounded-full shadow-lg mt-8">
