@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,35 +14,35 @@ const PROJECTS = [
         title: "Off-Plan Brokerage",
         category: "Full Website",
         developer: "Multi-Developer",
-        image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=800",
+        bgColor: "from-blue-900 to-sky-700",
     },
     {
         id: 'template-damac-islands',
         title: "Damac Islands Launch",
         category: "Lead Gen",
         developer: "Damac",
-        image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=800",
+        bgColor: "from-purple-900 to-indigo-700",
     },
     {
         id: 'template-listing-portal',
         title: "Market Data Portal",
         category: "Search Engine",
         developer: "All Projects",
-        image: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?auto=format&fit=crop&q=80&w=800",
+        bgColor: "from-emerald-900 to-green-700",
     },
     {
         id: 'template-palm-jebel-ali',
         title: "Palm Jebel Ali",
         category: "Luxury Landing",
         developer: "Nakheel",
-        image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&q=80&w=800",
+        bgColor: "from-rose-900 to-pink-700",
     },
     {
         id: 'template-dubai-roadshow',
         title: "Dubai Roadshow Event",
         category: "Event",
         developer: "Dubai Holding",
-        image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
+        bgColor: "from-amber-900 to-yellow-700",
     }
 ];
 
@@ -77,14 +76,9 @@ export function ReadyBuilds() {
                         viewport={{ once: true }}
                         className="group cursor-pointer"
                     >
-                        <div className="relative aspect-[4/5] rounded-3xl overflow-hidden mb-6 bg-muted border border-border/50 shadow-sm transition-all duration-500 group-hover:shadow-2xl group-hover:scale-[1.02]">
-                            <Image 
-                                src={project.image} 
-                                alt={project.title} 
-                                fill 
-                                className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300" />
+                        <div className={`relative aspect-[4/5] rounded-3xl overflow-hidden mb-6 bg-gradient-to-br ${project.bgColor} border border-white/10 shadow-sm transition-all duration-500 group-hover:shadow-2xl group-hover:scale-[1.02]`}>
+                            <div className="absolute inset-0 bg-grid-pattern opacity-10" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                             
                             <div className="absolute top-5 left-5 flex flex-col gap-2">
                                 <Badge className="bg-white/10 text-white backdrop-blur-md border-white/20 shadow-sm px-3 py-1.5 text-xs font-medium">
@@ -114,4 +108,17 @@ export function ReadyBuilds() {
       </div>
     </section>
   );
+}
+
+function BgGridPattern() {
+  return (
+    <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+            <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+            </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)"/>
+    </svg>
+  )
 }
