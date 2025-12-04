@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { ArrowRight, Sparkles, Command, MessageCircle, X } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AgentChat } from '@/components/onboarding/agent-chat'; // Import the AgentChat component
 
 const promptCategories = [
   {
@@ -69,26 +68,16 @@ const promptCategories = [
 
 export function OnboardingFlow({ onComplete }: { onComplete: (data: any) => void; }) {
   const [prompt, setPrompt] = useState('');
-  const [isChatting, setIsChatting] = useState(false); // New state to control chat view
 
   const handlePromptSubmit = () => {
     if (!prompt.trim()) return;
-    setIsChatting(true); // Switch to chat mode
+    onComplete({ prompt });
   };
 
   const handlePresetClick = (presetPrompt: string) => {
     setPrompt(presetPrompt);
-    setIsChatting(true); // Immediately start chat with preset prompt
+    onComplete({ prompt: presetPrompt });
   };
-  
-  const handleAgentCompletion = (config: any) => {
-      // The AgentChat component will pass the final site config here
-      onComplete({
-          method: 'agent',
-          'user-prompt': prompt, // Keep the original prompt
-          ...config // This will contain the generated blocks, siteType, etc.
-      });
-  }
 
   return (
     <div className="fixed inset-0 z-[100] bg-background flex items-center justify-center p-4 md:p-8">
@@ -98,64 +87,46 @@ export function OnboardingFlow({ onComplete }: { onComplete: (data: any) => void
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-6xl h-[85vh] bg-card border rounded-2xl shadow-2xl flex overflow-hidden"
       >
-        {/* Left Side: Prompt Input / Chat */}
+        {/* Left Side: Prompt Input */}
         <div className="flex-1 flex flex-col p-8">
            <AnimatePresence mode="wait">
-               {isChatting ? (
-                   <motion.div
-                       key="agent-chat-view"
-                       initial={{ opacity: 0, x: 50 }}
-                       animate={{ opacity: 1, x: 0 }}
-                       exit={{ opacity: 0, x: -50 }}
-                       transition={{ duration: 0.3 }}
-                       className="flex-1 flex flex-col items-center justify-center"
-                   >
-                       <div className="w-full max-w-xl h-full">
-                           <AgentChat 
-                               initialPrompt={prompt} 
-                               onSiteConfigReady={handleAgentCompletion}
-                           />
-                       </div>
-                   </motion.div>
-               ) : (
-                   <motion.div
-                       key="prompt-input-view"
-                       initial={{ opacity: 0, x: -50 }}
-                       animate={{ opacity: 1, x: 0 }}
-                       exit={{ opacity: 0, x: 50 }}
-                       transition={{ duration: 0.3 }}
-                       className="flex-1 flex flex-col"
-                   >
-                       <div className="mb-8">
-                          <h1 className="text-2xl font-bold tracking-tight mb-2">Describe the website you want to build</h1>
-                          <p className="text-muted-foreground">
-                            Be as descriptive as possible, or choose a starting point from our library.
-                          </p>
-                       </div>
-                       
-                       <div className="flex-grow flex flex-col">
-                          <Textarea
-                            placeholder="e.g., A luxury real estate site for Emaar with a video hero, featured listings, and a simple lead form..."
-                            className="flex-grow text-base p-4 resize-none border rounded-lg bg-muted/20 focus-visible:ring-primary"
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            autoFocus
-                          />
-                       </div>
+               <motion.div
+                   key="prompt-input-view"
+                   initial={{ opacity: 0, x: -50 }}
+                   animate={{ opacity: 1, x: 0 }}
+                   exit={{ opacity: 0, x: 50 }}
+                   transition={{ duration: 0.3 }}
+                   className="flex-1 flex flex-col"
+               >
+                   <div className="mb-8">
+                      <h1 className="text-2xl font-bold tracking-tight mb-2">Describe the website you want to build</h1>
+                      <p className="text-muted-foreground">
+                        Be as descriptive as possible, or choose a starting point from our library.
+                      </p>
+                   </div>
+                   
+                   <div className="flex-grow flex flex-col">
+                      <Textarea
+                        placeholder="e.g., A luxury real estate site for Emaar with a video hero, featured listings, and a simple lead form..."
+                        className="flex-grow text-base p-4 resize-none border rounded-lg bg-muted/20 focus-visible:ring-primary"
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        autoFocus
+                      />
+                   </div>
 
-                        <div className="mt-6">
-                            <Button 
-                                size="lg" 
-                                className="w-full h-12 text-base font-semibold" 
-                                disabled={!prompt.trim()}
-                                onClick={handlePromptSubmit}
-                            >
-                                <Sparkles className="mr-2 h-4 w-4" />
-                                Start Conversation
-                            </Button>
-                        </div>
-                   </motion.div>
-               )}
+                    <div className="mt-6">
+                        <Button 
+                            size="lg" 
+                            className="w-full h-12 text-base font-semibold" 
+                            disabled={!prompt.trim()}
+                            onClick={handlePromptSubmit}
+                        >
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Generate Site
+                        </Button>
+                    </div>
+               </motion.div>
            </AnimatePresence>
         </div>
 
