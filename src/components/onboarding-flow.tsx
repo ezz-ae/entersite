@@ -3,10 +3,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Wand2, Briefcase, Zap, User, Search, Pyramid, TrendingUp } from "lucide-react";
+import { ArrowRight, Wand2, Briefcase, Zap, User, Search, Pyramid, TrendingUp, Sparkles } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AgentChat } from './onboarding/agent-chat';
+import { Textarea } from '@/components/ui/textarea';
 
 interface OnboardingFlowProps {
   onComplete: (data: any) => void;
@@ -14,22 +14,15 @@ interface OnboardingFlowProps {
 
 const promptCategories = [
     {
-        id: 'ai-native',
-        name: 'Build with AI',
-        description: 'Describe your vision in plain text.',
-        prompts: [
-            {
-                title: 'Start with a conversation',
-                description: 'Use our AI Architect to refine your idea, choose a style, and generate the perfect site structure.',
-                isFreeform: true,
-            },
-        ]
-    },
-    {
         id: 'company-hub',
         name: 'Company Hub',
         description: 'Full websites for agencies and brokerages.',
         prompts: [
+            { 
+                title: 'Describe Your Vision', 
+                description: 'Use our AI Architect to refine your idea, choose a style, and generate the perfect site structure.', 
+                isFreeform: true 
+            },
             { title: 'Full Company Site', description: 'Build a complete website with listings, agent profiles, and contact pages.', prompt: 'Build me a full company website with listings, agents, and contact pages.' },
             { title: 'Corporate Site with Insights', description: 'A corporate real estate website with project portfolios and market insights.', prompt: 'Create a corporate real estate website with project portfolios and market insights.' },
             { title: 'Brokerage-Style Site', description: 'A professional site for a brokerage featuring projects and an interactive map.', prompt: 'I want a brokerage-style site with featured projects and a map.' },
@@ -111,25 +104,27 @@ const promptCategories = [
 ];
 
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
-  const [activeTab, setActiveTab] = useState('ai-native');
+  const [activeTab, setActiveTab] = useState('company-hub');
+  const [freeformPrompt, setFreeformPrompt] = useState('');
 
-  const handlePromptClick = (prompt: string) => {
+  const handlePresetClick = (prompt: string) => {
     onComplete({
       method: 'prompt',
       'user-prompt': prompt,
     });
   };
 
-  const handleSiteConfigReady = (config: any) => {
+  const handleFreeformSubmit = () => {
+    if (!freeformPrompt.trim()) return;
     onComplete({
-      method: 'wizard', // or 'agent'
-      ...config
-    })
-  }
+        method: 'prompt',
+        'user-prompt': freeformPrompt,
+    });
+  };
 
   return (
     <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center p-4">
-      <div className="text-center space-y-4 mb-12">
+      <div className="text-center space-y-4 my-12">
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight">How would you like to start?</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Choose a starting point, or describe your vision to our AI architect.
@@ -138,7 +133,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-7xl">
         <div className="flex justify-center mb-8">
-            <TabsList className="h-auto p-1.5 bg-muted/50 space-x-2">
+            <TabsList className="h-auto p-1.5 bg-muted/50 space-x-1 rounded-xl">
                 {promptCategories.map(cat => (
                     <TabsTrigger 
                         key={cat.id} 
@@ -161,37 +156,69 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             >
                 {promptCategories.map(cat => (
                     <TabsContent key={cat.id} value={cat.id}>
-                        {cat.id === 'ai-native' ? (
-                             <div className="w-full max-w-3xl mx-auto h-[600px]">
-                                <AgentChat onSiteConfigReady={handleSiteConfigReady} />
-                             </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {cat.prompts.map((p, i) => (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {cat.prompts.map((p, i) => {
+                                if (p.isFreeform) {
+                                    return (
+                                        <motion.div
+                                            key="freeform"
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: i * 0.05 }}
+                                            className="md:col-span-2 lg:col-span-2 xl:col-span-2 bg-card border rounded-2xl p-6 text-left flex flex-col justify-between shadow-2xl relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-transparent"
+                                        >
+                                             <div className="absolute -inset-px bg-gradient-to-r from-orange-400 via-red-500 to-purple-600 rounded-2xl opacity-70 blur-lg" />
+                                             <div className="relative z-10 flex flex-col h-full">
+                                                <div className="flex-grow">
+                                                    <h3 className="font-bold text-lg text-foreground mb-2">{p.title}</h3>
+                                                    <p className="text-sm text-muted-foreground mb-4">{p.description}</p>
+                                                    <Textarea
+                                                        placeholder="e.g., A luxury real estate site with a video hero, featured listings, and a simple lead form."
+                                                        className="w-full min-h-[80px] text-base p-3 resize-none border-border/20 focus-visible:ring-primary bg-background/50 placeholder:text-muted-foreground/60 rounded-xl"
+                                                        value={freeformPrompt}
+                                                        onChange={(e) => setFreeformPrompt(e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="mt-4 flex justify-end">
+                                                    <Button 
+                                                        size="lg" 
+                                                        className="h-12 rounded-xl text-base font-semibold shadow-lg hover:scale-105 transition-transform" 
+                                                        disabled={!freeformPrompt.trim()}
+                                                        onClick={handleFreeformSubmit}
+                                                    >
+                                                        <Sparkles className="mr-2 h-4 w-4" />
+                                                        Generate Site
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )
+                                }
+                                return (
                                     <motion.div
                                         key={i}
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: i * 0.05 }}
-                                        className="bg-card border rounded-2xl p-6 text-left flex flex-col justify-between shadow-lg hover:shadow-2xl hover:border-transparent transition-all duration-300 cursor-pointer h-full group relative overflow-hidden"
-                                        onClick={() => p.prompt && handlePromptClick(p.prompt)}
+                                        className="bg-card border rounded-2xl p-6 text-left flex flex-col justify-between shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full group relative overflow-hidden"
+                                        onClick={() => p.prompt && handlePresetClick(p.prompt)}
                                     >
-                                        <div className="absolute -inset-px bg-gradient-to-r from-orange-400 via-red-500 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                        <div className="absolute -inset-px bg-gradient-to-r from-orange-400/20 via-red-500/20 to-purple-600/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                         <div className="relative z-10 flex flex-col h-full">
                                           <div className="flex-grow">
                                               <h3 className="font-bold text-lg text-foreground mb-2">{p.title}</h3>
                                               <p className="text-sm text-muted-foreground">{p.description}</p>
                                           </div>
                                           <div className="mt-8 flex justify-end">
-                                              <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-muted-foreground group-hover:bg-white/10 group-hover:text-white transition-colors duration-300">
+                                              <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors duration-300">
                                                   <ArrowRight className="h-4 w-4" />
                                               </div>
                                           </div>
                                         </div>
                                     </motion.div>
-                                ))}
-                            </div>
-                        )}
+                                )
+                            })}
+                        </div>
                     </TabsContent>
                 ))}
             </motion.div>
