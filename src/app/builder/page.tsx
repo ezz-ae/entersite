@@ -15,7 +15,7 @@ import { InspectorPanel } from '@/components/editor/inspector/inspector-panel';
 import { ThemePanel } from '@/components/editor/sidebar/theme-panel';
 import { PageBuilder } from '@/components/page-builder';
 import { PublishSuccessDialog } from '@/components/publish-success-dialog';
-import { MultiStepOnboarding } from '@/components/onboarding/multi-step-onboarding';
+import { OnboardingFlow } from '@/components/onboarding-flow';
 import { generateSiteFromAgentResponse } from '@/lib/ai-orchestration';
 
 export default function BuilderPage() {
@@ -89,7 +89,7 @@ export default function BuilderPage() {
   // --- Render ---
 
   if (!siteTemplate) {
-      return <MultiStepOnboarding onComplete={handleOnboardingComplete} />;
+      return <OnboardingFlow onComplete={handleOnboardingComplete} />;
   }
 
   if (isPreviewMode && activePage) {
