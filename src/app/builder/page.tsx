@@ -1,7 +1,9 @@
+
 'use client';
 
-import { useState } from 'react';
-import { SiteTemplate } from '@/lib/templates';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { SiteTemplate, availableTemplates } from '@/lib/templates';
 import { PageRenderer } from "@/components/page-renderer";
 import type { SitePage, Block } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -18,12 +20,24 @@ import { PublishSuccessDialog } from '@/components/publish-success-dialog';
 import { OnboardingFlow } from '@/components/onboarding-flow';
 import { generateSiteFromAgentResponse } from '@/lib/ai-orchestration';
 
+function useTemplateFromUrl() {
+  const searchParams = useSearchParams();
+  const templateId = searchParams.get('template');
+  
+  if (!templateId) return null;
+
+  const template = availableTemplates.find(t => t.id === templateId);
+  return template || null;
+}
+
+
 export default function BuilderPage() {
-  const [siteTemplate, setSiteTemplate] = useState<SiteTemplate | null>(null);
+  const initialTemplate = useTemplateFromUrl();
+  const [siteTemplate, setSiteTemplate] = useState<SiteTemplate | null>(initialTemplate);
   
   // App State
-  const [pages, setPages] = useState<SitePage[]>([]);
-  const [activePageId, setActivePageId] = useState<string>('');
+  const [pages, setPages] = useState<SitePage[]>(initialTemplate?.pages || []);
+  const [activePageId, setActivePageId] = useState<string>(initialTemplate?.pages[0]?.id || '');
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   
   // UI State
@@ -40,15 +54,22 @@ export default function BuilderPage() {
   // --- Handlers ---
   
   const handleOnboardingComplete = (agentData: any) => {
-    // The agent now returns a complete site structure
-    // We use a mapping function to ensure it's a valid SiteTemplate
-    const newTemplate = generateSiteFromAgentResponse(agentData);
+    // This can handle both a simple prompt and a complex agent response
+    const promptText = agentData.prompt || '';
+    const isTemplateRequest = availableTemplates.some(t => promptText.toLowerCase().includes(t.name.toLowerCase()));
+    
+    let newTemplate;
+
+    if (isTemplateRequest) {
+        newTemplate = availableTemplates.find(t => promptText.toLowerCase().includes(t.name.toLowerCase())) || generateSiteFromAgentResponse(agentData);
+    } else {
+        newTemplate = generateSiteFromAgentResponse(agentData);
+    }
     
     setSiteTemplate(newTemplate);
     setPages(newTemplate.pages);
     setActivePageId(newTemplate.pages[0]?.id || '');
     
-    // Also apply the brand color if provided
     if (agentData.brandColor) {
         setBrandColor(agentData.brandColor);
     }
