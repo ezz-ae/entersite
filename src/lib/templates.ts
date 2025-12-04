@@ -1,9 +1,5 @@
-import type { SitePage, Block } from './types';
-import { allProjects } from './projects';
-import { dubaiProjects } from '@/data/dubai';
-import { abuDhabiProjects } from '@/data/abudhabi';
-import { rasAlKhaimahProjects } from '@/data/rasalkhaimah';
-import { sharjahProjects } from '@/data/sharjah';
+import type { SitePage, Block, ProjectData } from './types';
+import { allProjects, dubaiProjects, abuDhabiProjects, rasAlKhaimahProjects, sharjahProjects } from './projects';
 
 export interface SiteTemplate {
   id: string;
@@ -14,6 +10,23 @@ export interface SiteTemplate {
   description?: string;
 }
 
+// Helper to find a specific project by ID
+const findProject = (projectId: string): ProjectData | undefined => {
+    return allProjects.find(p => p.id === projectId);
+};
+
+// Helper to filter projects by criteria
+const filterProjects = (criteria: { city?: string, developer?: string, limit?: number }): ProjectData[] => {
+    let filtered = allProjects;
+    if (criteria.city) {
+        filtered = filtered.filter(p => p.location.city.toLowerCase() === criteria.city!.toLowerCase());
+    }
+    if (criteria.developer) {
+        filtered = filtered.filter(p => p.developer.toLowerCase().includes(criteria.developer!.toLowerCase()));
+    }
+    return filtered.slice(0, criteria.limit || 3);
+};
+
 const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   hero: {
     type: 'hero',
@@ -21,24 +34,28 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
       headline: "Discover Unparalleled Luxury",
       subtext: "Explore our exclusive collection of premium properties.",
       ctaText: "Explore Properties",
+      backgroundImage: 'https://images.unsplash.com/photo-1512453979798-5ea904ac66de?auto=format&fit=crop&q=80&w=2000'
     },
   },
   'launch-hero': {
       type: 'launch-hero',
       data: {
-          headline: "The Future of Living Arrives Soon"
+          headline: "The Future of Living Arrives Soon",
+          backgroundImage: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=2000'
       }
   },
   'coming-soon-hero': {
       type: 'coming-soon-hero',
       data: {
-          headline: "Something Extraordinary is Coming"
+          headline: "Something Extraordinary is Coming",
+          backgroundImage: 'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&q=80&w=2000'
       }
   },
   'hero-lead-form': {
     type: 'hero-lead-form',
     data: {
         headline: "Find Your Dream Home",
+        backgroundImage: 'https://images.unsplash.com/photo-1512453979798-5ea904ac66de?auto=format&fit=crop&q=80&w=2000'
     }
   },
   'search-filters': {
@@ -52,20 +69,24 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
     data: {
       headline: "Featured Properties",
       subtext: "Handpicked listings that define luxury living.",
-      projects: allProjects.slice(0, 3), // Default projects
+      projects: allProjects.slice(0, 3), // Default projects, can be overridden
     },
   },
   'listing-grid-map': {
     type: 'listing-grid-map',
     data: {
         headline: "Explore Projects on Map",
-        projects: allProjects.slice(0, 5),
+        projects: allProjects.slice(0, 5), // Default, can be overridden
     }
   },
   'featured-listing': {
       type: 'featured-listing',
       data: {
-          headline: "Property of the Month"
+          headline: "Property of the Month",
+          listingTitle: "Luxury Penthouse with Sea Views",
+          price: "AED 15,500,000",
+          location: "Palm Jumeirah, Dubai",
+          listingImage: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=1600'
       }
   },
   'cta-form': {
@@ -102,7 +123,11 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   gallery: {
       type: 'gallery',
       data: {
-          headline: 'Project Gallery'
+          headline: 'Project Gallery',
+          images: [
+            'https://images.unsplash.com/photo-1582407947304-fd86f028f3a6?auto=format&fit=crop&q=80&w=1000',
+            'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&q=80&w=1000'
+          ]
       }
   },
   testimonial: {
@@ -118,9 +143,6 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
           subtext: "Find answers to common questions about our properties and services.",
           faqItems: [
               { question: "What types of properties do you offer?", answer: "We offer a wide range of properties including luxury villas, modern apartments, and exclusive townhouses in prime locations." },
-              { question: "Can I schedule a viewing online?", answer: "Yes, you can easily schedule a private viewing through our contact form. One of our agents will get in touch with you to confirm the details." },
-              { question: "Are there financing options available?", answer: "We work with several trusted financial partners to offer you flexible financing options. Please contact us for more information." },
-              { question: "What amenities are included?", answer: "Our properties come with a variety of high-end amenities, which may include private pools, state-of-the-art gyms, community centers, and more. Specific amenities vary by project." }
           ]
       }
   },
@@ -129,7 +151,8 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
       data: {
           eventName: "Dubai Property Show 2025",
           city: "London",
-          date: "October 15-17, 2025"
+          date: "October 15-17, 2025",
+          imageUrl: 'https://images.unsplash.com/photo-1540575467063-17e6fc48db44?auto=format&fit=crop&q=80&w=2000'
       }
   },
   team: {
@@ -141,7 +164,10 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   'project-detail': {
       type: 'project-detail',
       data: {
-          projectName: "Elysian Residence"
+          projectName: "Elysian Residence",
+          developer: "Mfour Development",
+          description: "Elysian Residence redefines urban sophistication in Jumeirah Garden City.",
+          imageUrl: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=1000'
       }
   },
   'brochure-form': {
@@ -207,7 +233,8 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   'video': {
       type: 'video',
       data: {
-          headline: "Watch Video Tour"
+          headline: "Watch Video Tour",
+          videoThumbnail: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000'
       }
   },
   'split-content': {
@@ -248,23 +275,23 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   }
 };
 
-const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: { city?: string, overrides?: any }): Block => {
+const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: { city?: string, overrides?: any, projectId?: string, projectFilter?: {city?: string, developer?: string, limit?: number} }): Block => {
     const blockData = JSON.parse(JSON.stringify(defaultBlocks[type]));
 
-    if (type === 'listing-grid' || type === 'listing-grid-map') {
-      let projectsToShow = [];
-       const city = context?.city?.toLowerCase();
-
-      if (city === 'dubai') projectsToShow = dubaiProjects;
-      else if (city === 'abu dhabi') projectsToShow = abuDhabiProjects;
-      else if (city === 'ras al khaimah') projectsToShow = rasAlKhaimahProjects;
-      else if (city === 'sharjah') projectsToShow = sharjahProjects;
-      else projectsToShow = allProjects;
-      
-      blockData.data.projects = type === 'listing-grid' ? projectsToShow.slice(0, 3) : projectsToShow.slice(0, 5);
+    // Handle specific project data for listing blocks
+    if (type === 'listing-grid' || type === 'listing-grid-map' || type === 'project-detail') {
+        if (context?.projectId) {
+            const project = findProject(context.projectId);
+            if (project) {
+                blockData.data = { ...blockData.data, ...project, projects: [project] };
+            }
+        } else if (context?.projectFilter) {
+            blockData.data.projects = filterProjects(context.projectFilter);
+        } else { // Fallback to a default filter if no specific project/filter is provided
+            blockData.data.projects = filterProjects({ city: context?.city, limit: type === 'listing-grid' ? 3 : 5 });
+        }
     }
 
-    // Apply manual overrides for ready-made templates
     if (context?.overrides) {
         Object.assign(blockData.data, context.overrides);
     }
@@ -277,14 +304,16 @@ const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: 
     }
 }
 
-const createPage = (id: string, title: string, blocks: (keyof typeof defaultBlocks | { type: keyof typeof defaultBlocks, overrides: any })[], context?: { city?: string }): SitePage => {
+const createPage = (id: string, title: string, blocks: (keyof typeof defaultBlocks | { type: keyof typeof defaultBlocks, overrides?: any, projectId?: string, projectFilter?: {city?: string, developer?: string, limit?: number} })[], context?: { city?: string }): SitePage => {
     return {
         id: `page-${id}`,
         title: title,
         blocks: blocks.map((blockDef, index) => {
             const type = typeof blockDef === 'string' ? blockDef : blockDef.type;
             const overrides = typeof blockDef === 'string' ? {} : blockDef.overrides;
-            return createBlock(type, index + 1, { ...context, overrides });
+            const projectId = typeof blockDef === 'string' ? undefined : blockDef.projectId;
+            const projectFilter = typeof blockDef === 'string' ? undefined : blockDef.projectFilter;
+            return createBlock(type, index + 1, { ...context, overrides, projectId, projectFilter });
         }),
         canonicalListings: [],
         brochureUrl: "",
@@ -299,13 +328,23 @@ const createPage = (id: string, title: string, blocks: (keyof typeof defaultBloc
 }
 
 
-// --- BASE TEMPLATES ---
+// --- BASE TEMPLATES (Existing but now use specific project data helpers) ---
+
 export const roadshowTemplate: SiteTemplate = {
   id: 'template-roadshow',
   name: 'Dubai Roadshow Page',
   siteType: 'roadshow',
   pages: [
-    createPage('home', 'Event Details', ['roadshow', 'banner-cta', 'split-content', 'listing-grid', 'brochure-form', 'cta-form', 'faq', 'chat-widget'], { city: 'Dubai' }),
+    createPage('home', 'Event Details', [
+        'roadshow', 
+        'banner-cta', 
+        'split-content',
+        { type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 3 } },
+        'brochure-form', 
+        'cta-form', 
+        'faq', 
+        'chat-widget'
+    ], { city: 'Dubai' }),
   ],
 };
 
@@ -314,7 +353,17 @@ export const developerFocusTemplate: SiteTemplate = {
     name: 'Abu Dhabi Developer',
     siteType: 'developer-focus',
     pages: [
-      createPage('home', 'Home', ['hero', 'stats', 'listing-grid', 'project-detail', 'features', 'payment-plan', 'team', 'newsletter', 'chat-widget'], { city: 'Abu Dhabi' }),
+      createPage('home', 'Home', [
+          'hero',
+          'stats',
+          { type: 'listing-grid', projectFilter: { city: 'Abu Dhabi', developer: 'Bloom Holding', limit: 3 } },
+          { type: 'project-detail', projectId: 'marbella-villas' },
+          'features', 
+          'payment-plan', 
+          'team', 
+          'newsletter', 
+          'chat-widget'
+      ], { city: 'Abu Dhabi' }),
       createPage('about', 'About Us', ['hero', 'split-content', 'team', 'video', 'partners']),
       createPage('contact', 'Contact', ['contact-details', 'cta-form']),
     ],
@@ -325,7 +374,12 @@ export const partnerLaunchTemplate: SiteTemplate = {
     name: 'RAK Partner Launch',
     siteType: 'partner-launch',
     pages: [
-        createPage('home', 'Launch Home', ['launch-hero', 'featured-listing', 'listing-grid', 'offer', 'map', 'partners', 'cta-grid', 'chat-widget'], { city: 'Ras Al Khaimah' }),
+        createPage('home', 'Launch Home', [
+            { type: 'launch-hero', overrides: { backgroundImage: 'https://images.unsplash.com/photo-1596178060671-7a80dc8059ea?auto=format&fit=crop&q=80&w=2000' } },
+            { type: 'featured-listing', projectId: 'palazzo-tissoli' },
+            { type: 'listing-grid', projectFilter: { city: 'Ras Al Khaimah', limit: 3 } }, 
+            'offer', 'map', 'partners', 'cta-grid', 'chat-widget'
+        ], { city: 'Ras Al Khaimah' }),
     ]
 };
 
@@ -334,9 +388,14 @@ export const fullCompanyTemplate: SiteTemplate = {
     name: 'Full Real Estate Company',
     siteType: 'full-company',
     pages: [
-        createPage('home', 'Home', ['hero-lead-form', 'search-filters', 'partners', 'listing-grid-map', 'featured-listing', 'developers-list', 'city-guide', 'features', 'blog-grid', 'team', 'newsletter', 'chat-widget']),
+        createPage('home', 'Home', [
+            'hero-lead-form', 'search-filters', 'partners',
+            { type: 'listing-grid-map', projectFilter: { city: 'Dubai', limit: 5 } },
+            { type: 'featured-listing', projectId: 'skygate-tower' },
+            'developers-list', 'city-guide', 'features', 'blog-grid', 'team', 'newsletter', 'chat-widget'
+        ], { city: 'Dubai' }),
         createPage('about', 'About Us', ['hero', 'stats', 'team', 'contact-details']),
-        createPage('projects', 'Projects', ['listing-grid', 'mortgage-calculator', 'roi-calculator']),
+        createPage('projects', 'Projects', [{ type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 6 } }, 'mortgage-calculator', 'roi-calculator']),
         createPage('contact', 'Contact Us', ['contact-details', 'cta-form']),
     ]
 };
@@ -346,7 +405,11 @@ export const freelancerTemplate: SiteTemplate = {
     name: 'Freelancer Agent',
     siteType: 'freelancer',
     pages: [
-        createPage('home', 'Home', ['hero', 'listing-grid', 'blog-grid', 'team', 'testimonial', 'cta-form', 'chat-widget']),
+        createPage('home', 'Home', [
+            'hero', 
+            { type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 3 } },
+            'blog-grid', 'team', 'testimonial', 'cta-form', 'chat-widget'
+        ], { city: 'Dubai' }),
     ]
 };
 
@@ -355,7 +418,12 @@ export const mapFocusedTemplate: SiteTemplate = {
     name: 'Map-First Search',
     siteType: 'map-focused',
     pages: [
-        createPage('home', 'Map Search', ['search-filters', 'listing-grid-map', 'listing-grid', 'chat-widget']),
+        createPage('home', 'Map Search', [
+            'search-filters',
+            { type: 'listing-grid-map', projectFilter: { city: 'Dubai', limit: 5 } },
+            { type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 3 } },
+            'chat-widget'
+        ], { city: 'Dubai' }),
     ]
 };
 
@@ -364,128 +432,102 @@ export const adsQuickLaunchTemplate: SiteTemplate = {
     name: 'Landing Page + Ads',
     siteType: 'ads-launch',
     pages: [
-        createPage('home', 'Landing Page', ['coming-soon-hero', 'project-detail', 'video', 'floor-plan', 'payment-plan', 'offer', 'brochure-form', 'chat-widget']),
+        createPage('home', 'Landing Page', [
+            { type: 'coming-soon-hero', overrides: { backgroundImage: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=2000' } },
+            { type: 'project-detail', projectId: 'skygate-tower' },
+            'video', 'floor-plan', 'payment-plan', 'offer', 'brochure-form', 'chat-widget'
+        ], { city: 'Dubai' }),
     ]
 };
 
-// --- NEW AGENT PORTFOLIO TEMPLATES ---
+// --- NEW AGENT PORTFOLIO TEMPLATES (Directly connected to projects) ---
 
-export const luxuryAgentTemplate: SiteTemplate = {
-    id: 'luxury_agent_portfolio',
-    name: 'Luxury Agent Portfolio',
+export const offPlanBrokerageWebsite: SiteTemplate = {
+    id: 'offplan_brokerage_website',
+    name: 'Off-Plan Brokerage Website',
     siteType: 'agent-portfolio',
-    description: 'Premium showcase for high-net-worth clients.',
+    description: 'A comprehensive portal for new developments and investment opportunities.',
     pages: [
-        createPage('home', 'Home', [
-            { type: 'hero', overrides: { headline: "Discreet Luxury Real Estate", subtext: "Exclusive off-market listings for the discerning investor.", backgroundImage: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=2000" } },
-            { type: 'featured-listing', overrides: { headline: "Signature Listing" } },
-            { type: 'split-content', overrides: { headline: "About Your Advisor", subtext: "15 years of experience managing high-value portfolios.", imagePosition: "left" } },
-            { type: 'listing-grid', overrides: { headline: "Curated Collection" } },
-            'testimonial',
-            { type: 'cta-form', overrides: { headline: "Private Consultation" } }
-        ], { city: 'Dubai' })
-    ]
-};
-
-export const offPlanSpecialistTemplate: SiteTemplate = {
-    id: 'offplan_specialist_page',
-    name: 'Off-Plan Specialist',
-    siteType: 'agent-portfolio',
-    description: 'Dedicated funnel for new project launches.',
-    pages: [
-        createPage('home', 'Home', [
-            { type: 'launch-hero', overrides: { headline: "First Access to Dubai's Launches", subtext: "Don't miss the next big opportunity. Get pre-launch pricing." } },
-            'developers-list',
-            { type: 'listing-grid', overrides: { headline: "Launching Soon" } },
-            'payment-plan',
+        createPage('home', 'Off-Plan Deals', [
+            { type: 'hero-lead-form', overrides: { headline: "Dubai's Hottest Off-Plan Investments", subtext: "Exclusive access to pre-launch and new development inventory." } },
+            { type: 'developers-list', overrides: { headline: "Leading Developers" } },
+            { type: 'listing-grid', projectFilter: { city: 'Dubai', status: 'Pipeline', limit: 6 }, overrides: { headline: "Featured New Launches" } },
+            { type: 'city-guide', overrides: { city: "Dubai", headline: "Why Invest in Dubai Off-Plan?" } },
             'roi-calculator',
-            'cta-grid'
+            'newsletter',
+            'chat-widget'
         ], { city: 'Dubai' })
     ]
 };
 
-export const internationalBuyerTemplate: SiteTemplate = {
-    id: 'international_buyer_landing',
-    name: 'International Buyer Guide',
-    siteType: 'agent-portfolio',
-    description: 'Trust-building site for overseas investors.',
+export const damacIslandsLeadGen: SiteTemplate = {
+    id: 'damac_islands_lead_gen',
+    name: 'Damac Islands Lead Gen',
+    siteType: 'ads-launch',
+    description: 'High-converting landing page for Damac's new island projects.',
     pages: [
-        createPage('home', 'Home', [
-            { type: 'hero-lead-form', overrides: { headline: "Invest in Dubai from Anywhere", subtext: "Your trusted partner for safe, remote property acquisition." } },
-            'city-guide',
-            { type: 'stats', overrides: { headline: "Why Invest Now?" } },
-            { type: 'listing-grid', overrides: { headline: "Investment Opportunities" } },
-            'faq',
-            { type: 'chat-widget', overrides: { welcomeMessage: "Hi! I can help with Golden Visa & Remote Buying questions." } }
+        createPage('home', 'Damac Islands', [
+            { type: 'launch-hero', overrides: { headline: "Discover Damac Islands", subtext: "Your private sanctuary awaits. Launching soon.", launchDate: "Dec 2025", backgroundImage: findProject('damac-riverside-azure')?.images?.[0] || defaultBlocks['launch-hero'].data.backgroundImage } },
+            { type: 'video', overrides: { headline: "The Damac Islands Experience", videoThumbnail: findProject('damac-riverside-azure')?.images?.[0] || defaultBlocks.video.data.videoThumbnail } },
+            { type: 'project-detail', projectId: 'damac-riverside-azure', overrides: { headline: "Azure 2 Residences" } },
+            { type: 'floor-plan', overrides: { headline: "Island Home Layouts" } },
+            { type: 'payment-plan', overrides: { headline: "Exclusive Payment Offer" } },
+            { type: 'brochure-form', overrides: { brochureTitle: "Damac Islands Brochure" } },
+            'cta-form',
+            'chat-widget'
         ], { city: 'Dubai' })
     ]
 };
 
-export const whatsappLeadTemplate: SiteTemplate = {
-    id: 'whatsapp_only_lead_page',
-    name: 'WhatsApp Quick Lead',
-    siteType: 'agent-portfolio',
-    description: 'Minimalist page to drive chat conversions.',
+export const listingPortalMarketData: SiteTemplate = {
+    id: 'listing_portal_market_data',
+    name: 'Listing Portal',
+    siteType: 'map-focused',
+    description: 'A comprehensive property search engine with live market data.',
     pages: [
-        createPage('home', 'Chat Now', [
-            { type: 'hero', overrides: { headline: "Find Your Dream Home Today", subtext: "Chat with a specialist instantly for live availability.", ctaText: "WhatsApp Now" } },
-            { type: 'featured-listing', overrides: { headline: "Hot Deal of the Week" } },
-            'chat-widget' // This handles the floating button, but hero CTA also drives action
+        createPage('home', 'Property Search', [
+            'search-filters',
+            { type: 'listing-grid-map', projectFilter: { limit: 10 } },
+            { type: 'roi-calculator', overrides: { headline: "Estimate Your Investment Return" } },
+            { type: 'blog-grid', overrides: { headline: "Market Trends & Analysis" } },
+            'chat-widget'
         ], { city: 'Dubai' })
     ]
 };
 
-
-// --- READY-MADE TEMPLATES (Existing) ---
-export const dubaiLuxuryTemplate: SiteTemplate = {
-    id: 'template-dubai-luxury',
-    name: 'Dubai Luxury Collection',
-    siteType: 'ready-made',
-    description: 'High-end portfolio for Jumeirah & Marina properties.',
+export const palmJebelAliLandingPage: SiteTemplate = {
+    id: 'palm_jebel_ali_landing_page',
+    name: 'Palm Jebel Ali',
+    siteType: 'ads-launch',
+    description: 'High-impact landing page for Nakheel's iconic Palm Jebel Ali project.',
     pages: [
-        createPage('home', 'Luxury Collection', [
-            { type: 'hero', overrides: { headline: "Dubai's Finest Addresses", subtext: "Exclusive waterfront apartments and villas.", backgroundImage: "https://images.unsplash.com/photo-1512453979798-5ea904ac66de?auto=format&fit=crop&q=80&w=2000" } },
-            { type: 'featured-listing', overrides: { headline: "Penthouse of the Month", listingTitle: "Palm Royale Penthouse", price: "AED 45,000,000" } },
-            'listing-grid',
-            { type: 'city-guide', overrides: { city: "Dubai", headline: "Invest in the Future" } },
-            'roi-calculator',
-            'cta-form'
+        createPage('home', 'Palm Jebel Ali', [
+            { type: 'hero', overrides: { headline: "Palm Jebel Ali: A New Global Landmark", subtext: "Experience unparalleled luxury and a redefined waterfront lifestyle.", backgroundImage: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=2000' } },
+            { type: 'split-content', overrides: { headline: "The Vision of a New City", subtext: "Double the size of Palm Jumeirah, offering vast expanses of luxury living.", image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&q=80&w=1000' } },
+            { type: 'gallery', overrides: { headline: "Masterplan & Lifestyle", images: ['https://images.unsplash.com/photo-1582407947304-fd86f028f3a6?auto=format&fit=crop&q=80&w=1000', 'https://images.unsplash.com/photo-1600596542815-275084988866?auto=format&fit=crop&q=80&w=1000'] } },
+            { type: 'offer', overrides: { headline: "Exclusive Pre-Booking Access", subtext: "Secure your plot in this iconic development with priority registration." } },
+            'cta-form',
+            'chat-widget'
         ], { city: 'Dubai' })
     ]
-}
+};
 
-export const emaarLaunchTemplate: SiteTemplate = {
-    id: 'template-emaar-launch',
-    name: 'Emaar Beachfront Launch',
-    siteType: 'ready-made',
-    description: 'Conversion-focused page for Emaar new releases.',
+export const dubaiPropertiesRoadshow: SiteTemplate = {
+    id: 'dubai_properties_roadshow',
+    name: 'Dubai Properties Roadshow',
+    siteType: 'roadshow',
+    description: 'Event registration page for international investor roadshows.',
     pages: [
-        createPage('home', 'Launch Event', [
-            { type: 'launch-hero', overrides: { headline: "Emaar Beachfront", subtext: "Private Beach Living. Launching Soon.", launchDate: "Dec 2025" } },
-            { type: 'banner-cta', overrides: { headline: "50/50 Payment Plan", subtext: "Pay 50% during construction, 50% on handover." } },
-            { type: 'project-detail', overrides: { projectName: "Beach Isle", developer: "Emaar" } },
-            'video',
-            'payment-plan',
-            'brochure-form'
+        createPage('home', 'Global Investor Event', [
+            { type: 'roadshow', overrides: { eventName: "Dubai Properties Global Roadshow", city: "London", date: "Dec 1-3, 2025", venue: "The Dorchester, London", imageUrl: defaultBlocks.roadshow.data.imageUrl } },
+            { type: 'featured-listing', projectId: 'skygate-tower', overrides: { headline: "Exclusive Investment Opportunity" } },
+            { type: 'city-guide', overrides: { headline: "Why Invest in Dubai?", city: "Dubai" } },
+            'partners',
+            'cta-form',
+            'chat-widget'
         ], { city: 'Dubai' })
     ]
-}
-
-export const rakInvestmentTemplate: SiteTemplate = {
-    id: 'template-rak-invest',
-    name: 'RAK Casino Investment',
-    siteType: 'ready-made',
-    description: 'Targeting investors for the upcoming Wynn Resort area.',
-    pages: [
-        createPage('home', 'Investment Opportunity', [
-            { type: 'hero-lead-form', overrides: { headline: "Invest in Al Marjan Island", subtext: "Home of the upcoming Wynn Casino Resort." } },
-            { type: 'stats', overrides: { headline: "The Next Vegas", stats: [{ value: "20M", label: "Annual Tourists" }, { value: "15%", label: "Exp. Yield" }] } },
-            'listing-grid',
-            { type: 'offer', overrides: { headline: "Founder's Special", subtext: "Get 4% DLD Waiver + Free Furnishing" } },
-            'cta-grid'
-        ], { city: 'Ras Al Khaimah' })
-    ]
-}
+};
 
 
 export const availableTemplates: SiteTemplate[] = [
@@ -495,10 +537,12 @@ export const availableTemplates: SiteTemplate[] = [
     internationalBuyerTemplate,
     whatsappLeadTemplate,
 
-    // Ready Made
-    dubaiLuxuryTemplate,
-    emaarLaunchTemplate,
-    rakInvestmentTemplate,
+    // Requested Data-Rich Templates
+    offPlanBrokerageWebsite,
+    damacIslandsLeadGen,
+    listingPortalMarketData,
+    palmJebelAliLandingPage,
+    dubaiPropertiesRoadshow,
 
     // Classic Templates
     roadshowTemplate,

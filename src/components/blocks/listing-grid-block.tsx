@@ -5,29 +5,29 @@ import {
   Card, 
   CardContent, 
   CardFooter, 
-  CardHeader 
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapPin, BedDouble, Bath, Square, ArrowRight, Heart, Search, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { ResponsiveImage } from "@/components/ui/responsive-image"; // Use ResponsiveImage
+import { SAFE_IMAGES, getRandomImage } from "@/lib/images"; // Import safe images
 import type { ProjectData } from "@/lib/types";
 import { motion } from "framer-motion";
 import { searchProjects } from "@/lib/project-service";
-import { verifyAndFetchAssets } from "@/lib/media-scraper"; // Use new verification logic
+import { verifyAndFetchAssets } from "@/lib/media-scraper"; 
 
 interface ListingGridBlockProps {
   headline?: string;
   subtext?: string;
-  initialFilter?: { city?: string, developer?: string }; 
-  projects?: ProjectData[];
+  initialFilter?: { city?: string, developer?: string, status?: string }; // Expanded filter options
+  projects?: ProjectData[]; // Can be pre-populated by template
 }
 
-export function ListingGridBlock({ 
-    headline = "Featured Properties", 
+export function ListingGridBlock({
+    headline = "Featured Properties",
     subtext = "Discover our handpicked selection of premium real estate opportunities.",
-    initialFilter,
+    initialFilter = {},
     projects: initialProjects = []
 }: ListingGridBlockProps) {
   
@@ -36,25 +36,26 @@ export function ListingGridBlock({
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-      if (initialProjects.length === 0) {
-          loadProjects();
+      // Only load projects if not pre-populated by a template
+      if (initialProjects.length === 0 || Object.keys(initialFilter).length > 0) {
+          loadProjects(searchQuery, initialFilter);
+      } else {
+          setProjects(initialProjects);
       }
-  }, []);
+  }, [initialFilter, initialProjects]); // Re-run if initialFilter/Projects change
 
-  const loadProjects = async (query = "") => {
+  const loadProjects = async (query = "", filters = initialFilter) => {
       setLoading(true);
       try {
-          const rawResults = await searchProjects(query, initialFilter);
+          const rawResults = await searchProjects(query, filters);
           
-          // Apply "Asset Purification" on the fly for the top results
           const cleanedResults = await Promise.all(rawResults.slice(0, 6).map(async (p) => {
-              // This simulates the agent checking the image quality in real-time
               const cleanAssets = await verifyAndFetchAssets(p.name, p.images);
               
               return {
                   ...p,
                   images: cleanAssets.heroImages.concat(cleanAssets.galleryImages),
-                  developer: cleanAssets.developerName || p.developer // Normalize developer name
+                  developer: cleanAssets.developerName || p.developer
               };
           }));
 
@@ -72,12 +73,12 @@ export function ListingGridBlock({
   }
 
   return (
-    <section className="py-32 bg-background">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+    <section className="py-24 bg-background">
+      <div className="container mx-auto px-6 max-w-7xl">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
             <div className="max-w-2xl space-y-4">
-                <h2 className="text-4xl md:text-5xl font-bold tracking-tight">{headline}</h2>
-                <p className="text-xl text-muted-foreground font-light">{subtext}</p>
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tighter">{headline}</h2>
+                <p className="text-lg text-muted-foreground font-light max-w-xl">{subtext}</p>
             </div>
             
             <form onSubmit={handleSearch} className="relative w-full md:w-72">
@@ -92,8 +93,9 @@ export function ListingGridBlock({
         </div>
 
         {loading ? (
-            <div className="h-96 flex items-center justify-center">
+            <div className="h-64 flex items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="ml-3 text-lg text-muted-foreground">Loading projects...</span>
             </div>
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -101,17 +103,17 @@ export function ListingGridBlock({
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.08 }}
+                    viewport={{ once: true, amount: 0.5 }}
                     key={project.id}
                 >
-                    <Card className="group overflow-hidden border-0 bg-card/50 hover:bg-card transition-colors duration-500 flex flex-col h-full rounded-3xl shadow-sm hover:shadow-2xl">
-                    <div className="relative aspect-[4/3] overflow-hidden m-2 rounded-2xl">
-                        <Image
-                        src={project.images?.[0] || 'https://picsum.photos/800/600'}
-                        alt={project.name}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    <Card className="group overflow-hidden border border-border/50 bg-card hover:bg-muted/20 transition-colors duration-500 flex flex-col h-full rounded-2xl shadow-sm hover:shadow-xl">
+                    <div className="relative aspect-[4/3] overflow-hidden m-2 rounded-xl">
+                        <ResponsiveImage
+                            src={project.images?.[0] || getRandomImage('hero')}
+                            alt={project.name}
+                            fill
+                            className="transition-transform duration-700 group-hover:scale-110"
                         />
                         <div className="absolute top-4 left-4">
                             <Badge variant="secondary" className="bg-white/90 backdrop-blur text-black border-0 shadow-sm font-medium px-3 py-1">
