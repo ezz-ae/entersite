@@ -1,3 +1,4 @@
+
 import type { SitePage, Block, ProjectData } from './types';
 import { allProjects, dubaiProjects, abuDhabiProjects, rasAlKhaimahProjects, sharjahProjects } from './projects';
 
@@ -384,7 +385,7 @@ export const partnerLaunchTemplate: SiteTemplate = {
 };
 
 export const fullCompanyTemplate: SiteTemplate = {
-    id: 'template-full-company',
+    id: 'full-company',
     name: 'Full Real Estate Company',
     siteType: 'full-company',
     pages: [
@@ -442,6 +443,99 @@ export const adsQuickLaunchTemplate: SiteTemplate = {
 
 // --- NEW AGENT PORTFOLIO TEMPLATES (Directly connected to projects) ---
 
+export const luxuryAgentTemplate: SiteTemplate = {
+  id: "luxury_agent_portfolio",
+  name: "Luxury Agent Portfolio",
+  siteType: "agent-portfolio",
+  description: "A premium, black-and-gold showcase site for agents targeting high-net-worth buyers.",
+  pages: [
+    createPage("home", "Luxury Portfolio", [
+      {
+        type: "hero",
+        overrides: {
+          headline: "Representing Dubai's Finest Estates",
+          subtext: "Discreet. Dedicated. Unparalleled Results.",
+          backgroundImage: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=2000",
+        },
+      },
+      { type: "listing-grid", projectFilter: { city: "Dubai", limit: 3 }, overrides: { headline: "Signature Listings" } },
+      { type: "testimonial", overrides: { headline: "Client Accolades" } },
+      "team",
+      "cta-form"
+    ])
+  ]
+};
+
+export const offPlanSpecialistTemplate: SiteTemplate = {
+  id: "offplan_specialist_page",
+  name: "Off-Plan Specialist Page",
+  siteType: "agent-portfolio",
+  description: "A dedicated funnel for agents selling new-launch off-plan projects.",
+  pages: [
+    createPage("home", "Off-Plan Specialist", [
+      {
+        type: "launch-hero",
+        overrides: {
+          headline: "Exclusive Access to Dubai's Future Landmarks",
+          subtext: "Get priority allocation and developer offers before the public.",
+        },
+      },
+      { type: "listing-grid", projectFilter: { city: "Dubai", developer: "Emaar", limit: 3 }, overrides: { headline: "Latest Emaar Launches" } },
+      "payment-plan",
+      "offer",
+      "brochure-form"
+    ])
+  ]
+};
+
+export const internationalBuyerTemplate: SiteTemplate = {
+  id: "international_buyer_landing",
+  name: "International Buyer Landing Page",
+  siteType: "agent-portfolio",
+  description: "A trust-building page for overseas investors with FAQ, guides, and WhatsApp CTA.",
+  pages: [
+    createPage("home", "Invest in Dubai", [
+      {
+        type: "hero",
+        overrides: {
+          headline: "Invest in Dubai Real Estate From Anywhere",
+          subtext: "Secure, high-yield property investments with expert guidance and seamless processing.",
+        },
+      },
+      "city-guide",
+      "stats",
+      "faq",
+      {
+        type: "cta-form", overrides: {
+          headline: "Request a Free Consultation",
+          subtext: "Our investment advisors are ready to help you in your preferred time zone."
+        }
+      },
+      "chat-widget",
+    ])
+  ]
+};
+
+export const whatsappLeadTemplate: SiteTemplate = {
+  id: "whatsapp_only_lead_page",
+  name: "WhatsApp-Only Lead Page",
+  siteType: "agent-portfolio",
+  description: "Ultra-lightweight page designed purely to convert into WhatsApp chats.",
+  pages: [
+    createPage("home", "Quick Inquiry", [
+      {
+        type: 'split-content', overrides: {
+          headline: "Questions? Get Instant Answers on WhatsApp",
+          subtext: "Click the button to start a chat with a property expert. No forms, no waiting.",
+          ctaText: "Chat on WhatsApp",
+        }
+      },
+      { type: 'featured-listing', projectId: 'elysian-residence' },
+    ])
+  ]
+};
+
+
 export const offPlanBrokerageWebsite: SiteTemplate = {
     id: 'offplan_brokerage_website',
     name: 'Off-Plan Brokerage Website',
@@ -451,7 +545,7 @@ export const offPlanBrokerageWebsite: SiteTemplate = {
         createPage('home', 'Off-Plan Deals', [
             { type: 'hero-lead-form', overrides: { headline: "Dubai's Hottest Off-Plan Investments", subtext: "Exclusive access to pre-launch and new development inventory." } },
             { type: 'developers-list', overrides: { headline: "Leading Developers" } },
-            { type: 'listing-grid', projectFilter: { city: 'Dubai', status: 'Pipeline', limit: 6 }, overrides: { headline: "Featured New Launches" } },
+            { type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 6 }, overrides: { headline: "Featured New Launches" } },
             { type: 'city-guide', overrides: { city: "Dubai", headline: "Why Invest in Dubai Off-Plan?" } },
             'roi-calculator',
             'newsletter',
@@ -464,7 +558,7 @@ export const damacIslandsLeadGen: SiteTemplate = {
     id: 'damac_islands_lead_gen',
     name: 'Damac Islands Lead Gen',
     siteType: 'ads-launch',
-    description: 'High-converting landing page for Damac's new island projects.',
+    description: "High-converting landing page for Damac's new island projects.",
     pages: [
         createPage('home', 'Damac Islands', [
             { type: 'launch-hero', overrides: { headline: "Discover Damac Islands", subtext: "Your private sanctuary awaits. Launching soon.", launchDate: "Dec 2025", backgroundImage: findProject('damac-riverside-azure')?.images?.[0] || defaultBlocks['launch-hero'].data.backgroundImage } },
@@ -499,7 +593,7 @@ export const palmJebelAliLandingPage: SiteTemplate = {
     id: 'palm_jebel_ali_landing_page',
     name: 'Palm Jebel Ali',
     siteType: 'ads-launch',
-    description: 'High-impact landing page for Nakheel's iconic Palm Jebel Ali project.',
+    description: 'High-impact landing page for Nakheel\'s iconic Palm Jebel Ali project.',
     pages: [
         createPage('home', 'Palm Jebel Ali', [
             { type: 'hero', overrides: { headline: "Palm Jebel Ali: A New Global Landmark", subtext: "Experience unparalleled luxury and a redefined waterfront lifestyle.", backgroundImage: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=2000' } },
