@@ -8,20 +8,19 @@ import { debounce } from 'lodash';
 
 // Helper to transform raw GraphQL data into our ProjectData format
 const transformProjectData = (rawProject: any): ProjectData => {
-  
   const priceFrom = rawProject.stats?.priceRange?.min?.value || 0;
   const priceLabel = priceFrom 
     ? `${rawProject.stats.priceRange.min.currency} ${priceFrom.toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short' })}`
     : 'POA';
 
-  // Determine availability from tags
   let availability: ProjectData['availability'] = 'Available';
-  if (rawProject.tags?.some((t: any) => t.code === 'sold_out')) {
+  const tags = rawProject.tags?.map((t: any) => t.code) || [];
+  if (tags.includes('sold_out')) {
     availability = 'Sold Out';
-  } else if (rawProject.tags?.some((t: any) => t.code === 'coming_soon' || t.code === 'prelaunch' || t.code.includes('announced'))) {
+  } else if (tags.includes('coming_soon') || tags.includes('prelaunch') || tags.includes('s: announced')) {
     availability = 'Coming Soon';
   }
-  
+
   const bedrooms = rawProject.stats?.bedrooms?.map((b: any) => b.count) || [];
   const minBed = bedrooms.length > 0 ? Math.min(...bedrooms) : 0;
   const maxBed = bedrooms.length > 0 ? Math.max(...bedrooms) : 0;
@@ -35,7 +34,6 @@ const transformProjectData = (rawProject: any): ProjectData => {
       areaLabel = `${Math.round(areaMin)}+ sqft`;
   }
 
-
   return {
     id: rawProject.urlPathSegment || rawProject.name.toLowerCase().replace(/\s+/g, '-'),
     name: rawProject.name,
@@ -48,7 +46,7 @@ const transformProjectData = (rawProject: any): ProjectData => {
     handover: rawProject.handover,
     description: {
       short: `A premier development named ${rawProject.name}.`,
-      full: `Discover ${rawProject.name}, a leading project offering unique living experiences in ${rawProject.agglomeration?.name}. With its modern design and strategic location, it represents a prime investment opportunity.`
+      full: `Discover ${rawProject.name}, a leading project offering unique living experiences. With its modern design and strategic location, it represents a prime investment opportunity.`
     },
     features: rawProject.tags?.map((t: any) => t.name) || [],
     price: {
@@ -57,48 +55,46 @@ const transformProjectData = (rawProject: any): ProjectData => {
     },
     availability,
     images: rawProject.marketing?.mainImageUrl ? [rawProject.marketing.mainImageUrl] : ['https://picsum.photos/seed/1/800/600'],
-    bedrooms: { min: minBed, max: maxBed, label: `${minBed}-${maxBed}` },
+    bedrooms: { min: minBed, max: maxBed, label: bedrooms.length > 1 ? `${minBed}-${maxBed}` : `${minBed}` },
     areaSqft: {
       min: areaMin || 0,
       max: areaMax || 0,
       label: areaLabel
     },
-    tags: rawProject.tags?.map((t:any) => t.code),
+    tags: tags,
     publicUrl: rawProject.publicUrl,
     unitsStockUpdatedAt: rawProject.unitsStockUpdatedAt,
   };
 };
 
-
 export function useRealisteProjects(initialFilter: ProjectFilter = {}) {
   const [projects, setProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [currentFilter, setCurrentFilter] = useState(initialFilter);
 
   const fetchAndTransform = useCallback(async (filter: ProjectFilter) => {
     setLoading(true);
     setError(null);
     try {
       const graphqlFilter: any = {};
-      if (filter.developer) graphqlFilter.developerName = filter.developer;
-      if (filter.city) {
-          // Find the country code from the city name if needed, assuming one country for now
-          const agglomerationCode = filter.city.toLowerCase().replace(/\s+/g, '-');
-          graphqlFilter.agglomerationCodes = [`uae-${agglomerationCode}`];
-      }
-       if (filter.availability) {
-        if(filter.availability === "Available") {
-          graphqlFilter.tags = ["on_sale"];
-        } else if (filter.availability === "Sold Out") {
-          graphqlFilter.tags = ["sold_out"];
-        } else if (filter.availability === "Coming Soon") {
-            graphqlFilter.tags = ["coming_soon", "prelaunch"];
-        }
+      if (filter.developer) graphqlFilter.developerName = { like: filter.developer };
+      if (filter.availability) {
+        if (filter.availability === "Available") graphqlFilter.tags = ["on_sale"];
+        else if (filter.availability === "Sold Out") graphqlFilter.tags = ["sold_out"];
+        else if (filter.availability === "Coming Soon") graphqlFilter.tags = ["coming_soon", "prelaunch"];
       }
       
-      const rawData = await fetchRealisteProjects(graphqlFilter);
+      const rawData = await fetchRealisteProjects(filter.city || 'dubai', graphqlFilter);
       const transformedData = rawData.map(transformProjectData);
-      setProjects(transformedData);
+      
+      let filteredProjects = transformedData;
+      if (filter.query) {
+          const q = filter.query.toLowerCase();
+          filteredProjects = filteredProjects.filter(p => p.name.toLowerCase().includes(q));
+      }
+
+      setProjects(filteredProjects);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("An unknown error occurred."));
     } finally {
@@ -106,21 +102,19 @@ export function useRealisteProjects(initialFilter: ProjectFilter = {}) {
     }
   }, []);
 
-  // Initial fetch
   useEffect(() => {
-    fetchAndTransform(initialFilter);
-  }, []);
-
-  const debouncedFetch = useCallback(
-    debounce((newFilter: ProjectFilter) => {
-        fetchAndTransform(newFilter);
-    }, 500),
-    [fetchAndTransform]
-  );
+    fetchAndTransform(currentFilter);
+  }, [fetchAndTransform]);
   
   const search = (newFilter: ProjectFilter) => {
+    setCurrentFilter(newFilter);
     debouncedFetch(newFilter);
   }
 
-  return { projects, loading, error, search };
+  const debouncedFetch = useCallback(
+    debounce((filter) => fetchAndTransform(filter), 300),
+    [fetchAndTransform]
+  );
+
+  return { projects, loading, error, search, currentFilter, setCurrentFilter };
 }

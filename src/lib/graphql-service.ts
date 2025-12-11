@@ -2,73 +2,70 @@
 const API_URL = "https://data2.realiste.io/graphql";
 
 // This query is now corrected to align with the provided schema.
-// It fetches agglomerations and then the buildingInfos (projects) within them.
+// It fetches buildingInfos (projects) for a specific agglomeration (city).
 export const GET_PROJECTS_QUERY = `
-  query GetProjects($filter: BuildingInfo__FilterInput__Common) {
-    agglomerationsP(filter: { buildingInfoFilter: $filter }) {
-      nodes {
-        buildingInfos(first: 50) {
-          nodes {
-            id
-            name
-            urlPathSegment
-            publicUrl
-            developer {
-              name
-            }
-            agglomeration {
-              name
-              country {
-                code
-              }
-            }
-            agglomerationArea {
-              name
-            }
-            handover {
-              quarter
-              year
-            }
-            tags {
-              code
-              name
-            }
-            stats {
-              priceRange {
-                min {
-                  value
-                  currency
-                }
-              }
-              areaRange {
-                min { value unit }
-                max { value unit }
-              }
-              bedrooms {
-                count
-              }
-            }
-            marketing {
-              mainImageUrl
-            }
-            unitsStockUpdatedAt
+  query GetProjectsInAgglomeration($agglomerationUrlPath: String!, $filter: BuildingInfo__FilterInput__Common) {
+    agglomeration(urlPathSegment: $agglomerationUrlPath) {
+      buildingInfos(first: 100, filter: $filter) {
+        nodes {
+          id
+          name
+          urlPathSegment
+          publicUrl
+          handover {
+            quarter
+            year
           }
+          tags {
+            code
+            name
+          }
+          developer {
+            name
+          }
+          agglomeration {
+            name
+          }
+          agglomerationArea {
+            name
+          }
+          stats {
+            priceRange {
+              min { value currency }
+            }
+            areaRange {
+              min { value unit }
+              max { value unit }
+            }
+            bedrooms {
+              count
+            }
+          }
+          marketing {
+            mainImageUrl
+          }
+          unitsStockUpdatedAt
         }
       }
     }
   }
 `;
 
-export async function fetchRealisteProjects(filter: any) {
+export async function fetchRealisteProjects(city: string, filter: any) {
     try {
+        const agglomerationUrlPath = `uae-${city.toLowerCase()}`;
+
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 query: GET_PROJECTS_QUERY,
-                variables: { filter },
+                variables: { 
+                    agglomerationUrlPath,
+                    filter 
+                },
             }),
-            cache: 'no-store' // Disable caching to ensure fresh data
+            cache: 'no-store'
         });
 
         if (!response.ok) {
@@ -84,12 +81,7 @@ export async function fetchRealisteProjects(filter: any) {
             throw new Error("Error fetching data from Realiste API.");
         }
         
-        // The data is nested within agglomerations, so we need to flatten it.
-        const projects = json.data.agglomerationsP.nodes.flatMap(
-            (agg: any) => agg.buildingInfos.nodes
-        );
-
-        return projects;
+        return json.data.agglomeration?.buildingInfos?.nodes || [];
 
     } catch (error) {
         console.error("Failed to fetch Realiste projects:", error);

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -14,8 +15,7 @@ import { useRealisteProjects } from '@/hooks/useRealisteProjects';
 import { ProjectCard } from '@/components/project-card';
 
 export function ProjectDiscoverySection() {
-  const [filters, setFilters] = useState<ProjectFilter>({});
-  const { projects, loading, error, search } = useRealisteProjects(filters);
+  const { projects, loading, error, search, currentFilter, setCurrentFilter } = useRealisteProjects();
   
   const [developers, setDevelopers] = useState<string[]>([]);
   const [locations, setLocations] = useState<{city: string, areas: string[]}[]>([]);
@@ -37,17 +37,15 @@ export function ProjectDiscoverySection() {
   }, [loadFilterOptions]);
 
   const handleFilterChange = (key: keyof ProjectFilter, value: any) => {
-    const newFilters = {
-      ...filters,
+    setCurrentFilter(prev => ({
+      ...prev,
       [key]: value === "all" ? undefined : value,
-    };
-    setFilters(newFilters);
-    search(newFilters);
+    }));
   };
   
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    search(filters);
+    search(currentFilter);
   }
 
   if (error) {
@@ -99,15 +97,21 @@ export function ProjectDiscoverySection() {
               </p>
           </div>
 
-          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 max-w-6xl mx-auto mb-8">
-            <Select onValueChange={(val) => handleFilterChange('city', val)}>
+          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 max-w-6xl mx-auto mb-8">
+             <Input 
+                placeholder="Search by name..."
+                className="h-12 rounded-xl bg-muted/30 border-muted-foreground/20 focus:ring-primary col-span-1 md:col-span-2 lg:col-span-1"
+                value={currentFilter.query || ''}
+                onChange={(e) => handleFilterChange('query', e.target.value)}
+              />
+            <Select onValueChange={(val) => handleFilterChange('city', val)} defaultValue={currentFilter.city}>
               <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-muted-foreground/20 focus:ring-primary">
                 <SelectValue placeholder="City" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Cities</SelectItem>
                 {locations.map(loc => (
-                    <SelectItem key={loc.city} value={loc.city}>{loc.city}</SelectItem>
+                    <SelectItem key={loc.city} value={loc.city.toLowerCase()}>{loc.city}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -135,7 +139,7 @@ export function ProjectDiscoverySection() {
                   <SelectItem value="Coming Soon">Coming Soon</SelectItem>
               </SelectContent>
             </Select>
-            <Button type="submit" size="lg" className="h-12 px-8 rounded-xl shadow-lg w-full lg:w-auto">
+            <Button type="submit" size="lg" className="h-12 px-8 rounded-xl shadow-lg w-full">
               <Search className="h-5 w-5 mr-2" />
               Search
             </Button>
@@ -148,8 +152,8 @@ export function ProjectDiscoverySection() {
             </div>
           ) : projects.length > 0 ? (
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                 {projects.slice(0, 6).map((project) => (
-                     <ProjectCard key={project.id} project={project} />
+                 {projects.slice(0, 6).map((project, index) => (
+                     <ProjectCard key={project.id || index} project={project} index={index} />
                  ))}
              </div>
           ) : (
