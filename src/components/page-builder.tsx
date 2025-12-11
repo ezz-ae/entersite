@@ -125,7 +125,7 @@ const renderBlock = (block: BlockType) => {
   return <Component {...block.data} />;
 };
 
-const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: { onSelectBlock: (blockType: string, content?: any) => void, currentBlocks: string[], variant?: 'default' | 'mini' }) => {
+const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: { onSelectBlock: (blockType: string, data?: any) => void, currentBlocks: string[], variant?: 'default' | 'mini' }) => {
   const [suggestions, setSuggestions] = useState<SuggestNextBlocksOutput>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -154,8 +154,8 @@ const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: 
     }
   };
 
-  const handleSelect = (type: string, content?: any) => {
-      onSelectBlock(type, content);
+  const handleSelect = (type: string, data?: any) => {
+      onSelectBlock(type, data);
       setOpen(false);
   }
 
@@ -216,7 +216,7 @@ const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: 
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.1 }}
                                 key={suggestion.blockId}
-                                onClick={() => handleSelect(suggestion.blockId, suggestion.defaultContent)}
+                                onClick={() => handleSelect(suggestion.blockId, { ...suggestion.defaultContent, ...suggestion.recommendedStyleOverrides })}
                                 className="w-full text-left p-3 rounded-lg bg-white dark:bg-black/20 hover:shadow-md hover:scale-[1.02] transition-all text-sm flex items-center justify-between group border border-transparent hover:border-indigo-100"
                             >
                                 <div>
@@ -285,12 +285,12 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
     })
   );
 
-  const addBlock = (blockType: string, content?: any, index?: number) => {
+  const addBlock = (blockType: string, data?: any, index?: number) => {
     const newBlock: BlockType = {
       blockId: `${blockType}-${Date.now()}`,
       type: blockType,
       order: 0,
-      data: content || {
+      data: data || {
         headline: "New Headline",
         subtext: "New subtext",
       },
@@ -399,7 +399,7 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
                </p>
                <div className="scale-110">
                    <AddBlockPopover 
-                      onSelectBlock={(type, content) => addBlock(type, content, 0)}
+                      onSelectBlock={(type, data) => addBlock(type, data, 0)}
                       currentBlocks={[]}
                     />
                </div>
@@ -409,7 +409,7 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
           {sortedBlocks.length > 0 && (
             <div className="flex justify-center py-4">
               <AddBlockPopover 
-                onSelectBlock={(type, content) => addBlock(type, content, 0)}
+                onSelectBlock={(type, data) => addBlock(type, data, 0)}
                 currentBlocks={sortedBlocks.map(b => b.type)}
               />
             </div>
@@ -452,7 +452,7 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
                 <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 z-30 opacity-0 group-hover/add-block-area:opacity-100 transition-all duration-200 group-hover/add-block-area:pointer-events-auto hover:scale-110">
                    <AddBlockPopover 
                       variant="mini"
-                      onSelectBlock={(type, content) => addBlock(type, content, index + 1)}
+                      onSelectBlock={(type, data) => addBlock(type, data, index + 1)}
                       currentBlocks={sortedBlocks.map(b => b.type)}
                    />
                 </div>

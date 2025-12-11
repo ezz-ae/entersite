@@ -24,7 +24,7 @@ const SuggestNextBlocksOutputSchema = z.array(
     blockId: z.string().describe('The ID of the suggested block.'),
     order: z.number().describe('The order in which the block should be placed on the page.'),
     defaultContent: z.string().describe('A JSON string representing the default content for the block, with placeholders for dynamic data.'),
-    recommendedStyleOverrides: z.string().optional().describe('A JSON string representing recommended style overrides for the block, if needed.'),
+    recommendedStyleOverrides: z.string().describe('A JSON string representing recommended style overrides (e.g., {"backgroundColor": "#000", "textColor": "#FFF"}).'),
     adsReady: z.boolean().describe('Whether the block is ready for ads.'),
     seoReady: z.boolean().describe('Whether the block is ready for SEO.'),
   })
@@ -38,7 +38,7 @@ export async function suggestNextBlocks(input: SuggestNextBlocksInput): Promise<
   return result.map(item => ({
       ...item,
       defaultContent: JSON.parse(item.defaultContent || '{}'),
-      recommendedStyleOverrides: item.recommendedStyleOverrides ? JSON.parse(item.recommendedStyleOverrides) : undefined,
+      recommendedStyleOverrides: JSON.parse(item.recommendedStyleOverrides || '{}'),
   }));
 }
 
@@ -46,7 +46,7 @@ const prompt = ai.definePrompt({
   name: 'suggestNextBlocksPrompt',
   input: {schema: SuggestNextBlocksInputSchema},
   output: {schema: SuggestNextBlocksOutputSchema},
-  prompt: `User has created a landing page with the following blocks: {{{currentBlocks}}}.\nSite type: "{{{siteType}}}", brand: "{{{brand}}}", primary color: "{{{primaryColor}}}".\nSuggest 5 next blocks to maintain high conversion. For each suggestion provide:\n- blockId\n- order\n- defaultContent as a JSON string with placeholders: %PROJECT_NAME%, %CITY%, %PRICE%, %DEVELOPER%\n- recommendedStyleOverrides as a JSON string if needed\n- adsReady boolean\n- seoReady boolean\nOutput strictly as a valid JSON array. Ensure all content fields are proper JSON strings.`,
+  prompt: `User has created a landing page with the following blocks: {{{currentBlocks}}}.\nSite type: "{{{siteType}}}", brand: "{{{brand}}}", primary color: "{{{primaryColor}}}".\nSuggest 5 next blocks to maintain high conversion. For each suggestion provide:\n- blockId\n- order\n- defaultContent as a JSON string with placeholders: %PROJECT_NAME%, %CITY%, %PRICE%, %DEVELOPER%\n- recommendedStyleOverrides as a JSON string. For example, for a hero block, you could suggest: '{"backgroundImage": "https://images.unsplash.com/photo-1512453979798-5ea904ac66de"}'\n- adsReady boolean\n- seoReady boolean\nOutput strictly as a valid JSON array. Ensure all content fields are proper JSON strings.`,
 });
 
 const suggestNextBlocksFlow = ai.defineFlow(

@@ -12,14 +12,22 @@ import { motion } from "framer-motion";
 interface CtaFormBlockProps {
   headline?: string;
   subtext?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
 }
 
 export function CtaFormBlock({ 
     headline = "Schedule a Private Viewing", 
-    subtext = "Our experts are ready to assist you in finding your dream property." 
+    subtext = "Our experts are ready to assist you in finding your dream property.",
+    backgroundColor = "bg-zinc-50 dark:bg-zinc-950",
+    textColor = "text-foreground",
+    buttonColor = "bg-primary",
+    buttonTextColor = "text-primary-foreground",
 }: CtaFormBlockProps) {
   return (
-    <section className="relative py-32 overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+    <section className={cn("relative py-32 overflow-hidden", backgroundColor, textColor)}>
       {/* Decorative Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl opacity-50" />
@@ -105,7 +113,7 @@ export function CtaFormBlock({
                         <Label htmlFor="message" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Message</Label>
                         <Textarea id="message" placeholder="I'm interested in..." className="min-h-[140px] bg-muted/30 border-muted-foreground/10 focus:bg-background transition-colors rounded-xl resize-none p-4" />
                     </div>
-                    <Button type="button" size="lg" className="w-full h-14 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]">
+                    <Button type="button" size="lg" className={cn("w-full h-14 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]", buttonColor, buttonTextColor)}>
                         Send Message
                         <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
