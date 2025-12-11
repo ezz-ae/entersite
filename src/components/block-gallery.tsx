@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Image from "next/image";
 
 const availableBlocks = [
+  // --- Hero & Layout ---
   {
     type: 'hero',
     name: 'Hero Section',
@@ -22,15 +22,12 @@ const availableBlocks = [
     description: 'Minimalist teaser hero for unreleased projects.',
   },
   {
-    type: 'hero-lead-form',
-    name: 'Hero + Lead Form',
-    description: 'Hero section with an embedded lead capture form.',
+    type: 'split-content',
+    name: 'Split Content',
+    description: 'Image and text side-by-side layout.',
   },
-  {
-    type: 'search-filters',
-    name: 'Advanced Search',
-    description: 'Search bar with advanced filters for properties.',
-  },
+
+  // --- Listings & Projects ---
   {
     type: 'listing-grid',
     name: 'Listing Grid',
@@ -52,6 +49,11 @@ const availableBlocks = [
     description: 'A comprehensive detail view for a single project.',
   },
   {
+    type: 'trending-projects',
+    name: 'Trending Projects',
+    description: 'Carousel of popular properties.',
+  },
+  {
     type: 'floor-plan',
     name: 'Floor Plans',
     description: 'Display floor plans with tabbed navigation.',
@@ -61,25 +63,44 @@ const availableBlocks = [
     name: 'Project Features',
     description: 'Highlight key amenities and features.',
   },
+  
+  // --- Data & Maps ---
   {
-    type: 'offer',
-    name: 'Special Offer',
-    description: 'Promote a limited-time deal or payment plan.',
+    type: 'dubai-map',
+    name: 'Dubai Map Areas',
+    description: 'Interactive map highlighting key investment zones.',
   },
   {
-    type: 'banner-cta',
-    name: 'Banner CTA',
-    description: 'Full-width banner for urgent calls to action.',
+    type: 'area-analysis',
+    name: 'Area Analysis',
+    description: 'Market data (ROI, Yield) for a specific location.',
   },
   {
-    type: 'cta-grid',
-    name: 'Action Grid',
-    description: 'Grid of actions like Book Viewing, Download Brochure.',
+    type: 'city-guide',
+    name: 'City Guide',
+    description: 'Information about a city like Dubai or Sharjah.',
+  },
+  
+  // --- Forms & Leads ---
+  {
+    type: 'hero-lead-form',
+    name: 'Hero + Lead Form',
+    description: 'Hero section with an embedded lead capture form.',
   },
   {
     type: 'cta-form',
     name: 'Contact Form',
-    description: 'A form for users to get in touch.',
+    description: 'Standard inquiry form.',
+  },
+  {
+    type: 'lead-interest-form',
+    name: 'Lead Interest Form',
+    description: 'Multi-step qualification with OTP verification.',
+  },
+  {
+    type: 'booking-viewing',
+    name: 'Book Viewing',
+    description: 'Calendar scheduler for property tours.',
   },
   {
     type: 'brochure-form',
@@ -87,59 +108,41 @@ const availableBlocks = [
     description: 'Lead capture form to download a brochure.',
   },
   {
+    type: 'offer',
+    name: 'Special Offer',
+    description: 'Promote a limited-time deal or payment plan.',
+  },
+  {
     type: 'newsletter',
     name: 'Newsletter Signup',
     description: 'Simple form to subscribe to email updates.',
   },
   {
-    type: 'launch',
-    name: 'Launch Event',
-    description: 'Teaser section for a new project launch.',
+    type: 'cta-grid',
+    name: 'Action Grid',
+    description: 'Grid of actions like Book Viewing, Download Brochure.',
   },
   {
-    type: 'roadshow',
-    name: 'Roadshow Event',
-    description: 'Promote an upcoming real estate event or exhibition.',
+    type: 'banner-cta',
+    name: 'Banner CTA',
+    description: 'Full-width banner for urgent calls to action.',
+  },
+
+  // --- Social & Trust ---
+  {
+    type: 'instagram-feed',
+    name: 'Instagram Feed',
+    description: 'Grid of latest social media posts.',
   },
   {
-    type: 'team',
-    name: 'Team / Agents',
-    description: 'Showcase your team members or top agents.',
-  },
-  {
-    type: 'map',
-    name: 'Map',
-    description: 'An interactive map to show project locations.',
-  },
-  {
-    type: 'gallery',
-    name: 'Image Gallery',
-    description: 'A gallery to showcase project images.',
-  },
-  {
-    type: 'video',
-    name: 'Video Tour',
-    description: 'Embed a video tour or promotional video.',
-  },
-  {
-    type: 'split-content',
-    name: 'Split Content',
-    description: 'Image and text side-by-side layout.',
-  },
-  {
-    type: 'city-guide',
-    name: 'City Guide',
-    description: 'Information about a city like Dubai or Sharjah.',
+    type: 'google-reviews',
+    name: 'Google Reviews',
+    description: 'Carousel of 5-star customer reviews.',
   },
   {
     type: 'testimonial',
     name: 'Testimonials',
     description: 'Showcase client reviews and feedback.',
-  },
-  {
-    type: 'stats',
-    name: 'Statistics',
-    description: 'Showcase key numbers and achievements.',
   },
   {
     type: 'partners',
@@ -152,19 +155,26 @@ const availableBlocks = [
     description: 'Grid of developer profiles and logos.',
   },
   {
-    type: 'faq',
-    name: 'FAQ',
-    description: 'An accordion-style FAQ section.',
+    type: 'stats',
+    name: 'Statistics',
+    description: 'Showcase key numbers and achievements.',
+  },
+  
+  // --- Media & Tools ---
+  {
+    type: 'gallery',
+    name: 'Image Gallery',
+    description: 'A gallery to showcase project images.',
+  },
+  {
+    type: 'video',
+    name: 'Video Tour',
+    description: 'Embed a video tour or promotional video.',
   },
   {
     type: 'chat-widget',
     name: 'Chat Widget',
     description: 'Floating chat button for WhatsApp or AI Assistant.',
-  },
-  {
-    type: 'blog-grid',
-    name: 'Blog / Insights',
-    description: 'Grid of latest news or blog posts.',
   },
   {
     type: 'mortgage-calculator',
@@ -181,10 +191,42 @@ const availableBlocks = [
     name: 'Payment Plan',
     description: 'Visual breakdown of the payment milestones.',
   },
+  
+  // --- Other ---
+  {
+    type: 'launch',
+    name: 'Launch Event',
+    description: 'Teaser section for a new project launch.',
+  },
+  {
+    type: 'roadshow',
+    name: 'Roadshow Event',
+    description: 'Promote an upcoming real estate event or exhibition.',
+  },
+  {
+    type: 'team',
+    name: 'Team / Agents',
+    description: 'Showcase your team members or top agents.',
+  },
+  {
+    type: 'blog-grid',
+    name: 'Blog / Insights',
+    description: 'Grid of latest news or blog posts.',
+  },
+  {
+    type: 'faq',
+    name: 'FAQ',
+    description: 'An accordion-style FAQ section.',
+  },
   {
     type: 'contact-details',
     name: 'Contact Details',
     description: 'Detailed contact info section with map.',
+  },
+  {
+    type: 'search-filters',
+    name: 'Advanced Search',
+    description: 'Search bar with advanced filters for properties.',
   },
 ];
 
