@@ -1,90 +1,57 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Loader2, Rocket, ArrowRight } from "lucide-react";
 import { ListingGridBlock } from '@/components/blocks/listing-grid-block';
-import { searchProjects, getDevelopers, getLocations } from '@/lib/project-service';
-import type { ProjectData } from '@/lib/types';
+import type { ProjectFilter } from '@/lib/types';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import { debounce } from 'lodash';
+import { getDevelopers, getLocations } from '@/lib/project-service';
+import { useRealisteProjects } from '@/hooks/useRealisteProjects';
 
 export function ProjectDiscoverySection() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState<any>({});
-  const [projects, setProjects] = useState<ProjectData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<ProjectFilter>({});
+  const { projects, loading, error, search } = useRealisteProjects({});
+  
   const [developers, setDevelopers] = useState<string[]>([]);
   const [locations, setLocations] = useState<{city: string, areas: string[]}[]>([]);
   const { toast } = useToast();
 
-  const loadInitialData = useCallback(async () => {
-    setLoading(true);
+  const loadFilterOptions = useCallback(async () => {
     try {
-      const [devs, locs, initialProjects] = await Promise.all([
-        getDevelopers(),
-        getLocations(),
-        searchProjects("", {})
-      ]);
+      const [devs, locs] = await Promise.all([getDevelopers(), getLocations()]);
       setDevelopers(devs);
       setLocations(locs);
-      setProjects(initialProjects.slice(0, 9));
-    } catch (error) {
-      console.error("Failed to load initial data:", error);
-      toast({
-        title: "Error Loading Data",
-        description: "Could not fetch project information. Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error("Failed to load filter options", err);
+      toast({ title: "Error", description: "Could not load filter options.", variant: "destructive" });
     }
   }, [toast]);
 
   useEffect(() => {
-    loadInitialData();
-  }, [loadInitialData]);
+    loadFilterOptions();
+  }, [loadFilterOptions]);
 
-  const debouncedSearch = useCallback(
-    debounce(async (query, currentFilters) => {
-        setLoading(true);
-        try {
-            const results = await searchProjects(query, currentFilters);
-            setProjects(results.slice(0, 9)); 
-        } catch (error) {
-            console.error("Error searching projects:", error);
-        } finally {
-            setLoading(false);
-        }
-    }, 500),
-    []
-  );
-
-  const handleFilterChange = (key: string, value: any) => {
+  const handleFilterChange = (key: keyof ProjectFilter, value: any) => {
     const newFilters = {
       ...filters,
       [key]: value === "all" ? undefined : value,
     };
     setFilters(newFilters);
-    debouncedSearch(searchQuery, newFilters);
+    search(newFilters);
   };
-  
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const query = e.target.value;
-      setSearchQuery(query);
-      debouncedSearch(query, filters);
-  }
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      debouncedSearch.cancel(); // Cancel any pending debounced calls
-      handleSearch();
-  };
+  if (error) {
+    return (
+      <div className="text-center py-16 text-red-500">
+        Error loading projects: {error.message}
+      </div>
+    );
+  }
 
   return (
     <section className="bg-background text-foreground py-24">
@@ -127,17 +94,7 @@ export function ProjectDiscoverySection() {
               </p>
           </div>
 
-          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-6xl mx-auto mb-8">
-            <div className="md:col-span-2 lg:col-span-2 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder="Search by project, developer, city..."
-                className="h-12 pl-10 rounded-xl bg-muted/30 border-muted-foreground/20 focus-visible:ring-primary"
-                value={searchQuery}
-                onChange={handleSearchInputChange}
-              />
-            </div>
-            
+          <form onSubmit={(e) => e.preventDefault()} className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 max-w-6xl mx-auto mb-8">
             <Select onValueChange={(val) => handleFilterChange('city', val)}>
               <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-muted-foreground/20 focus:ring-primary">
                 <SelectValue placeholder="City" />
@@ -161,10 +118,22 @@ export function ProjectDiscoverySection() {
                 ))}
               </SelectContent>
             </Select>
-             <Button type="submit" size="lg" className="h-12 px-8 rounded-xl shadow-lg w-full lg:w-auto" onClick={() => handleSearch()}>
-                    {loading ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <Search className="h-5 w-5 mr-2" />}
-                    {loading ? 'Searching...' : 'Search'}
-             </Button>
+
+            <Select onValueChange={(val) => handleFilterChange('status', val)}>
+              <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-muted-foreground/20 focus:ring-primary">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="Available">Available</SelectItem>
+                  <SelectItem value="Sold Out">Sold Out</SelectItem>
+                  <SelectItem value="Coming Soon">Coming Soon</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button type="submit" size="lg" className="h-12 px-8 rounded-xl shadow-lg w-full lg:w-auto" disabled>
+              <Search className="h-5 w-5 mr-2" />
+              Search
+            </Button>
           </form>
 
           {loading ? (

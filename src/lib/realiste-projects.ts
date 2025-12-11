@@ -5,20 +5,15 @@ function getCityFromUrl(url: string): string {
     try {
         const urlObj = new URL(url);
         const pathParts = urlObj.pathname.split('/');
-        // URL format: /cities/uae-dubai/projects/...
         if (pathParts.length > 2 && pathParts[1] === 'cities') {
             const citySlug = pathParts[2];
-            // Convert 'uae-dubai' to 'Dubai'
             const city = citySlug.split('-').pop() || citySlug;
             return city.charAt(0).toUpperCase() + city.slice(1);
         }
-    } catch (e) {
-        // Invalid URL
-    }
+    } catch (e) { /* Invalid URL */ }
     return 'Dubai'; // Default
 }
 
-// A simple function to extract a developer name from the project name if it exists
 function extractDeveloper(projectName: string): string {
     const developers = ['Emaar', 'Damac', 'Sobha', 'Nakheel', 'Meraas', 'Azizi', 'Aldar', 'Reportage', 'Tiger'];
     const lowerProjectName = projectName.toLowerCase();
@@ -31,41 +26,44 @@ function extractDeveloper(projectName: string): string {
 }
 
 function getAreaFromCity(city: string): string {
-    // Simple mapping for demonstration. A real app might use a more complex geo-database.
     const cityAreaMap: { [key: string]: string } = {
-        'Dubai': 'Downtown Dubai',
-        'Abu-dhabi': 'Yas Island',
-        'Sharjah': 'Aljada',
-        'Umm-al-quwain': 'Al Maqta',
-        'Ras-al-khaimah': 'Al Marjan Island'
+        'Dubai': 'Downtown Dubai', 'Abu-dhabi': 'Yas Island', 'Sharjah': 'Aljada',
+        'Umm-al-quwain': 'Al Maqta', 'Ras-al-khaimah': 'Al Marjan Island'
     };
-    return cityAreaMap[city] || city;
+    return cityAreaMap[city.toLowerCase()] || city;
 }
 
-export const realisteProjects: ProjectData[] = rawProjects.map((raw: any) => {
+export const realisteProjects: ProjectData[] = (rawProjects as any[]).map((raw: any): ProjectData => {
     const city = getCityFromUrl(raw.publicUrl);
     const area = getAreaFromCity(city);
+    const priceFrom = 500000 + Math.random() * 5000000;
+    
+    let availability: ProjectData['availability'] = 'Available';
+    if (raw.tags?.some((t: any) => t.code === 'sold_out')) {
+        availability = 'Sold Out';
+    } else if (raw.tags?.some((t: any) => t.code === 'coming_soon' || t.code === 'prelaunch')) {
+        availability = 'Coming Soon';
+    }
+
     return {
-        id: raw.urlPathSegment || raw.name.toLowerCase().replace(/ /g, '-'),
+        id: raw.urlPathSegment || raw.name.toLowerCase().replace(/\s+/g, '-'),
         name: raw.name,
         developer: extractDeveloper(raw.name),
-        location: {
-            city: city,
-            area: area,
-            mapQuery: `${raw.name}, ${city}`
-        },
-        launchYear: 2024, // Placeholder
-        deliveryYear: raw.unitsStockUpdatedAt ? new Date(raw.unitsStockUpdatedAt).getFullYear() : 2026,
+        location: { city, area, mapQuery: `${raw.name}, ${city}` },
+        handover: raw.unitsStockUpdatedAt ? { quarter: Math.ceil(new Date(raw.unitsStockUpdatedAt).getMonth() / 3), year: new Date(raw.unitsStockUpdatedAt).getFullYear() } : null,
         description: {
             short: `A premier development named ${raw.name}.`,
             full: `Discover ${raw.name}, a leading project offering unique living experiences in ${city}. With its modern design and strategic location, it represents a prime investment opportunity.`
         },
-        features: ['Modern Architecture', 'Prime Location', 'High ROI'], // Placeholder
+        features: raw.tags?.map((t: any) => t.name) || [],
         price: {
-            from: 500000 + Math.random() * 5000000, // Placeholder price
-            label: 'AED ' + (500000 + Math.random() * 5000000).toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short' })
+            from: priceFrom,
+            label: `AED ${priceFrom.toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short' })}`
         },
-        availability: raw.tags?.some((t: any) => t.code === 'sold_out') ? 'Sold Out' : 'Available',
-        images: [] // To be populated by media-scraper
+        availability,
+        images: [],
+        tags: raw.tags?.map((t:any) => t.code),
+        publicUrl: raw.publicUrl,
+        unitsStockUpdatedAt: raw.unitsStockUpdatedAt,
     };
 });

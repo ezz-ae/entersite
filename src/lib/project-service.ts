@@ -1,4 +1,4 @@
-import { allProjects } from './realiste-projects'; // Switch to the new data source
+import { allProjects } from '@/lib/projects';
 import type { ProjectData } from './types';
 
 // In a real ecosystem, this would call an API endpoint or query Firestore directly

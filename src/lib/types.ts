@@ -26,8 +26,10 @@ export interface ProjectData {
     area: string;
     mapQuery: string;
   };
-  launchYear: number;
-  deliveryYear: number;
+  handover: {
+      quarter: number;
+      year: number;
+  } | null;
   description: {
     full: string;
     short: string;
@@ -39,6 +41,17 @@ export interface ProjectData {
   };
   availability: 'Available' | 'Sold Out' | 'Coming Soon';
   images: string[];
+  bedrooms?: {
+    min: number;
+    max: number;
+  };
+  areaSqft?: {
+    min: number;
+    max: number;
+  };
+  tags?: string[];
+  publicUrl?: string;
+  unitsStockUpdatedAt?: string;
 }
 
 
