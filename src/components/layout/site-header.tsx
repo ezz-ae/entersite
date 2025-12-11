@@ -55,8 +55,8 @@ export function SiteHeader() {
                     <div className="grid grid-cols-2 w-[400px] gap-2 p-2">
                         <NavCard title="Site Builder" desc="Drag & drop editor" href="/builder" />
                         <NavCard title="Data Engine" desc="3,750+ Projects" href="/discover" />
-                        <NavCard title="Ads Manager" desc="Automated campaigns" href="#" />
-                        <NavCard title="CRM" desc="Lead management" href="#" />
+                        <NavCard title="Ads Manager" desc="Automated campaigns" href="/products/google-ads" />
+                        <NavCard title="CRM" desc="Lead management" href="/products/crm" />
                     </div>
                 </NavItem>
                 

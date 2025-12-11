@@ -1,69 +1,72 @@
-import type { ProjectData } from '@/lib/types';
-import rawProjects from '../../realiste_buildings_raw.json';
+import rawData from '../../realiste_buildings_raw.json';
+import type { ProjectData } from './types';
 
-function getCityFromUrl(url: string): string {
-    try {
-        const urlObj = new URL(url);
-        const pathParts = urlObj.pathname.split('/');
-        if (pathParts.length > 2 && pathParts[1] === 'cities') {
-            const citySlug = pathParts[2];
-            const city = citySlug.split('-').pop() || citySlug;
-            return city.charAt(0).toUpperCase() + city.slice(1);
-        }
-    } catch (e) { /* Invalid URL */ }
-    return 'Dubai'; // Default
+// Define the shape of the raw Realiste data based on inspection
+// (Simplified based on standard real estate data structures)
+interface RawBuilding {
+  id: string;
+  name: string;
+  developer?: { name: string };
+  region?: { name: string; city?: { name: string } };
+  completion_date?: string;
+  price_min?: number;
+  currency?: string;
+  photos?: string[];
+  location?: { lat: number; lng: number };
+  // Add other fields as discovered in the JSON
 }
 
-function extractDeveloper(projectName: string): string {
-    const developers = ['Emaar', 'Damac', 'Sobha', 'Nakheel', 'Meraas', 'Azizi', 'Aldar', 'Reportage', 'Tiger'];
-    const lowerProjectName = projectName.toLowerCase();
-    for (const dev of developers) {
-        if (lowerProjectName.includes(dev.toLowerCase())) {
-            return dev;
-        }
-    }
-    return 'Unknown Developer';
-}
+// Map raw data to our internal ProjectData interface
+export const getRealisteProjects = (): ProjectData[] => {
+  // @ts-ignore - Assuming the raw JSON structure is an array or has a data property
+  const buildings = Array.isArray(rawData) ? rawData : (rawData as any).data || [];
 
-function getAreaFromCity(city: string): string {
-    const cityAreaMap: { [key: string]: string } = {
-        'Dubai': 'Downtown Dubai', 'Abu-dhabi': 'Yas Island', 'Sharjah': 'Aljada',
-        'Umm-al-quwain': 'Al Maqta', 'Ras-al-khaimah': 'Al Marjan Island'
-    };
-    return cityAreaMap[city.toLowerCase()] || city;
-}
+  return buildings.map((b: any) => ({
+    id: b.id || `realiste-${Math.random().toString(36).substr(2, 9)}`,
+    name: b.name || "Unnamed Project",
+    developer: b.developer?.name || "Unknown Developer",
+    location: {
+      city: b.region?.city?.name || "Dubai", // Default to Dubai if missing
+      area: b.region?.name || "Unknown Area",
+      mapQuery: `${b.name}, ${b.region?.name}, Dubai`
+    },
+    launchYear: new Date().getFullYear(), // Fallback
+    deliveryYear: b.completion_date ? new Date(b.completion_date).getFullYear() : 2026,
+    description: {
+      full: `Experience luxury living at ${b.name} by ${b.developer?.name}. Located in ${b.region?.name}, this project offers exceptional value and modern amenities.`,
+      short: `${b.name} in ${b.region?.name}`
+    },
+    features: [" luxury finishes", "modern design", "prime location"], // Generic if missing
+    price: {
+      from: b.price_min || 0,
+      label: b.price_min ? `AED ${(b.price_min / 1000000).toFixed(1)}M` : "Price on Request"
+    },
+    availability: "Available",
+    images: b.photos && b.photos.length > 0 ? b.photos : [],
+    // Custom Realiste Fields (we can extend ProjectData type later)
+    coordinates: b.location ? { lat: b.location.lat, lng: b.location.lng } : undefined
+  }));
+};
 
-export const realisteProjects: ProjectData[] = (rawProjects as any[]).map((raw: any): ProjectData => {
-    const city = getCityFromUrl(raw.publicUrl);
-    const area = getAreaFromCity(city);
-    const priceFrom = 500000 + Math.random() * 5000000;
+export const searchRealisteProjects = async (query: string, filters?: any): Promise<ProjectData[]> => {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    let availability: ProjectData['availability'] = 'Available';
-    if (raw.tags?.some((t: any) => t.code === 'sold_out')) {
-        availability = 'Sold Out';
-    } else if (raw.tags?.some((t: any) => t.code === 'coming_soon' || t.code === 'prelaunch')) {
-        availability = 'Coming Soon';
+    let projects = getRealisteProjects();
+    
+    if (query) {
+        const q = query.toLowerCase();
+        projects = projects.filter(p => 
+            p.name.toLowerCase().includes(q) || 
+            p.developer.toLowerCase().includes(q) ||
+            p.location.area.toLowerCase().includes(q)
+        );
     }
-
-    return {
-        id: raw.urlPathSegment || raw.name.toLowerCase().replace(/\s+/g, '-'),
-        name: raw.name,
-        developer: extractDeveloper(raw.name),
-        location: { city, area, mapQuery: `${raw.name}, ${city}` },
-        handover: raw.unitsStockUpdatedAt ? { quarter: Math.ceil(new Date(raw.unitsStockUpdatedAt).getMonth() / 3), year: new Date(raw.unitsStockUpdatedAt).getFullYear() } : null,
-        description: {
-            short: `A premier development named ${raw.name}.`,
-            full: `Discover ${raw.name}, a leading project offering unique living experiences in ${city}. With its modern design and strategic location, it represents a prime investment opportunity.`
-        },
-        features: raw.tags?.map((t: any) => t.name) || [],
-        price: {
-            from: priceFrom,
-            label: `AED ${priceFrom.toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short' })}`
-        },
-        availability,
-        images: [],
-        tags: raw.tags?.map((t:any) => t.code),
-        publicUrl: raw.publicUrl,
-        unitsStockUpdatedAt: raw.unitsStockUpdatedAt,
-    };
-});
+    
+    // Apply filters
+    if (filters?.city) {
+        projects = projects.filter(p => p.location.city.toLowerCase() === filters.city.toLowerCase());
+    }
+    
+    return projects;
+}

@@ -1,43 +1,38 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { SiteTemplate, availableTemplates } from '@/lib/templates';
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { UserNav } from "@/components/user-nav";
+import { EntreSiteLogo } from "@/components/icons";
+import { PageBuilder } from "@/components/page-builder";
 import { PageRenderer } from "@/components/page-renderer";
+import { LayoutGrid, Plus, ChevronsUpDown, Eye, Edit3, Settings, Rocket } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
+import { availableTemplates, SiteTemplate, fullCompanyTemplate, roadshowTemplate, developerFocusTemplate, partnerLaunchTemplate, adsQuickLaunchTemplate, luxuryAgentTemplate, offPlanSpecialistTemplate, internationalBuyerTemplate, whatsappLeadTemplate } from '@/lib/templates';
+import { OnboardingFlow } from '@/components/onboarding-flow';
+import { SeoSettingsDialog } from '@/components/seo-settings-dialog';
+import { PublishSuccessDialog } from '@/components/publish-success-dialog';
 import type { SitePage, Block } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/theme-provider';
 import { verifyAndFetchAssets } from '@/lib/media-scraper';
+import { searchProjects } from '@/lib/project-service';
 
 // Components
 import { EditorHeader } from '@/components/editor/editor-header';
 import { SidebarNav } from '@/components/editor/sidebar/sidebar-nav';
 import { InspectorPanel } from '@/components/editor/inspector/inspector-panel';
 import { ThemePanel } from '@/components/editor/sidebar/theme-panel';
-import { PageBuilder } from '@/components/page-builder';
-import { PublishSuccessDialog } from '@/components/publish-success-dialog';
-import { OnboardingFlow } from '@/components/onboarding-flow';
-import { generateSiteFromAgentResponse } from '@/lib/ai-orchestration';
-
-function useTemplateFromUrl() {
-  const searchParams = useSearchParams();
-  const templateId = searchParams.get('template');
-  
-  if (!templateId) return null;
-
-  const template = availableTemplates.find(t => t.id === templateId);
-  return template || null;
-}
-
 
 export default function BuilderPage() {
-  const initialTemplate = useTemplateFromUrl();
-  const [siteTemplate, setSiteTemplate] = useState<SiteTemplate | null>(initialTemplate);
+  const [showOnboarding, setShowOnboarding] = useState(true);
   
   // App State
-  const [pages, setPages] = useState<SitePage[]>(initialTemplate?.pages || []);
-  const [activePageId, setActivePageId] = useState<string>(initialTemplate?.pages[0]?.id || '');
+  const [currentTemplate, setCurrentTemplate] = useState<SiteTemplate>(availableTemplates[0]);
+  const [pages, setPages] = useState<SitePage[]>(currentTemplate.pages);
+  const [activePageId, setActivePageId] = useState<string>(currentTemplate.pages[0].id);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   
   // UI State
@@ -52,27 +47,163 @@ export default function BuilderPage() {
   const selectedBlock = activePage?.blocks.find(b => b.blockId === selectedBlockId) || null;
 
   // --- Handlers ---
-  
-  const handleOnboardingComplete = (agentData: any) => {
-    // This can handle both a simple prompt and a complex agent response
-    const promptText = agentData.prompt || '';
-    const isTemplateRequest = availableTemplates.some(t => promptText.toLowerCase().includes(t.name.toLowerCase()));
-    
-    let newTemplate;
 
-    if (isTemplateRequest) {
-        newTemplate = availableTemplates.find(t => promptText.toLowerCase().includes(t.name.toLowerCase())) || generateSiteFromAgentResponse(agentData);
-    } else {
-        newTemplate = generateSiteFromAgentResponse(agentData);
-    }
-    
-    setSiteTemplate(newTemplate);
-    setPages(newTemplate.pages);
-    setActivePageId(newTemplate.pages[0]?.id || '');
-    
-    if (agentData.brandColor) {
-        setBrandColor(agentData.brandColor);
-    }
+  const handleTemplateChange = (template: SiteTemplate) => {
+    setCurrentTemplate(template);
+    setPages(template.pages);
+    setActivePageId(template.pages[0]?.id || '');
+  };
+
+  const handleOnboardingComplete = async (data: any) => {
+      if (data['brand-color']) {
+          setBrandColor(data['brand-color']);
+      }
+
+      // --- THE BRAIN: Translating User Intent into a Site Structure ---
+      if (data.method === 'prompt' || data.method === 'agent') {
+          const prompt = (data['user-prompt'] || "").toLowerCase();
+          console.log("Analyzing prompt for Deep Build:", prompt);
+          
+          // 1. Identify Project/Developer Context
+          let targetProject = null;
+          let targetDeveloper = null;
+          
+          // Try to find a real project match in our 3750 database
+          const projectResults = await searchProjects(prompt);
+          if (projectResults.length > 0) {
+              // Exact or close match found
+              targetProject = projectResults[0];
+              targetDeveloper = targetProject.developer;
+          } else {
+             // Fallback: Check for developer keywords if no specific project found
+             if (prompt.includes('emaar')) targetDeveloper = "Emaar Properties";
+             if (prompt.includes('damac')) targetDeveloper = "Damac Properties";
+             if (prompt.includes('nakheel')) targetDeveloper = "Nakheel";
+             if (prompt.includes('sobha')) targetDeveloper = "Sobha Realty";
+          }
+
+          // 2. Fetch Assets (The Librarian Agent)
+          // We pass the project name OR developer name to get the best visual match
+          const assets = await verifyAndFetchAssets(targetProject?.name || targetDeveloper || prompt);
+
+          // 3. Construct Dynamic Blocks based on Intent
+          const dynamicBlocks: any[] = [];
+          let order = 0;
+
+          // -- Hero Selection --
+          const heroData = {
+               headline: targetProject ? `Exclusive Offers at ${targetProject.name}` : (data.pageTitle || "Discover Luxury Living"),
+               subtext: targetProject ? `Prices starting from ${targetProject.price.label}. Handover ${targetProject.deliveryYear}.` : "Your trusted partner for premium real estate investments.",
+               backgroundImage: assets.heroImages[0],
+               ctaText: prompt.includes('whatsapp') ? "WhatsApp Us" : "Register Interest"
+          };
+
+          if (prompt.includes('launch') || (targetProject && targetProject.status === 'Pipeline')) {
+              dynamicBlocks.push({ type: 'launch-hero', order: order++, data: heroData });
+          } else {
+              dynamicBlocks.push({ type: 'hero', order: order++, data: heroData });
+          }
+
+          // -- Core Content --
+          
+          // If specific project, show Details & Gallery
+          if (targetProject) {
+              dynamicBlocks.push({ 
+                  type: 'project-detail', 
+                  order: order++, 
+                  data: {
+                      projectName: targetProject.name,
+                      developer: targetProject.developer,
+                      description: targetProject.description.full,
+                      imageUrl: assets.galleryImages[0], // Use a different image if available
+                      stats: [
+                          { label: "Starting Price", value: targetProject.price.label },
+                          { label: "Handover", value: targetProject.deliveryYear.toString() },
+                          { label: "Type", value: "Luxury Residences" } // Mock type if missing
+                      ]
+                  } 
+              });
+              
+              dynamicBlocks.push({ type: 'gallery', order: order++, data: { images: assets.galleryImages, headline: `Inside ${targetProject.name}` } });
+              dynamicBlocks.push({ type: 'floor-plan', order: order++, data: {} });
+              dynamicBlocks.push({ type: 'payment-plan', order: order++, data: {} });
+          } 
+          // If Developer/General, show Listing Grid
+          else {
+               const filter = targetDeveloper ? { developer: targetDeveloper } : {};
+               dynamicBlocks.push({ 
+                   type: 'listing-grid', 
+                   order: order++, 
+                   data: { 
+                       headline: targetDeveloper ? `Latest from ${targetDeveloper}` : "Featured Projects",
+                       // We pass the filter so the block knows what to fetch
+                       initialFilter: filter 
+                   } 
+               });
+               dynamicBlocks.push({ type: 'developers-list', order: order++, data: {} });
+          }
+
+          // -- Tools & Conversion --
+          
+          if (prompt.includes('invest') || prompt.includes('roi')) {
+              dynamicBlocks.push({ type: 'roi-calculator', order: order++, data: {} });
+          }
+          
+          // Map is always good for real estate
+          dynamicBlocks.push({ type: 'map', order: order++, data: { headline: targetProject ? "Prime Location" : "Explore Our Projects" } });
+
+          // Contact
+          if (prompt.includes('whatsapp') || data.siteType === 'whatsapp_only') {
+               // Floating widget is added via template, but we can also add a CTA section
+               dynamicBlocks.push({ type: 'cta-grid', order: order++, data: { headline: "Connect Instantly" } });
+          } else {
+               dynamicBlocks.push({ type: 'cta-form', order: order++, data: { headline: "Register Your Interest" } });
+          }
+          
+          // Always add Chat Widget for AI agent
+          dynamicBlocks.push({ type: 'chat-widget', order: order++, data: { welcomeMessage: targetProject ? `Hi! Ask me anything about ${targetProject.name}.` : "Hi! How can I help you find a property?" } });
+
+
+          // 4. Assemble the Template
+          const customTemplate: SiteTemplate = {
+              id: `ai-gen-${Date.now()}`,
+              name: targetProject ? targetProject.name : 'AI Custom Build',
+              siteType: 'custom',
+              pages: [{
+                  id: 'home',
+                  title: 'Home',
+                  blocks: dynamicBlocks.map((b, i) => ({
+                      blockId: `ai-block-${i}`,
+                      type: b.type,
+                      order: b.order,
+                      data: b.data
+                  })),
+                  canonicalListings: [],
+                  brochureUrl: assets.brochureUrl || "",
+                  seo: { 
+                      title: targetProject ? `${targetProject.name} | Official Launch` : "Real Estate Portfolio", 
+                      description: "Generated by EntreSite AI", 
+                      keywords: [] 
+                  },
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+              }]
+          };
+
+          handleTemplateChange(customTemplate);
+      } else {
+          // Standard Wizard Flow (Fallback)
+          let selectedTemplate = availableTemplates[0];
+          if (data['site-type'] === 'roadshow') selectedTemplate = roadshowTemplate;
+          else if (data['site-type'] === 'developer') selectedTemplate = developerFocusTemplate;
+          else if (data['site-type'] === 'partner') selectedTemplate = partnerLaunchTemplate;
+          else if (data['site-type'] === 'company') selectedTemplate = fullCompanyTemplate;
+          else if (data['site-type'] === 'landing') selectedTemplate = adsQuickLaunchTemplate;
+          
+          handleTemplateChange(selectedTemplate);
+      }
+
+      setShowOnboarding(false);
   };
 
   const handlePageUpdate = (updatedPage: SitePage) => {
@@ -109,7 +240,7 @@ export default function BuilderPage() {
 
   // --- Render ---
 
-  if (!siteTemplate) {
+  if (showOnboarding) {
       return <OnboardingFlow onComplete={handleOnboardingComplete} />;
   }
 
@@ -140,6 +271,7 @@ export default function BuilderPage() {
   return (
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden font-sans">
       
+      {/* 1. Top Header */}
       <EditorHeader 
         onPreview={() => setIsPreviewMode(true)}
         onPublish={() => setShowPublishDialog(true)}
@@ -148,12 +280,15 @@ export default function BuilderPage() {
 
       <div className="flex-1 flex overflow-hidden relative">
         
+        {/* 2. Left Sidebar (Navigator) */}
         <SidebarNav activeView={activeView || ''} setActiveView={handleViewChange} />
 
+        {/* 2.5 Left Panels (Slide out) */}
         {activeView === 'theme' && (
             <ThemePanel onClose={() => setActiveView(null)} />
         )}
 
+        {/* 3. Center Canvas (Artboard) */}
         <main className="flex-1 relative bg-muted/20 overflow-y-auto transition-all duration-300 flex justify-center">
             <div 
                 className="min-h-full py-12 px-8 transition-all duration-500 ease-in-out"
@@ -176,6 +311,7 @@ export default function BuilderPage() {
             </div>
         </main>
 
+        {/* 4. Right Sidebar (Inspector) */}
         {selectedBlock && (
             <InspectorPanel 
                 selectedBlock={selectedBlock} 

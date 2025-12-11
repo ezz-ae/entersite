@@ -9,7 +9,7 @@ import {
   serverTimestamp,
   Timestamp
 } from 'firebase/firestore';
-import { db } from '@/firebase';
+import { db } from '@/firebase/get-sdks';
 
 export interface JobStep {
   name: string;

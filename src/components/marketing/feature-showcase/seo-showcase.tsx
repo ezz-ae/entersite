@@ -3,60 +3,99 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Search, Link as LinkIcon, Bot } from 'lucide-react';
+import { FileText, Search, Link as LinkIcon, Bot, TrendingUp } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export function SeoShowcase() {
   return (
-    <section className="py-24 bg-background">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+    <section className="py-32 bg-background border-t border-border/40">
+      <div className="container mx-auto px-6 max-w-7xl">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           
-          <div className="relative">
-            <div className="aspect-[4/3] bg-muted/30 rounded-2xl border flex items-center justify-center p-8">
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="relative order-2 lg:order-1"
+          >
+            <div className="absolute -inset-1 bg-gradient-to-tl from-green-500/20 to-emerald-500/20 rounded-3xl blur-2xl opacity-50" />
+            <div className="relative aspect-[4/3] bg-muted/20 rounded-2xl border border-border/50 flex items-center justify-center p-8 backdrop-blur-sm">
+                
                 {/* Mockup of the SEO Settings Dialog */}
-                <Card className="w-full shadow-xl">
-                    <div className="p-4 border-b">
-                        <h4 className="font-bold text-sm flex items-center gap-2">
+                <Card className="w-full shadow-2xl border-border/50 overflow-hidden bg-background">
+                    <div className="p-4 border-b border-border/50 flex items-center justify-between bg-muted/30">
+                        <h4 className="font-bold text-sm flex items-center gap-2 text-foreground">
                             <Search className="h-4 w-4" /> SEO Optimizer
                         </h4>
+                        <div className="flex gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-green-400/80" />
+                        </div>
                     </div>
-                    <div className="p-4 space-y-4">
-                        <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-200">
-                            <h5 className="text-xs font-semibold text-blue-800 mb-2">Google Preview</h5>
-                            <div className="font-sans">
-                                <div className="text-xl text-[#1a0dab] font-medium truncate">
-                                    Luxury Villas for Sale | Dubai Hills
+                    
+                    <div className="p-6 space-y-6">
+                        <div className="p-4 bg-background rounded-lg border border-border/50 shadow-sm relative overflow-hidden">
+                             <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+                            <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1">
+                                <span className="bg-[#f1f3f4] rounded-full w-3 h-3 inline-block" /> Google Search Preview
+                            </h5>
+                            <div className="font-sans pl-2">
+                                <div className="text-sm text-[#202124] flex items-center gap-1 mb-1">
+                                    <span className="text-muted-foreground text-xs">entresite.ai › dubai-hills</span>
                                 </div>
-                                <div className="text-sm text-[#006621]">
-                                    https://yoursite.com/dubai-hills-villas
+                                <div className="text-lg text-[#1a0dab] font-medium truncate hover:underline cursor-pointer">
+                                    Luxury Villas for Sale | Dubai Hills Estate
                                 </div>
-                                <div className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                                    Discover exclusive 5-bedroom villas in Dubai Hills Estate. Gated community, golf course views...
+                                <div className="text-xs text-[#4d5156] line-clamp-2 mt-1 leading-relaxed">
+                                    Discover exclusive 5-bedroom villas in Dubai Hills Estate. Gated community, golf course views, and flexible payment plans available.
                                 </div>
                             </div>
                         </div>
-                        <div className="flex gap-2">
-                            <Badge variant="outline">dubai villas</Badge>
-                            <Badge variant="outline">luxury property</Badge>
-                            <Badge variant="outline">emaar</Badge>
+                        
+                        <div>
+                             <div className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">AI Keyword Suggestions</div>
+                             <div className="flex flex-wrap gap-2">
+                                <Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20">dubai luxury villas</Badge>
+                                <Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20">golf course property</Badge>
+                                <Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20">emaar off-plan</Badge>
+                                <Badge variant="outline" className="text-muted-foreground border-dashed">+ 5 more</Badge>
+                            </div>
                         </div>
                     </div>
                 </Card>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="space-y-6">
-            <Badge variant="outline" className="border-green-500/20 bg-green-500/5 text-green-700">
+          <div className="space-y-8 order-1 lg:order-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-medium border border-green-500/20">
+              <TrendingUp className="h-3.5 w-3.5" />
               Organic Growth
-            </Badge>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Rank Higher, Convert More</h2>
-            <p className="text-lg text-muted-foreground">
-              Our AI doesn't just write content; it writes content that ranks. Get automated meta tags, keyword suggestions, and SEO-optimized copy for all your listings and pages.
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter leading-[1.05]">
+                Rank Higher, <br/>
+                <span className="text-muted-foreground">Convert More.</span>
+            </h2>
+            
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Our AI doesn't just write content; it writes content that ranks. Get automated meta tags, high-value keyword injection, and SEO-optimized copy for every listing.
             </p>
-            <ul className="space-y-3 text-sm">
-                <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> AI Meta Tag Generation</li>
-                <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Keyword Opportunity Finder</li>
-                <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Automatic Internal Linking</li>
+            
+            <ul className="space-y-4 pt-4">
+                <li className="flex items-start gap-3">
+                    <div className="bg-green-100 p-1 rounded-full text-green-600 mt-0.5"><CheckCircle className="h-4 w-4" /></div>
+                    <span className="font-medium text-foreground/80">AI Meta Tag Generation</span>
+                </li>
+                <li className="flex items-start gap-3">
+                    <div className="bg-green-100 p-1 rounded-full text-green-600 mt-0.5"><CheckCircle className="h-4 w-4" /></div>
+                    <span className="font-medium text-foreground/80">Competitor Keyword Analysis</span>
+                </li>
+                <li className="flex items-start gap-3">
+                    <div className="bg-green-100 p-1 rounded-full text-green-600 mt-0.5"><CheckCircle className="h-4 w-4" /></div>
+                    <span className="font-medium text-foreground/80">Automatic Schema Markup</span>
+                </li>
             </ul>
           </div>
 
@@ -76,12 +115,11 @@ function CheckCircle(props: any) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="3"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
+      <polyline points="20 6 9 17 4 12" />
     </svg>
   )
 }
