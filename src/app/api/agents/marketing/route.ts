@@ -34,55 +34,8 @@ const client = new SessionsClient({
 });
 
 export async function POST(req: NextRequest) {
-  try {
-    const { message, sessionId } = await req.json();
-
-    const sessionPath = client.projectLocationAgentSessionPath(
-      PROJECT_ID,
-      LOCATION,
-      AGENT_ID,
-      sessionId || 'default-session' 
-    );
-
-    const request = {
-      session: sessionPath,
-      queryInput: {
-        text: {
-          text: message,
-        },
-        languageCode: LANGUAGE_CODE,
-      },
-    };
-
-    const [response] = await client.detectIntent(request);
-    const result = response.queryResult;
-    
-    const agentText = result?.responseMessages?.[0]?.text?.text?.[0] || "I'm processing your request. Please bear with me...";
-    
-    const parameters = result?.parameters ? agentResponseSchema.parse(result.parameters.fields) : {}; // Parse and validate parameters
-    const isEndInteraction = result?.match?.intent?.displayName === 'End Session' || !result?.match?.intent; // Infer end of conversation
-
-    // If agent returns structured parameters, use them
-    if (Object.keys(parameters).length > 0) {
-        console.log("Agent returned structured parameters:", parameters);
-        return NextResponse.json({
-          text: agentText,
-          parameters: parameters,
-          isEndInteraction: isEndInteraction
-        });
-    }
-
-    // Else, continue conversation
-    return NextResponse.json({
-        text: agentText,
-        parameters: null, 
-        isEndInteraction: isEndInteraction
-    });
-
-  } catch (error) {
-    console.error('Vertex AI Agent Error:', error);
-    
-    // Enhanced Fallback for robust development
+    // DEV MODE: Always return mock data to prevent charges.
+    // In production, the try/catch block would be the primary logic.
     const mockConfig = {
       siteType: 'full-company',
       pageTitle: 'Luxury Portfolio Generated',
@@ -97,9 +50,8 @@ export async function POST(req: NextRequest) {
     };
     
     return NextResponse.json({ 
-      text: "(Mock Agent): I'm simulating the agent response. Here is a generated site configuration. To connect a real agent, set up Vertex AI credentials.",
+      text: "(Mock Agent): I'm simulating the agent response. To connect a real agent, please update the API route.",
       parameters: mockConfig,
       isEndInteraction: true
     });
-  }
 }
