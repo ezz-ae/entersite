@@ -1,12 +1,5 @@
-import { abuDhabiProjects } from '@/data/abudhabi';
-import { dubaiProjects } from '@/data/dubai';
-import { rasAlKhaimahProjects } from '@/data/rasalkhaimah';
-import { sharjahProjects } from '@/data/sharjah';
+import { realisteProjects } from '@/lib/realiste-projects';
 import type { ProjectData } from './types';
 
-export const allProjects: ProjectData[] = [
-  ...dubaiProjects,
-  ...abuDhabiProjects,
-  ...rasAlKhaimahProjects,
-  ...sharjahProjects,
-];
+// The new Realiste data is now the single source of truth for all projects.
+export const allProjects: ProjectData[] = realisteProjects;

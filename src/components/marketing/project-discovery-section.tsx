@@ -137,8 +137,9 @@ export function ProjectDiscoverySection() {
             </Select>
             
             <div className="md:col-span-4 text-center mt-4">
-                <Button type="submit" size="lg" className="h-12 px-8 rounded-full shadow-lg">
-                    <Search className="h-5 w-5 mr-2" /> Filter Projects
+                <Button type="submit" size="lg" className="h-12 px-8 rounded-full shadow-lg" onClick={handleSearch}>
+                    {loading ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <Search className="h-5 w-5 mr-2" />}
+                    {loading ? 'Searching...' : 'Search Projects'}
                 </Button>
             </div>
           </form>

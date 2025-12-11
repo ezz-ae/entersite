@@ -1,4 +1,4 @@
-import { allProjects } from './projects';
+import { allProjects } from './realiste-projects'; // Switch to the new data source
 import type { ProjectData } from './types';
 
 // In a real ecosystem, this would call an API endpoint or query Firestore directly
@@ -53,8 +53,8 @@ export const searchProjects = async (query: string, filters?: ProjectFilter): Pr
 
 export const getDevelopers = async (): Promise<string[]> => {
     // Extract unique developers from the dataset
-    const developers = Array.from(new Set(allProjects.map(p => p.developer)));
-    return developers.sort();
+    const developerNames = new Set(allProjects.map(p => p.developer).filter(Boolean));
+    return Array.from(developerNames).sort();
 }
 
 export const getLocations = async (): Promise<{city: string, areas: string[]}[]> => {
@@ -62,14 +62,17 @@ export const getLocations = async (): Promise<{city: string, areas: string[]}[]>
     const locationMap = new Map<string, Set<string>>();
     
     allProjects.forEach(p => {
+        if (!p.location.city) return; // Skip if no city
         if (!locationMap.has(p.location.city)) {
             locationMap.set(p.location.city, new Set());
         }
-        locationMap.get(p.location.city)?.add(p.location.area);
+        if (p.location.area) {
+            locationMap.get(p.location.city)?.add(p.location.area);
+        }
     });
 
     return Array.from(locationMap.entries()).map(([city, areas]) => ({
         city,
         areas: Array.from(areas).sort()
-    }));
+    })).sort((a,b) => a.city.localeCompare(b.city));
 }
