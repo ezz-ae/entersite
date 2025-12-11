@@ -15,7 +15,7 @@ import { useRealisteProjects } from '@/hooks/useRealisteProjects';
 
 export function ProjectDiscoverySection() {
   const [filters, setFilters] = useState<ProjectFilter>({});
-  const { projects, loading, error, search } = useRealisteProjects({});
+  const { projects, loading, error, search } = useRealisteProjects(filters);
   
   const [developers, setDevelopers] = useState<string[]>([]);
   const [locations, setLocations] = useState<{city: string, areas: string[]}[]>([]);
@@ -44,6 +44,11 @@ export function ProjectDiscoverySection() {
     setFilters(newFilters);
     search(newFilters);
   };
+  
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    search(filters);
+  }
 
   if (error) {
     return (
@@ -94,7 +99,7 @@ export function ProjectDiscoverySection() {
               </p>
           </div>
 
-          <form onSubmit={(e) => e.preventDefault()} className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 max-w-6xl mx-auto mb-8">
+          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 max-w-6xl mx-auto mb-8">
             <Select onValueChange={(val) => handleFilterChange('city', val)}>
               <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-muted-foreground/20 focus:ring-primary">
                 <SelectValue placeholder="City" />
@@ -119,7 +124,7 @@ export function ProjectDiscoverySection() {
               </SelectContent>
             </Select>
 
-            <Select onValueChange={(val) => handleFilterChange('status', val)}>
+            <Select onValueChange={(val) => handleFilterChange('availability', val)}>
               <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-muted-foreground/20 focus:ring-primary">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -130,7 +135,7 @@ export function ProjectDiscoverySection() {
                   <SelectItem value="Coming Soon">Coming Soon</SelectItem>
               </SelectContent>
             </Select>
-            <Button type="submit" size="lg" className="h-12 px-8 rounded-xl shadow-lg w-full lg:w-auto" disabled>
+            <Button type="submit" size="lg" className="h-12 px-8 rounded-xl shadow-lg w-full lg:w-auto">
               <Search className="h-5 w-5 mr-2" />
               Search
             </Button>

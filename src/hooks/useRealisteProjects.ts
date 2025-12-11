@@ -18,7 +18,7 @@ const transformProjectData = (rawProject: any): ProjectData => {
   let availability: ProjectData['availability'] = 'Available';
   if (rawProject.tags?.some((t: any) => t.code === 'sold_out')) {
     availability = 'Sold Out';
-  } else if (rawProject.tags?.some((t: any) => t.code === 'coming_soon' || t.code === 'prelaunch')) {
+  } else if (rawProject.tags?.some((t: any) => t.code === 'coming_soon' || t.code === 'prelaunch' || t.code.includes('announced'))) {
     availability = 'Coming Soon';
   }
   
@@ -27,7 +27,7 @@ const transformProjectData = (rawProject: any): ProjectData => {
   const maxBed = bedrooms.length > 0 ? Math.max(...bedrooms) : 0;
 
   return {
-    id: rawProject.id || rawProject.urlPathSegment,
+    id: rawProject.urlPathSegment || rawProject.name.toLowerCase().replace(/\s+/g, '-'),
     name: rawProject.name,
     developer: rawProject.developer?.name || 'Unknown Developer',
     location: {
@@ -52,7 +52,7 @@ const transformProjectData = (rawProject: any): ProjectData => {
       min: rawProject.stats?.areaRange?.min?.value || 0,
       max: rawProject.stats?.areaRange?.max?.value || 0,
     },
-    tags: rawProject.tags?.map((t: any) => t.code),
+    tags: rawProject.tags?.map((t:any) => t.code),
     publicUrl: rawProject.publicUrl,
     unitsStockUpdatedAt: rawProject.unitsStockUpdatedAt,
   };
@@ -70,8 +70,20 @@ export function useRealisteProjects(initialFilter: ProjectFilter = {}) {
     try {
       const graphqlFilter: any = {};
       if (filter.developer) graphqlFilter.developerName = filter.developer;
-      if (filter.city) graphqlFilter.agglomerationCodes = [filter.city.toLowerCase().replace(' ', '-')];
-      // Note: Add more filter transformations here as needed.
+      if (filter.city) {
+          // Find the country code from the city name if needed, assuming one country for now
+          const agglomerationCode = filter.city.toLowerCase().replace(/\s+/g, '-');
+          graphqlFilter.agglomerationCodes = [`uae-${agglomerationCode}`];
+      }
+       if (filter.availability) {
+        if(filter.availability === "Available") {
+          graphqlFilter.tags = ["on_sale"];
+        } else if (filter.availability === "Sold Out") {
+          graphqlFilter.tags = ["sold_out"];
+        } else if (filter.availability === "Coming Soon") {
+            graphqlFilter.tags = ["coming_soon", "prelaunch"];
+        }
+      }
       
       const rawData = await fetchRealisteProjects(graphqlFilter);
       const transformedData = rawData.map(transformProjectData);
@@ -86,7 +98,7 @@ export function useRealisteProjects(initialFilter: ProjectFilter = {}) {
   // Initial fetch
   useEffect(() => {
     fetchAndTransform(initialFilter);
-  }, []); // Initial fetch depends only on the initial filter config
+  }, []);
 
   const debouncedFetch = useCallback(
     debounce((newFilter: ProjectFilter) => {
@@ -101,4 +113,3 @@ export function useRealisteProjects(initialFilter: ProjectFilter = {}) {
 
   return { projects, loading, error, search };
 }
-
