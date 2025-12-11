@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -12,7 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { 
     CheckCircle2, AlertCircle, TrendingUp, MousePointerClick, Eye, Globe, 
-    Target, Loader2, Plus, Trash2, BarChart3, Calendar, MapPin, Zap, ExternalLink
+    Target, Loader2, Plus, Trash2, BarChart3, Calendar, MapPin, Zap, ExternalLink,
+    Sparkles
 } from "lucide-react";
 import { generateAdsFromPageContent, GenerateAdsOutput } from "@/ai/flows/generate-ads-from-page-content";
 import { createJob } from "@/lib/jobs";
@@ -236,7 +238,7 @@ export function GoogleAdsManager({ pageTitle, pageDescription, userEmail }: Goog
                     <TabsContent value="setup" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="p-6 bg-card border rounded-xl space-y-8">
                              <div className="space-y-4">
-                                <div className="flex justify-between">
+                                <div className="flex justify-between items-center">
                                     <Label className="text-base font-semibold">Daily Budget</Label>
                                     <span className="font-bold text-xl text-primary">${budget[0]}</span>
                                 </div>
@@ -390,3 +392,5 @@ function MetricCard({ label, value, icon: Icon, highlight, trend, positive = tru
 // Helper icons
 function ArrowRight(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg> }
 function X(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> }
+
+    
