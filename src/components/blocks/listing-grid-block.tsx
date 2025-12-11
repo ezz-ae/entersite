@@ -10,8 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapPin, BedDouble, Bath, Square, ArrowRight, Heart, Search, Loader2 } from "lucide-react";
-import { ResponsiveImage } from "@/components/ui/responsive-image"; // Use ResponsiveImage
-import { SAFE_IMAGES, getRandomImage } from "@/lib/images"; // Import safe images
+import Image from "next/image";
 import type { ProjectData } from "@/lib/types";
 import { motion } from "framer-motion";
 import { searchProjects } from "@/lib/project-service";
@@ -36,13 +35,18 @@ export function ListingGridBlock({
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-      // Only load projects if not pre-populated by a template
-      if (initialProjects.length === 0 || Object.keys(initialFilter).length > 0) {
+      if (initialProjects.length === 0) {
           loadProjects(searchQuery, initialFilter);
       } else {
-          setProjects(initialProjects);
+          // If projects are passed in, verify their assets.
+          const verifyInitial = async () => {
+              const verified = await Promise.all(initialProjects.map(p => verifyAndFetchAssets(p.name, p.images)));
+              const updatedProjects = initialProjects.map((p, i) => ({ ...p, images: verified[i].heroImages, developer: verified[i].developerName || p.developer }));
+              setProjects(updatedProjects);
+          };
+          verifyInitial();
       }
-  }, [initialFilter, initialProjects]); // Re-run if initialFilter/Projects change
+  }, [initialProjects, initialFilter]);
 
   const loadProjects = async (query = "", filters = initialFilter) => {
       setLoading(true);
@@ -109,11 +113,11 @@ export function ListingGridBlock({
                 >
                     <Card className="group overflow-hidden border border-border/50 bg-card hover:bg-muted/20 transition-colors duration-500 flex flex-col h-full rounded-2xl shadow-sm hover:shadow-xl">
                     <div className="relative aspect-[4/3] overflow-hidden m-2 rounded-xl">
-                        <ResponsiveImage
-                            src={project.images?.[0] || getRandomImage('hero')}
+                        <Image
+                            src={project.images?.[0] || 'https://picsum.photos/seed/1/800/600'}
                             alt={project.name}
                             fill
-                            className="transition-transform duration-700 group-hover:scale-110"
+                            className="object-cover transition-transform duration-700 group-hover:scale-110"
                         />
                         <div className="absolute top-4 left-4">
                             <Badge variant="secondary" className="bg-white/90 backdrop-blur text-black border-0 shadow-sm font-medium px-3 py-1">
@@ -141,7 +145,7 @@ export function ListingGridBlock({
                                 <h3 className="font-bold text-xl mb-1 group-hover:text-primary transition-colors line-clamp-1">{project.name}</h3>
                                 <div className="flex items-center text-muted-foreground text-sm">
                                     <MapPin className="h-3.5 w-3.5 mr-1" />
-                                    {project.location?.area}
+                                    {project.location?.city}
                                 </div>
                             </div>
                             <div className="text-right">

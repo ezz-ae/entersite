@@ -15,7 +15,7 @@ export const mockProjects = allProjects.slice(0,4).map(p => ({
     source: 'manual',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-}))
+}));
 
 export const mockPage: SitePage = {
   id: "page-01",

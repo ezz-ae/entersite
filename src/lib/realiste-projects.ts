@@ -1,15 +1,6 @@
 import type { ProjectData } from '@/lib/types';
 import rawProjects from '../../realiste_buildings_raw.json';
 
-function transformUrlPath(segment: string) {
-    if (!segment) return 'dubai'; // Default city
-    const parts = segment.split('_');
-    if (parts.length > 1 && parts[0].includes('-')) {
-        return parts[0].split('-')[1];
-    }
-    return 'dubai'; // Fallback
-}
-
 function getCityFromUrl(url: string): string {
     try {
         const urlObj = new URL(url);
@@ -28,7 +19,6 @@ function getCityFromUrl(url: string): string {
 }
 
 // A simple function to extract a developer name from the project name if it exists
-// This is a placeholder for a more sophisticated NLP model or rule engine.
 function extractDeveloper(projectName: string): string {
     const developers = ['Emaar', 'Damac', 'Sobha', 'Nakheel', 'Meraas', 'Azizi', 'Aldar', 'Reportage', 'Tiger'];
     const lowerProjectName = projectName.toLowerCase();
@@ -40,26 +30,42 @@ function extractDeveloper(projectName: string): string {
     return 'Unknown Developer';
 }
 
-export const realisteProjects: ProjectData[] = rawProjects.map((raw: any) => ({
-    id: raw.urlPathSegment || raw.name.toLowerCase().replace(/ /g, '-'),
-    name: raw.name,
-    developer: extractDeveloper(raw.name),
-    location: {
-        city: getCityFromUrl(raw.publicUrl),
-        area: raw.name, // The raw data doesn't have a clear 'area', so using name as a placeholder
-        mapQuery: `${raw.name}, ${getCityFromUrl(raw.publicUrl)}`
-    },
-    launchYear: 2024, // Placeholder
-    deliveryYear: raw.unitsStockUpdatedAt ? new Date(raw.unitsStockUpdatedAt).getFullYear() : 2026,
-    description: {
-        short: `A premier development named ${raw.name}.`,
-        full: `Discover ${raw.name}, a leading project offering unique living experiences. With its modern design and strategic location, it represents a prime investment opportunity.`
-    },
-    features: ['Modern Architecture', 'Prime Location'], // Placeholder
-    price: {
-        from: 500000 + Math.random() * 5000000, // Placeholder price
-        label: 'AED ' + (500000 + Math.random() * 5000000).toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short' })
-    },
-    availability: raw.tags?.some((t: any) => t.code === 'sold_out') ? 'Sold Out' : 'Available',
-    images: [] // To be populated by media-scraper
-}));
+function getAreaFromCity(city: string): string {
+    // Simple mapping for demonstration. A real app might use a more complex geo-database.
+    const cityAreaMap: { [key: string]: string } = {
+        'Dubai': 'Downtown Dubai',
+        'Abu-dhabi': 'Yas Island',
+        'Sharjah': 'Aljada',
+        'Umm-al-quwain': 'Al Maqta',
+        'Ras-al-khaimah': 'Al Marjan Island'
+    };
+    return cityAreaMap[city] || city;
+}
+
+export const realisteProjects: ProjectData[] = rawProjects.map((raw: any) => {
+    const city = getCityFromUrl(raw.publicUrl);
+    const area = getAreaFromCity(city);
+    return {
+        id: raw.urlPathSegment || raw.name.toLowerCase().replace(/ /g, '-'),
+        name: raw.name,
+        developer: extractDeveloper(raw.name),
+        location: {
+            city: city,
+            area: area,
+            mapQuery: `${raw.name}, ${city}`
+        },
+        launchYear: 2024, // Placeholder
+        deliveryYear: raw.unitsStockUpdatedAt ? new Date(raw.unitsStockUpdatedAt).getFullYear() : 2026,
+        description: {
+            short: `A premier development named ${raw.name}.`,
+            full: `Discover ${raw.name}, a leading project offering unique living experiences in ${city}. With its modern design and strategic location, it represents a prime investment opportunity.`
+        },
+        features: ['Modern Architecture', 'Prime Location', 'High ROI'], // Placeholder
+        price: {
+            from: 500000 + Math.random() * 5000000, // Placeholder price
+            label: 'AED ' + (500000 + Math.random() * 5000000).toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short' })
+        },
+        availability: raw.tags?.some((t: any) => t.code === 'sold_out') ? 'Sold Out' : 'Available',
+        images: [] // To be populated by media-scraper
+    };
+});

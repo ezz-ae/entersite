@@ -20,21 +20,30 @@ export function ListingGridMapBlock({
     projects = []
 }: ListingGridMapBlockProps) {
   
+  // Use a slice of projects for display to avoid overwhelming the UI
+  const displayProjects = projects.slice(0, 5);
+
+  const pins = displayProjects.map((p, i) => ({
+    x: `${20 + (i * 15)}%`,
+    y: `${30 + (i % 2 === 0 ? i * 5 : -(i * 5))}%`,
+    name: p.name
+  }));
+
   return (
     <section className="h-[800px] flex flex-col md:flex-row bg-background border-t">
         {/* Map Side (Left) */}
         <div className="w-full md:w-1/2 h-1/2 md:h-full bg-muted relative group overflow-hidden">
              {/* Simulating a Map View */}
-             <div className="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ec/USA_location_map.svg')] bg-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-500"></div>
+             <div className="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ec/USA_location_map.svg')] bg-cover opacity-50 grayscale group-hover:grayscale-0 transition-all duration-500"></div>
              
              {/* Simulated Map Pins */}
-             {projects.map((p, i) => (
+             {pins.map((pin, i) => (
                  <div 
-                    key={p.id}
+                    key={i}
                     className="absolute w-8 h-8 -ml-4 -mt-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform z-10"
                     style={{ 
-                        top: `${30 + (i * 15)}%`, 
-                        left: `${40 + (i * 10)}%` 
+                        top: pin.y, 
+                        left: pin.x 
                     }}
                  >
                      <MapPin className="h-4 w-4" />
@@ -55,7 +64,7 @@ export function ListingGridMapBlock({
              </div>
 
              <div className="space-y-6">
-                 {projects.map((project) => (
+                 {displayProjects.map((project) => (
                      <Card key={project.id} className="flex flex-col sm:flex-row overflow-hidden hover:shadow-md transition-shadow cursor-pointer group">
                          <div className="relative w-full sm:w-40 aspect-video sm:aspect-auto">
                              <Image 

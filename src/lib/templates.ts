@@ -1,6 +1,6 @@
 
 import type { SitePage, Block, ProjectData } from './types';
-import { allProjects, dubaiProjects, abuDhabiProjects, rasAlKhaimahProjects, sharjahProjects } from './projects';
+import { allProjects } from './projects';
 
 export interface SiteTemplate {
   id: string;
@@ -70,14 +70,14 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
     data: {
       headline: "Featured Properties",
       subtext: "Handpicked listings that define luxury living.",
-      projects: allProjects.slice(0, 3), // Default projects, can be overridden
+      projects: [], // Default projects, will be populated by createBlock
     },
   },
   'listing-grid-map': {
     type: 'listing-grid-map',
     data: {
         headline: "Explore Projects on Map",
-        projects: allProjects.slice(0, 5), // Default, can be overridden
+        projects: [], // Default, will be populated
     }
   },
   'featured-listing': {
@@ -280,11 +280,12 @@ const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: 
     const blockData = JSON.parse(JSON.stringify(defaultBlocks[type]));
 
     // Handle specific project data for listing blocks
-    if (type === 'listing-grid' || type === 'listing-grid-map' || type === 'project-detail') {
+    if (type === 'listing-grid' || type === 'listing-grid-map' || type === 'project-detail' || type === 'featured-listing') {
         if (context?.projectId) {
             const project = findProject(context.projectId);
             if (project) {
-                blockData.data = { ...blockData.data, ...project, projects: [project] };
+                // For a single project, populate the data directly
+                blockData.data = { ...blockData.data, ...project, projects: [project], listingTitle: project.name, location: project.location.area, price: project.price.label, area: project.features.find(f=>f.includes('sq.ft')) || '' };
             }
         } else if (context?.projectFilter) {
             blockData.data.projects = filterProjects(context.projectFilter);
@@ -357,14 +358,14 @@ export const developerFocusTemplate: SiteTemplate = {
       createPage('home', 'Home', [
           'hero',
           'stats',
-          { type: 'listing-grid', projectFilter: { city: 'Abu Dhabi', developer: 'Bloom Holding', limit: 3 } },
-          { type: 'project-detail', projectId: 'marbella-villas' },
+          { type: 'listing-grid', projectFilter: { city: 'Abu-dhabi', developer: 'Bloom Holding', limit: 3 } },
+          { type: 'project-detail', projectId: 'marbella' },
           'features', 
           'payment-plan', 
           'team', 
           'newsletter', 
           'chat-widget'
-      ], { city: 'Abu Dhabi' }),
+      ], { city: 'Abu-dhabi' }),
       createPage('about', 'About Us', ['hero', 'split-content', 'team', 'video', 'partners']),
       createPage('contact', 'Contact', ['contact-details', 'cta-form']),
     ],
@@ -377,10 +378,10 @@ export const partnerLaunchTemplate: SiteTemplate = {
     pages: [
         createPage('home', 'Launch Home', [
             { type: 'launch-hero', overrides: { backgroundImage: 'https://images.unsplash.com/photo-1596178060671-7a80dc8059ea?auto=format&fit=crop&q=80&w=2000' } },
-            { type: 'featured-listing', projectId: 'palazzo-tissoli' },
-            { type: 'listing-grid', projectFilter: { city: 'Ras Al Khaimah', limit: 3 } }, 
+            { type: 'featured-listing', projectId: 'rosso-bay-residences' },
+            { type: 'listing-grid', projectFilter: { city: 'Ras-al-khaimah', limit: 3 } }, 
             'offer', 'map', 'partners', 'cta-grid', 'chat-widget'
-        ], { city: 'Ras Al Khaimah' }),
+        ], { city: 'Ras-al-khaimah' }),
     ]
 };
 
@@ -392,11 +393,11 @@ export const fullCompanyTemplate: SiteTemplate = {
         createPage('home', 'Home', [
             'hero-lead-form', 'search-filters', 'partners',
             { type: 'listing-grid-map', projectFilter: { city: 'Dubai', limit: 5 } },
-            { type: 'featured-listing', projectId: 'skygate-tower' },
+            { type: 'featured-listing', projectId: 'skyscape-avenue' },
             'developers-list', 'city-guide', 'features', 'blog-grid', 'team', 'newsletter', 'chat-widget'
         ], { city: 'Dubai' }),
         createPage('about', 'About Us', ['hero', 'stats', 'team', 'contact-details']),
-        createPage('projects', 'Projects', [{ type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 6 } }, 'mortgage-calculator', 'roi-calculator']),
+        createPage('projects', 'Projects', [{ type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 9 } }, 'mortgage-calculator', 'roi-calculator']),
         createPage('contact', 'Contact Us', ['contact-details', 'cta-form']),
     ]
 };
@@ -421,8 +422,8 @@ export const mapFocusedTemplate: SiteTemplate = {
     pages: [
         createPage('home', 'Map Search', [
             'search-filters',
-            { type: 'listing-grid-map', projectFilter: { city: 'Dubai', limit: 5 } },
-            { type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 3 } },
+            { type: 'listing-grid-map', projectFilter: { city: 'Dubai', limit: 8 } },
+            { type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 6 } },
             'chat-widget'
         ], { city: 'Dubai' }),
     ]
@@ -435,7 +436,7 @@ export const adsQuickLaunchTemplate: SiteTemplate = {
     pages: [
         createPage('home', 'Landing Page', [
             { type: 'coming-soon-hero', overrides: { backgroundImage: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=2000' } },
-            { type: 'project-detail', projectId: 'skygate-tower' },
+            { type: 'project-detail', projectId: 'orbis-tower-d' },
             'video', 'floor-plan', 'payment-plan', 'offer', 'brochure-form', 'chat-widget'
         ], { city: 'Dubai' }),
     ]
@@ -530,7 +531,7 @@ export const whatsappLeadTemplate: SiteTemplate = {
           ctaText: "Chat on WhatsApp",
         }
       },
-      { type: 'featured-listing', projectId: 'elysian-residence' },
+      { type: 'featured-listing', projectId: '310-riverside-crescent' },
     ])
   ]
 };
@@ -561,15 +562,15 @@ export const damacIslandsLeadGen: SiteTemplate = {
     description: "High-converting landing page for Damac's new island projects.",
     pages: [
         createPage('home', 'Damac Islands', [
-            { type: 'launch-hero', overrides: { headline: "Discover Damac Islands", subtext: "Your private sanctuary awaits. Launching soon.", launchDate: "Dec 2025", backgroundImage: findProject('damac-riverside-azure')?.images?.[0] || defaultBlocks['launch-hero'].data.backgroundImage } },
-            { type: 'video', overrides: { headline: "The Damac Islands Experience", videoThumbnail: findProject('damac-riverside-azure')?.images?.[0] || defaultBlocks.video.data.videoThumbnail } },
-            { type: 'project-detail', projectId: 'damac-riverside-azure', overrides: { headline: "Azure 2 Residences" } },
+            { type: 'launch-hero', overrides: { headline: "Discover Damac Islands", subtext: "Your private sanctuary awaits. Launching soon.", launchDate: "Dec 2025", backgroundImage: findProject('selene-beach-residences')?.images?.[0] || defaultBlocks['launch-hero'].data.backgroundImage } },
+            { type: 'video', overrides: { headline: "The Damac Islands Experience", videoThumbnail: findProject('selene-beach-residences')?.images?.[0] || defaultBlocks.video.data.videoThumbnail } },
+            { type: 'project-detail', projectId: 'selene-beach-residences', overrides: { headline: "Azure 2 Residences" } },
             { type: 'floor-plan', overrides: { headline: "Island Home Layouts" } },
             { type: 'payment-plan', overrides: { headline: "Exclusive Payment Offer" } },
             { type: 'brochure-form', overrides: { brochureTitle: "Damac Islands Brochure" } },
             'cta-form',
             'chat-widget'
-        ], { city: 'Dubai' })
+        ], { city: 'Umm-al-quwain' })
     ]
 };
 
@@ -614,7 +615,7 @@ export const dubaiPropertiesRoadshow: SiteTemplate = {
     pages: [
         createPage('home', 'Global Investor Event', [
             { type: 'roadshow', overrides: { eventName: "Dubai Properties Global Roadshow", city: "London", date: "Dec 1-3, 2025", venue: "The Dorchester, London", imageUrl: defaultBlocks.roadshow.data.imageUrl } },
-            { type: 'featured-listing', projectId: 'skygate-tower', overrides: { headline: "Exclusive Investment Opportunity" } },
+            { type: 'featured-listing', projectId: 'skyscape-avenue', overrides: { headline: "Exclusive Investment Opportunity" } },
             { type: 'city-guide', overrides: { headline: "Why Invest in Dubai?", city: "Dubai" } },
             'partners',
             'cta-form',
