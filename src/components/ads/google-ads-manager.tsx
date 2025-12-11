@@ -9,8 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, AlertCircle, TrendingUp, MousePointerClick, Eye, Globe } from "lucide-react";
-import { generateAdsFromPageContent } from "@/ai/flows/generate-ads-from-page-content";
+import { CheckCircle2, AlertCircle, TrendingUp, MousePointerClick, Eye, Globe, Loader2 } from "lucide-react";
+import { generateAdsFromPageContent, type GenerateAdsOutput } from "@/ai/flows/generate-ads-from-page-content";
 
 interface GoogleAdsManagerProps {
   pageTitle: string;
@@ -22,7 +22,7 @@ export function GoogleAdsManager({ pageTitle, pageDescription }: GoogleAdsManage
   const [budget, setBudget] = useState([50]); // Daily budget in USD
   const [duration, setDuration] = useState([7]); // Duration in days
   const [isGenerating, setIsGenerating] = useState(false);
-  const [adContent, setAdContent] = useState({
+  const [adContent, setAdContent] = useState<GenerateAdsOutput>({
       headlines: [
           "Luxury Living in Dubai",
           "Invest in High ROI Properties",
@@ -37,22 +37,15 @@ export function GoogleAdsManager({ pageTitle, pageDescription }: GoogleAdsManage
 
   const handleGenerateAds = async () => {
       setIsGenerating(true);
-      // Simulate AI generation
-      setTimeout(() => {
-          setAdContent({
-              headlines: [
-                  `New Launch: ${pageTitle}`,
-                  "Own a Piece of Paradise",
-                  "10% Guaranteed ROI"
-              ],
-              descriptions: [
-                  `Discover ${pageTitle}. ${pageDescription.slice(0, 50)}...`,
-                  "Tax-free investment with high rental yields. Golden Visa eligibility included."
-              ],
-              keywords: ["off plan dubai", "emaar new launch", "investment property"]
-          });
+      try {
+          const result = await generateAdsFromPageContent({ pageTitle, pageDescription });
+          setAdContent(result);
+      } catch (error) {
+          console.error("Failed to generate ads:", error);
+          // Optionally, show a toast notification to the user
+      } finally {
           setIsGenerating(false);
-      }, 1500);
+      }
   };
 
   const estimatedReach = Math.floor(budget[0] * 800 * (duration[0] / 7));
@@ -86,7 +79,12 @@ export function GoogleAdsManager({ pageTitle, pageDescription }: GoogleAdsManage
                         <div className="flex justify-between items-center">
                             <h4 className="font-semibold text-sm">Search Ad Preview</h4>
                             <Button variant="ghost" size="sm" onClick={handleGenerateAds} disabled={isGenerating}>
-                                {isGenerating ? "Generating..." : "Regenerate with AI"}
+                                {isGenerating ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Generating...
+                                    </>
+                                ) : "Regenerate with AI"}
                             </Button>
                         </div>
                         
@@ -97,10 +95,10 @@ export function GoogleAdsManager({ pageTitle, pageDescription }: GoogleAdsManage
                                 <span className="text-xs text-muted-foreground">entresite.ai/projects/{pageTitle.toLowerCase().replace(/ /g, '-')}</span>
                             </div>
                             <div className="text-xl text-[#1a0dab] hover:underline cursor-pointer font-medium leading-snug">
-                                {adContent.headlines[0]} | {adContent.headlines[1]}
+                                {adContent.headlines.join(' | ')}
                             </div>
                             <div className="text-sm text-[#4d5156] mt-1">
-                                {adContent.descriptions[0]} {adContent.descriptions[1]}
+                                {adContent.descriptions.join(' ')}
                             </div>
                             <div className="flex gap-2 mt-2">
                                 <span className="text-xs text-[#1a0dab] hover:underline cursor-pointer">View Floor Plans</span>
