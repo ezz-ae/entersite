@@ -44,10 +44,12 @@ export interface ProjectData {
   bedrooms?: {
     min: number;
     max: number;
+    label: string;
   };
   areaSqft?: {
     min: number;
     max: number;
+    label: string;
   };
   tags?: string[];
   publicUrl?: string;
@@ -75,4 +77,13 @@ export interface SitePage {
   };
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ProjectFilter {
+  city?: string;
+  developer?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  bedrooms?: number;
+  availability?: 'Available' | 'Sold Out' | 'Coming Soon';
 }

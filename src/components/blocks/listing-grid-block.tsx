@@ -1,20 +1,14 @@
+
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { 
-  Card, 
-  CardContent, 
-  CardFooter, 
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, BedDouble, Bath, Square, ArrowRight, Heart, Search, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { Search, Loader2 } from "lucide-react";
 import type { ProjectData } from "@/lib/types";
 import { motion } from "framer-motion";
 import { searchProjects } from "@/lib/project-service";
 import { verifyAndFetchAssets } from "@/lib/media-scraper"; 
+import { ProjectCard } from "@/components/project-card";
 
 interface ListingGridBlockProps {
   headline?: string;
@@ -31,20 +25,14 @@ export function ListingGridBlock({
 }: ListingGridBlockProps) {
   
   const [projects, setProjects] = useState<ProjectData[]>(initialProjects);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(initialProjects.length === 0);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
       if (initialProjects.length === 0) {
           loadProjects(searchQuery, initialFilter);
       } else {
-          // If projects are passed in, verify their assets.
-          const verifyInitial = async () => {
-              const verified = await Promise.all(initialProjects.map(p => verifyAndFetchAssets(p.name, p.images)));
-              const updatedProjects = initialProjects.map((p, i) => ({ ...p, images: verified[i].heroImages, developer: verified[i].developerName || p.developer }));
-              setProjects(updatedProjects);
-          };
-          verifyInitial();
+          setLoading(false);
       }
   }, [initialProjects, initialFilter]);
 
@@ -104,85 +92,7 @@ export function ListingGridBlock({
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map((project, index) => (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.08 }}
-                    viewport={{ once: true, amount: 0.5 }}
-                    key={project.id}
-                >
-                    <Card className="group overflow-hidden border border-border/50 bg-card hover:bg-muted/20 transition-colors duration-500 flex flex-col h-full rounded-2xl shadow-sm hover:shadow-xl">
-                    <div className="relative aspect-[4/3] overflow-hidden m-2 rounded-xl">
-                        <Image
-                            src={project.images?.[0] || 'https://picsum.photos/seed/1/800/600'}
-                            alt={project.name}
-                            fill
-                            className="object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                        <div className="absolute top-4 left-4">
-                            <Badge variant="secondary" className="bg-white/90 backdrop-blur text-black border-0 shadow-sm font-medium px-3 py-1">
-                                {project.availability}
-                            </Badge>
-                        </div>
-                        <Button size="icon" variant="ghost" className="absolute top-4 right-4 bg-black/20 hover:bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Heart className="h-5 w-5" />
-                        </Button>
-                        
-                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="flex gap-2">
-                                {project.features?.slice(0, 2).map((f, i) => (
-                                    <Badge key={i} variant="outline" className="text-white border-white/30 bg-black/20 backdrop-blur-sm text-[10px]">
-                                        {f}
-                                    </Badge>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <CardContent className="p-6 space-y-4 flex-grow">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h3 className="font-bold text-xl mb-1 group-hover:text-primary transition-colors line-clamp-1">{project.name}</h3>
-                                <div className="flex items-center text-muted-foreground text-sm">
-                                    <MapPin className="h-3.5 w-3.5 mr-1" />
-                                    {project.location?.city}
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-xs text-muted-foreground uppercase font-medium">Starting from</p>
-                                <p className="text-lg font-bold text-primary">{project.price?.label}</p>
-                            </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border/50">
-                            <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                                    <BedDouble className="h-3.5 w-3.5" /> Beds
-                                </div>
-                                <span className="font-semibold text-sm">1 - 4</span>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                                    <Square className="h-3.5 w-3.5" /> Area
-                                </div>
-                                <span className="font-semibold text-sm">850+ sqft</span>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                                    <Bath className="h-3.5 w-3.5" /> Baths
-                                </div>
-                                <span className="font-semibold text-sm">2 - 5</span>
-                            </div>
-                        </div>
-                    </CardContent>
-
-                    <CardFooter className="p-6 pt-0">
-                        <Button variant="secondary" className="w-full h-12 rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                            View Details <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                    </CardFooter>
-                    </Card>
-                </motion.div>
+                <ProjectCard key={project.id} project={project} index={index} />
             ))}
             </div>
         )}
@@ -190,3 +100,4 @@ export function ListingGridBlock({
     </section>
   );
 }
+

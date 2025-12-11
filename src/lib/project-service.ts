@@ -10,7 +10,7 @@ export interface ProjectFilter {
   minPrice?: number;
   maxPrice?: number;
   bedrooms?: number;
-  status?: 'Off-Plan' | 'Ready' | 'Resale';
+  availability?: 'Available' | 'Sold Out' | 'Coming Soon';
 }
 
 export const searchProjects = async (query: string, filters?: ProjectFilter): Promise<ProjectData[]> => {
@@ -45,7 +45,9 @@ export const searchProjects = async (query: string, filters?: ProjectFilter): Pr
         // Note: Our current mock data only has 'from' price. In real app, we'd check range.
         results = results.filter(p => p.price.from <= filters.maxPrice!);
     }
-    // Add more filter logic as data structure evolves
+    if (filters.availability) {
+        results = results.filter(p => p.availability === filters.availability);
+    }
   }
 
   return results;

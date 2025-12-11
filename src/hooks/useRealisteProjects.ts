@@ -25,6 +25,16 @@ const transformProjectData = (rawProject: any): ProjectData => {
   const bedrooms = rawProject.stats?.bedrooms?.map((b: any) => b.count) || [];
   const minBed = bedrooms.length > 0 ? Math.min(...bedrooms) : 0;
   const maxBed = bedrooms.length > 0 ? Math.max(...bedrooms) : 0;
+  
+  const areaMin = rawProject.stats?.areaRange?.min?.value;
+  const areaMax = rawProject.stats?.areaRange?.max?.value;
+  let areaLabel = 'N/A';
+  if (areaMin && areaMax) {
+      areaLabel = `${Math.round(areaMin)} - ${Math.round(areaMax)} sqft`;
+  } else if (areaMin) {
+      areaLabel = `${Math.round(areaMin)}+ sqft`;
+  }
+
 
   return {
     id: rawProject.urlPathSegment || rawProject.name.toLowerCase().replace(/\s+/g, '-'),
@@ -46,11 +56,12 @@ const transformProjectData = (rawProject: any): ProjectData => {
       label: priceLabel,
     },
     availability,
-    images: rawProject.marketing?.mainImageUrl ? [rawProject.marketing.mainImageUrl] : [],
-    bedrooms: { min: minBed, max: maxBed },
+    images: rawProject.marketing?.mainImageUrl ? [rawProject.marketing.mainImageUrl] : ['https://picsum.photos/seed/1/800/600'],
+    bedrooms: { min: minBed, max: maxBed, label: `${minBed}-${maxBed}` },
     areaSqft: {
-      min: rawProject.stats?.areaRange?.min?.value || 0,
-      max: rawProject.stats?.areaRange?.max?.value || 0,
+      min: areaMin || 0,
+      max: areaMax || 0,
+      label: areaLabel
     },
     tags: rawProject.tags?.map((t:any) => t.code),
     publicUrl: rawProject.publicUrl,

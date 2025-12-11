@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Loader2, Rocket, ArrowRight } from "lucide-react";
-import { ListingGridBlock } from '@/components/blocks/listing-grid-block';
-import type { ProjectFilter } from '@/lib/types';
+import type { ProjectFilter, ProjectData } from '@/lib/types';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { getDevelopers, getLocations } from '@/lib/project-service';
 import { useRealisteProjects } from '@/hooks/useRealisteProjects';
+import { ProjectCard } from '@/components/project-card';
 
 export function ProjectDiscoverySection() {
   const [filters, setFilters] = useState<ProjectFilter>({});
@@ -142,12 +142,16 @@ export function ProjectDiscoverySection() {
           </form>
 
           {loading ? (
-              <div className="h-96 flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <span className="ml-3 text-lg text-muted-foreground">Loading projects...</span>
-              </div>
+            <div className="h-96 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="ml-3 text-lg text-muted-foreground">Loading projects...</span>
+            </div>
           ) : projects.length > 0 ? (
-              <ListingGridBlock headline="" subtext="" projects={projects} />
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                 {projects.slice(0, 6).map((project) => (
+                     <ProjectCard key={project.id} project={project} />
+                 ))}
+             </div>
           ) : (
               <div className="text-center py-16 text-muted-foreground text-lg">
                   No projects found matching your criteria.
