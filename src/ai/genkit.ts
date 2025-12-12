@@ -1,6 +1,6 @@
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/google-genai';
-import {dev} from '@genkit-ai/next';
+import dev from '@genkit-ai/next';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
