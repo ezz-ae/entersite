@@ -21,12 +21,16 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 
+const PROJECTS_PER_PAGE = 12;
+
 export default function DiscoverPage() {
-  const [projects, setProjects] = useState<ProjectData[]>([]);
+  const [allProjects, setAllProjects] = useState<ProjectData[]>([]);
+  const [displayedProjects, setDisplayedProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
-  
+  const [page, setPage] = useState(1);
+
   // Filter State
   const [selectedCity, setSelectedCity] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -37,30 +41,26 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     loadData();
-  }, [selectedCity, selectedStatus]); // Reload when filters change
+  }, [selectedCity, selectedStatus, searchQuery]); // Reload when filters or search query change
 
   const loadData = async () => {
     setLoading(true);
     
-    // Construct filter object
     const filters: any = {};
     if (selectedCity !== "all") filters.city = selectedCity;
     if (selectedStatus !== "all") filters.status = selectedStatus;
     
-    // In a real app, we'd pass priceRange to the backend/service too
-    // For now, we'll filter client-side or assume service handles it if we passed it
-    
     const data = await searchRealisteProjects(searchQuery, filters);
     
-    // Apply client-side price filtering for this demo if service doesn't do it fully
     const filteredData = data.filter(p => p.price.from >= priceRange[0] && p.price.from <= priceRange[1]);
     
-    setProjects(filteredData);
-    
-    // Calculate stats dynamiclly based on filtered view
+    setAllProjects(filteredData);
+    setDisplayedProjects(filteredData.slice(0, PROJECTS_PER_PAGE));
+    setPage(1);
+
     const total = filteredData.length;
     const avgPrice = total > 0 ? filteredData.reduce((acc, curr) => acc + curr.price.from, 0) / total : 0;
-    const avgRoi = 8.5; // This would ideally come from the data
+    const avgRoi = 8.5; 
 
     setStats({ total, avgPrice, avgRoi });
     setLoading(false);
@@ -70,6 +70,13 @@ export default function DiscoverPage() {
       e.preventDefault();
       loadData();
   }
+
+  const loadMore = () => {
+    const nextPage = page + 1;
+    const newProjects = allProjects.slice(0, nextPage * PROJECTS_PER_PAGE);
+    setDisplayedProjects(newProjects);
+    setPage(nextPage);
+  };
 
   const formatPrice = (price: number) => {
       if (price >= 1000000) return `AED ${(price / 1000000).toFixed(1)}M`;
@@ -84,7 +91,7 @@ export default function DiscoverPage() {
       {/* Hero / Market Pulse */}
       <section className="bg-zinc-950 text-white border-b border-white/10 pt-32 pb-16">
           <div className="container mx-auto px-6 max-w-[1800px]">
-              <div className="flex flex-col xl:flex-row justify-between items-end gap-12 mb-12">
+              <div className="flex flex-col items-center gap-12 mb-12 text-center">
                   <div className="max-w-3xl">
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-medium border border-blue-500/20 mb-6">
                         <BarChart3 className="h-3 w-3" />
@@ -116,7 +123,7 @@ export default function DiscoverPage() {
               </div>
 
               {/* Search Bar */}
-              <div className="max-w-4xl">
+              <div className="max-w-4xl mx-auto">
                   <form onSubmit={handleSearch} className="relative group">
                       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-100 transition-opacity" />
                       <div className="relative flex items-center bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl p-2 pl-4 transition-all focus-within:ring-2 focus-within:ring-primary/50">
@@ -149,6 +156,7 @@ export default function DiscoverPage() {
                             setSelectedCity("all");
                             setSelectedStatus("all");
                             setPriceRange([0, 50000000]);
+                            setSearchQuery("");
                         }}>Reset</Button>
                     </div>
 
@@ -231,7 +239,7 @@ export default function DiscoverPage() {
             {/* Main Content */}
             <div className="space-y-8">
                 <div className="flex justify-between items-center bg-card p-4 rounded-xl border shadow-sm">
-                    <p className="text-sm font-medium text-muted-foreground">Showing <strong>{projects.length}</strong> verified projects</p>
+                    <p className="text-sm font-medium text-muted-foreground">Showing <strong>{displayedProjects.length}</strong> of <strong>{allProjects.length}</strong> verified projects</p>
                     <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-lg">
                         <Button 
                             variant={viewMode === 'grid' ? 'secondary' : 'ghost'} 
@@ -253,62 +261,69 @@ export default function DiscoverPage() {
                 </div>
 
                 {viewMode === 'grid' ? (
-                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-                        {projects.map((project) => (
-                            <Card key={project.id} className="overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group border-border/60 rounded-2xl bg-card">
-                                <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                                    <ResponsiveImage 
-                                        src={project.images?.[0] || getRandomImage('hero')} 
-                                        alt={project.name}
-                                        fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                    />
-                                    <div className="absolute top-4 left-4">
-                                        <Badge variant="secondary" className="backdrop-blur-xl bg-white/90 text-black border-0 shadow-sm font-semibold px-3 py-1">
-                                            {project.deliveryYear}
-                                        </Badge>
-                                    </div>
-                                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md">
-                                        {project.status || 'Off-Plan'}
-                                    </div>
-                                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent text-white opacity-100">
-                                        <p className="font-bold text-lg tracking-tight mb-1">{project.developer}</p>
-                                        <p className="text-white/80 text-sm flex items-center gap-1"><MapPin className="h-3 w-3" /> {project.location.area}</p>
-                                    </div>
-                                </div>
-                                <CardContent className="p-6">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <h3 className="font-bold text-xl line-clamp-1 group-hover:text-primary transition-colors">{project.name}</h3>
-                                        <div className="text-right">
-                                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">Starting From</p>
-                                            <p className="font-bold text-lg text-primary whitespace-nowrap">{project.price.label}</p>
+                    <>
+                        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+                            {displayedProjects.map((project) => (
+                                <Card key={project.id} className="overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group border-border/60 rounded-2xl bg-card">
+                                    <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                                        <ResponsiveImage 
+                                            src={project.images?.[0] || getRandomImage('hero')} 
+                                            alt={project.name}
+                                            fill
+                                            className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                        />
+                                        <div className="absolute top-4 left-4">
+                                            <Badge variant="secondary" className="backdrop-blur-xl bg-white/90 text-black border-0 shadow-sm font-semibold px-3 py-1">
+                                                {project.deliveryYear}
+                                            </Badge>
+                                        </div>
+                                        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md">
+                                            {project.status || 'Off-Plan'}
+                                        </div>
+                                        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent text-white opacity-100">
+                                            <p className="font-bold text-lg tracking-tight mb-1">{project.developer}</p>
+                                            <p className="text-white/80 text-sm flex items-center gap-1"><MapPin className="h-3 w-3" /> {project.location.area}</p>
                                         </div>
                                     </div>
-                                    
-                                    <div className="grid grid-cols-2 gap-4 py-4 border-t border-border/50">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
-                                                <TrendingUp className="h-4 w-4" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] text-muted-foreground uppercase font-bold">Est. ROI</p>
-                                                <p className="text-sm font-bold text-green-600">8.5%</p>
+                                    <CardContent className="p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <h3 className="font-bold text-xl line-clamp-1 group-hover:text-primary transition-colors">{project.name}</h3>
+                                            <div className="text-right">
+                                                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">Starting From</p>
+                                                <p className="font-bold text-lg text-primary whitespace-nowrap">{project.price.label}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-                                                <BarChart3 className="h-4 w-4" />
+                                        
+                                        <div className="grid grid-cols-2 gap-4 py-4 border-t border-border/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+                                                    <TrendingUp className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-muted-foreground uppercase font-bold">Est. ROI</p>
+                                                    <p className="text-sm font-bold text-green-600">8.5%</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="text-[10px] text-muted-foreground uppercase font-bold">Growth</p>
-                                                <p className="text-sm font-bold text-blue-600">+12%</p>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                                                    <BarChart3 className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-muted-foreground uppercase font-bold">Growth</p>
+                                                    <p className="text-sm font-bold text-blue-600">+12%</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                        {displayedProjects.length < allProjects.length && (
+                            <div className="text-center">
+                                <Button onClick={loadMore} size="lg">Load More</Button>
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <div className="border rounded-2xl overflow-hidden bg-card shadow-sm">
                         <table className="w-full text-sm">
@@ -324,7 +339,7 @@ export default function DiscoverPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/50">
-                                {projects.map((project) => (
+                                {displayedProjects.map((project) => (
                                     <tr key={project.id} className="hover:bg-muted/30 transition-colors group">
                                         <td className="py-4 px-6 font-bold text-foreground">{project.name}</td>
                                         <td className="py-4 px-6 text-muted-foreground">{project.developer}</td>
@@ -341,6 +356,11 @@ export default function DiscoverPage() {
                                 ))}
                             </tbody>
                         </table>
+                         {displayedProjects.length < allProjects.length && (
+                            <div className="text-center p-4">
+                                <Button onClick={loadMore} size="lg">Load More</Button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

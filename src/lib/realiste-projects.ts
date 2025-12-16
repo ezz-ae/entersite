@@ -24,10 +24,10 @@ export const getRealisteProjects = (): ProjectData[] => {
   return buildings.map((b: any) => ({
     id: b.id || `realiste-${Math.random().toString(36).substr(2, 9)}`,
     name: b.name || "Unnamed Project",
-    developer: b.developer?.name || "Unknown Developer",
+    developer: b.developer?.name || "- TBD -",
     location: {
       city: b.region?.city?.name || "Dubai", // Default to Dubai if missing
-      area: b.region?.name || "Unknown Area",
+      area: b.region?.name || "- TBD -",
       mapQuery: `${b.name}, ${b.region?.name}, Dubai`
     },
     launchYear: new Date().getFullYear(), // Fallback
