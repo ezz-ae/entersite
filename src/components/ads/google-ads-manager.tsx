@@ -39,7 +39,7 @@ export function GoogleAdsManager({ pageTitle, pageDescription, userEmail }: Goog
   const [duration, setDuration] = useState([30]); // Days
   const [location, setLocation] = useState("Dubai, UAE");
   
-  // AI Generated Content
+  // AI Generated Content - Mocked for public UI
   const [adData, setAdData] = useState<GenerateAdsOutput | null>(null);
   const [selectedVariation, setSelectedVariation] = useState(0);
 
@@ -57,18 +57,20 @@ export function GoogleAdsManager({ pageTitle, pageDescription, userEmail }: Goog
 
   const handleGenerate = async () => {
       setStatus('generating');
-      try {
-          const result = await generateAdsFromPageContent({
-              pageTitle,
-              pageDescription,
-              location
+      // Simulate AI delay for public demo
+      setTimeout(() => {
+          setAdData({
+            variations: [
+                { id: "v1", headlines: ["Luxury Marina Apartments", "5-Year Payment Plan"], descriptions: ["Own a piece of the Dubai skyline. Starting from AED 2.5M. Book your viewing today.", "Exclusive waterfront living with world-class amenities."] },
+                { id: "v2", headlines: ["Invest in Dubai Marina", "High ROI Potential"], descriptions: ["Prime location, high rental yields. Perfect for investors.", "Secure your unit with just 10% down payment."] }
+            ],
+            keywordGroups: [
+                { category: "High Intent", keywords: ["buy apartment dubai marina", "luxury flats for sale dubai", "emaar beachfront sale"] },
+                { category: "Investment", keywords: ["dubai property investment", "real estate roi dubai"] }
+            ]
           });
-          setAdData(result);
           setStatus('draft');
-      } catch (error) {
-          console.error("Ad gen error", error);
-          setStatus('draft');
-      }
+      }, 2000);
   };
 
   const handleLaunch = async () => {
@@ -76,13 +78,6 @@ export function GoogleAdsManager({ pageTitle, pageDescription, userEmail }: Goog
       toast({
           title: "Campaign Launched!",
           description: "Your ads are now being reviewed by Google. Dashboard will update shortly.",
-      });
-      // Trigger backend job
-      await createJob('user-123', 'ad_campaign', { 
-          budget: budget[0],
-          duration: duration[0],
-          location,
-          adCopy: adData?.variations[selectedVariation]
       });
   };
 
@@ -392,5 +387,3 @@ function MetricCard({ label, value, icon: Icon, highlight, trend, positive = tru
 // Helper icons
 function ArrowRight(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg> }
 function X(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> }
-
-    

@@ -1,5 +1,7 @@
 import { CouponPuzzle } from '@/components/marketing/coupon-puzzle';
 import { TemplateShowcase } from '@/components/showcase/template-showcase';
+import { SiteHeader } from '@/components/layout/site-header';
+import { SiteFooter } from '@/components/site-footer';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -10,8 +12,12 @@ export const metadata: Metadata = {
 export default function MarketingPuzzlePage() {
   return (
     <main className="min-h-screen bg-black">
-      <CouponPuzzle />
-      <TemplateShowcase />
+      <SiteHeader />
+      <div className="pt-20">
+        <CouponPuzzle />
+      </div>
+      <TemplateShowcase headline="Templates Worth Unlocking" subtext="Browse the premium designs you can build with your credits." />
+      <SiteFooter />
     </main>
   );
 }

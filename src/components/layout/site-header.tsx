@@ -23,6 +23,11 @@ export function SiteHeader() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
     <header 
         className={cn(
@@ -34,8 +39,8 @@ export function SiteHeader() {
     >
       <div className="container flex items-center justify-between px-6 max-w-[1800px]">
         
-        <div className="flex items-center gap-12">
-            <Link href="/" className="flex items-center space-x-2 group z-50 relative">
+        <div className="flex items-center gap-12 z-50 relative">
+            <Link href="/" className="flex items-center space-x-2 group">
                 <div className="bg-white text-black p-1.5 rounded-lg group-hover:scale-105 transition-transform">
                     <EntreSiteLogo className="h-5 w-5" />
                 </div>
@@ -52,11 +57,14 @@ export function SiteHeader() {
                     onMouseEnter={() => setActiveDropdown('product')}
                     onMouseLeave={() => setActiveDropdown(null)}
                 >
-                    <div className="grid grid-cols-2 w-[400px] gap-2 p-2">
+                    <div className="grid grid-cols-2 w-[500px] gap-2 p-2">
                         <NavCard title="Site Builder" desc="Drag & drop editor" href="/builder" />
                         <NavCard title="Data Engine" desc="3,750+ Projects" href="/discover" />
                         <NavCard title="Ads Manager" desc="Automated campaigns" href="/products/google-ads" />
                         <NavCard title="CRM" desc="Lead management" href="/products/crm" />
+                        <NavCard title="Instagram Bot" desc="Auto-reply & growth" href="/products/instagram-bot" />
+                        <NavCard title="SMS Marketing" desc="Bulk text campaigns" href="/products/sms-marketing" />
+                        <NavCard title="Email Marketing" desc="Newsletter automation" href="/products/email-marketing" />
                     </div>
                 </NavItem>
                 
@@ -72,7 +80,7 @@ export function SiteHeader() {
             </nav>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 z-50 relative">
             <Link href="/login" className="hidden sm:block text-sm font-medium text-white hover:opacity-80 transition-opacity">
                 Log in
             </Link>
@@ -85,8 +93,9 @@ export function SiteHeader() {
             <Button 
                 variant="ghost" 
                 size="icon" 
-                className="lg:hidden text-white"
+                className="lg:hidden text-white hover:bg-white/10"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle Menu"
             >
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
@@ -97,15 +106,42 @@ export function SiteHeader() {
       <AnimatePresence>
         {mobileMenuOpen && (
             <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "100vh" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="absolute top-0 left-0 w-full bg-black z-40 pt-24 px-6 flex flex-col gap-6 overflow-hidden"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black z-40 pt-24 px-6 flex flex-col gap-6 overflow-y-auto"
             >
-                <Link href="/builder" className="text-2xl font-bold text-white">Product</Link>
-                <Link href="/discover" className="text-2xl font-bold text-white">Data</Link>
-                <Link href="/marketing-puzzle" className="text-2xl font-bold text-white">Templates</Link>
-                <Link href="/blog" className="text-2xl font-bold text-white">Blog</Link>
+                <div className="flex flex-col gap-8 pb-10">
+                    <div className="space-y-4">
+                        <div className="text-sm font-bold text-zinc-500 uppercase tracking-wider mb-2">Product</div>
+                        <Link href="/builder" className="block text-2xl font-bold text-white hover:text-zinc-300">Site Builder</Link>
+                        <Link href="/discover" className="block text-2xl font-bold text-white hover:text-zinc-300">Data Engine</Link>
+                        <Link href="/products/google-ads" className="block text-2xl font-bold text-white hover:text-zinc-300">Ads Manager</Link>
+                        <Link href="/products/crm" className="block text-2xl font-bold text-white hover:text-zinc-300">CRM</Link>
+                        <Link href="/products/instagram-bot" className="block text-2xl font-bold text-white hover:text-zinc-300">Instagram Bot</Link>
+                        <Link href="/products/sms-marketing" className="block text-2xl font-bold text-white hover:text-zinc-300">SMS Marketing</Link>
+                        <Link href="/products/email-marketing" className="block text-2xl font-bold text-white hover:text-zinc-300">Email Marketing</Link>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="text-sm font-bold text-zinc-500 uppercase tracking-wider mb-2">Resources</div>
+                        <Link href="/marketing-puzzle" className="block text-2xl font-bold text-white hover:text-zinc-300">Templates</Link>
+                        <Link href="/blog" className="block text-2xl font-bold text-white hover:text-zinc-300">Blog</Link>
+                        <Link href="/docs" className="block text-2xl font-bold text-white hover:text-zinc-300">Documentation</Link>
+                    </div>
+
+                    <div className="pt-8 border-t border-white/10 space-y-4">
+                        <Link href="/login" className="block text-center text-lg font-medium text-white py-3 border border-white/20 rounded-xl hover:bg-white/5">
+                            Log in
+                        </Link>
+                        <Link href="/builder" className="block">
+                            <Button className="w-full h-14 text-lg font-bold rounded-xl bg-white text-black hover:bg-zinc-200">
+                                Start Building Now
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
             </motion.div>
         )}
       </AnimatePresence>

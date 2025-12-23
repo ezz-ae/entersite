@@ -30,6 +30,9 @@ export interface ProjectData {
       quarter: number;
       year: number;
   } | null;
+  // deliveryYear is a helper for sorting/filtering
+  deliveryYear?: number;
+  status?: string;
   description: {
     full: string;
     short: string;
