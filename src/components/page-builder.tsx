@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,8 +22,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import type { Block as BlockType, SitePage } from '@/lib/types';
-import { BlockCard } from './block-card';
-import { HeroBlock } from './blocks/hero-block';
+import { BlockCard } from '@/components/block-card';
+import { HeroBlock } from '@/components/blocks/hero-block';
 import { ListingGridBlock } from './blocks/listing-grid-block';
 import { CtaFormBlock } from './blocks/cta-form-block';
 import { GalleryBlock } from './blocks/gallery-block';
@@ -66,7 +65,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { BlockGallery } from './block-gallery';
-import { SortableItem } from './ui/sortable/sortable-item';
+import { SortableItem } from '@/components/ui/sortable/sortable-item';
 import { suggestNextBlocks, SuggestNextBlocksOutput } from '@/ai/flows/suggest-next-blocks';
 import { Separator } from './ui/separator';
 import { allProjects } from '@/lib/projects';

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Copy, ExternalLink, Globe, Loader2, Share2, Twitter, Linkedin } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/toaster";
 import { publishSite } from "@/lib/publish-service";
 import type { SitePage } from '@/lib/types';
 import confetti from 'canvas-confetti';
