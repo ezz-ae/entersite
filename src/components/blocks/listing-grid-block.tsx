@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, Loader2 } from "lucide-react";
 import type { ProjectData } from "@/lib/types";
@@ -28,15 +28,7 @@ export function ListingGridBlock({
   const [loading, setLoading] = useState(initialProjects.length === 0);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-      if (initialProjects.length === 0) {
-          loadProjects(searchQuery, initialFilter);
-      } else {
-          setLoading(false);
-      }
-  }, [initialProjects, initialFilter]);
-
-  const loadProjects = async (query = "", filters = initialFilter) => {
+  const loadProjects = useCallback(async (query = "", filters = initialFilter) => {
       setLoading(true);
       try {
           const rawResults = await searchProjects(query, filters);
@@ -57,7 +49,13 @@ export function ListingGridBlock({
       } finally {
           setLoading(false);
       }
-  }
+  }, [initialFilter]);
+
+  useEffect(() => {
+      if (initialProjects.length === 0) {
+          loadProjects(searchQuery);
+      }
+  }, [initialProjects.length, loadProjects, searchQuery]);
 
   const handleSearch = (e: React.FormEvent) => {
       e.preventDefault();
@@ -100,4 +98,3 @@ export function ListingGridBlock({
     </section>
   );
 }
-
