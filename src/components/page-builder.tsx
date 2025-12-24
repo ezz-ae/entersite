@@ -58,6 +58,8 @@ import { LaunchHeroBlock } from './blocks/hero/launch-hero-block';
 import { ComingSoonHeroBlock } from './blocks/hero/coming-soon-hero-block';
 import { CtaGridBlock } from './blocks/cta/cta-grid-block';
 import { BannerCtaBlock } from './blocks/cta/banner-cta-block';
+import { ChatAgentBlock } from './blocks/ai/chat-agent-block';
+import { SmsLeadBlock } from './blocks/marketing/sms-lead-block';
 import { Button } from './ui/button';
 import {
   Popover,
@@ -110,6 +112,8 @@ const blockComponents: Record<string, React.ComponentType<any>> = {
   'coming-soon-hero': ComingSoonHeroBlock,
   'cta-grid': CtaGridBlock,
   'banner-cta': BannerCtaBlock,
+  'chat-agent': ChatAgentBlock,
+  'sms-lead': SmsLeadBlock,
 };
 
 const renderBlock = (block: BlockType) => {

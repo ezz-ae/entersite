@@ -1,0 +1,104 @@
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+import { UserNav } from "@/components/user-nav";
+import { EntreSiteLogo } from "@/components/icons";
+import { Monitor, Smartphone, Tablet, Rocket, Eye, ChevronLeft, Save } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { SitePage } from '@/lib/types';
+
+interface EditorHeaderProps {
+  page: SitePage;
+  onSave?: () => void;
+  onPreview?: () => void;
+  onPublish?: () => void;
+}
+
+export function EditorHeader({ 
+  page,
+  onSave,
+  onPreview,
+  onPublish
+}: EditorHeaderProps) {
+  const [device, setDevice] = React.useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+
+  return (
+    <header className="h-16 flex-shrink-0 bg-black border-b border-white/10 flex items-center justify-between px-4 z-50">
+      
+      {/* Left Side: Exit & Title */}
+      <div className="flex items-center gap-4">
+          <Link href="/dashboard/sites">
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-zinc-500 hover:text-white hover:bg-white/5">
+                  <ChevronLeft className="h-5 w-5" />
+              </Button>
+          </Link>
+          <div className="h-4 w-px bg-white/10" />
+          <div className="flex flex-col">
+              <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest leading-none mb-1">Editing Site</span>
+              <h2 className="text-sm font-bold text-white leading-none">{page.title}</h2>
+          </div>
+      </div>
+
+      {/* Center: Device Controls */}
+      <div className="hidden md:flex items-center gap-2 p-1 bg-zinc-900 border border-white/10 rounded-xl">
+          <DeviceButton 
+              label="Desktop" 
+              icon={Monitor} 
+              isActive={device === 'desktop'} 
+              onClick={() => setDevice('desktop')} 
+          />
+          <DeviceButton 
+              label="Tablet" 
+              icon={Tablet} 
+              isActive={device === 'tablet'} 
+              onClick={() => setDevice('tablet')} 
+          />
+          <DeviceButton 
+              label="Mobile" 
+              icon={Smartphone} 
+              isActive={device === 'mobile'} 
+              onClick={() => setDevice('mobile')} 
+          />
+      </div>
+
+      {/* Right Side: Actions */}
+      <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" className="hidden lg:flex text-zinc-400 hover:text-white hover:bg-white/5 gap-2 h-9 px-4" onClick={onPreview}>
+              <Eye className="h-4 w-4"/>
+              Preview
+          </Button>
+          <Button variant="secondary" size="sm" className="hidden lg:flex gap-2 h-9 px-4 border border-white/5" onClick={onSave}>
+              <Save className="h-4 w-4"/>
+              Save
+          </Button>
+          <Button 
+            size="sm" 
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold gap-2 h-9 px-6 rounded-full shadow-lg shadow-blue-600/20"
+            onClick={onPublish}
+          >
+              <Rocket className="h-4 w-4"/>
+              Publish
+          </Button>
+          <div className="h-4 w-px bg-white/10 mx-1" />
+          <UserNav />
+      </div>
+    </header>
+  );
+}
+
+const DeviceButton = ({ label, icon: Icon, isActive, onClick }: any) => (
+    <button 
+        onClick={onClick} 
+        aria-label={`Switch to ${label} view`}
+        className={cn(
+            "p-2 rounded-lg transition-all",
+            isActive 
+                ? "bg-white/10 text-white shadow-sm"
+                : "text-zinc-500 hover:bg-white/5 hover:text-zinc-300"
+        )}
+    >
+        <Icon className="h-4 w-4" />
+    </button>
+)

@@ -1,130 +1,133 @@
 'use client';
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
+import { motion } from 'framer-motion';
+import { Bot, Instagram, MessageSquare, Zap, Globe, Sparkles, Send } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bot, MessageSquare, Upload, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 export function ChatAgentShowcase() {
   return (
-    <section className="py-32 bg-background border-t border-border/40">
-      <div className="container mx-auto px-6 max-w-7xl">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+    <section className="py-32 bg-zinc-950 overflow-hidden relative">
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+      
+      <div className="container mx-auto px-6 max-w-[1800px]">
+        <div className="grid lg:grid-cols-2 gap-24 items-center">
           
-          <div className="space-y-8">
-             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 text-xs font-medium border border-purple-500/20">
-              <Bot className="h-3.5 w-3.5" />
-              Your AI Employee
+          {/* Left: Content */}
+          <div className="space-y-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 text-xs font-bold uppercase tracking-widest">
+               <Sparkles className="h-3 w-3" /> Omnichannel Intelligence
             </div>
             
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter leading-[1.05]">
-                Deploy a Sales Expert <br/>
-                <span className="text-muted-foreground">That Never Sleeps.</span>
+            <h2 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.1]">
+              Your 24/7 <br/>
+              <span className="text-blue-500">Expert Sales Agent.</span>
             </h2>
             
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Stop losing leads after hours. Our AI Chat Agent acts as a 24/7 sales assistant, answering complex questions about floor plans, payment terms, and ROI using your specific project data.
+            <p className="text-xl text-zinc-400 leading-relaxed max-w-xl">
+              Trained on our database of 3,750+ UAE projects. Deploy it to your Instagram DMs, WhatsApp, or any website in seconds. It doesn't just chat—it sells.
             </p>
-            
-            <ul className="space-y-4 pt-4">
-                <li className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-1 rounded-full text-purple-600 mt-0.5"><CheckCircle className="h-4 w-4" /></div>
-                    <span className="font-medium text-foreground/80">Trained on your Brochures & PDFs</span>
-                </li>
-                <li className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-1 rounded-full text-purple-600 mt-0.5"><CheckCircle className="h-4 w-4" /></div>
-                    <span className="font-medium text-foreground/80">Captures & Qualifies Leads</span>
-                </li>
-                <li className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-1 rounded-full text-purple-600 mt-0.5"><CheckCircle className="h-4 w-4" /></div>
-                    <span className="font-medium text-foreground/80">Escalates to WhatsApp instantly</span>
-                </li>
-            </ul>
+
+            <div className="grid grid-cols-2 gap-6 pt-6">
+                <Feature icon={Instagram} title="Instagram Bio" desc="Automate lead capture from your bio link." />
+                <Feature icon={MessageSquare} title="WhatsApp Sync" desc="Share brochures and plans instantly." />
+                <Feature icon={Globe} title="Web Embed" desc="Add to your current site with one line of code." />
+                <Feature icon={Zap} title="Live Data" desc="Answers based on real-time price updates." />
+            </div>
+
+            <Button size="lg" className="h-16 px-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg mt-8 shadow-xl shadow-blue-900/20">
+              Build Your Agent Now
+            </Button>
           </div>
 
-          <motion.div 
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="relative"
-          >
-            <div className="absolute -inset-1 bg-gradient-to-bl from-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-50" />
-            <div className="relative aspect-[4/3] bg-muted/20 rounded-2xl border border-border/50 flex items-center justify-center p-8 backdrop-blur-sm">
-                {/* Mockup of the Chat Agent Dashboard */}
-                <Card className="w-full shadow-2xl border-border/50 overflow-hidden bg-background max-w-md mx-auto">
-                    <div className="p-4 border-b border-border/50 bg-muted/30">
-                        <h4 className="font-bold text-sm flex items-center gap-2 text-foreground">
-                            <Bot className="h-4 w-4 text-purple-600" /> Agent Knowledge Base
-                        </h4>
-                    </div>
-                    <div className="p-6 space-y-6">
-                       
-                       <div className="space-y-3">
-                           <div className="p-4 border border-dashed border-border rounded-xl text-center bg-background hover:bg-muted/50 transition-colors cursor-pointer group">
-                               <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center mx-auto mb-2 group-hover:bg-background border border-border">
-                                   <Upload className="h-5 w-5 text-muted-foreground" />
-                               </div>
-                               <p className="text-sm font-medium text-foreground">Upload Project Brochure</p>
-                               <p className="text-xs text-muted-foreground">PDF, DOCX, or TXT</p>
-                           </div>
-                       </div>
+          {/* Right: Visual Mockup */}
+          <div className="relative">
+             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[3rem] blur-2xl opacity-20 animate-pulse" />
+             
+             <div className="relative bg-black border border-white/10 rounded-[3rem] p-8 aspect-[4/5] shadow-2xl flex flex-col overflow-hidden">
+                <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
+                   <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                         <Bot className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                         <p className="font-bold text-white">Creek Expert AI</p>
+                         <p className="text-xs text-green-500 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> Online
+                         </p>
+                      </div>
+                   </div>
+                   <div className="flex gap-2">
+                      <div className="p-2 rounded-lg bg-white/5"><Instagram className="h-4 w-4 text-zinc-400" /></div>
+                      <div className="p-2 rounded-lg bg-white/5"><MessageSquare className="h-4 w-4 text-zinc-400" /></div>
+                   </div>
+                </div>
 
-                       <div className="space-y-3">
-                           <div className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                               <div className="flex items-center gap-3">
-                                   <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-600">
-                                       <Sparkles className="h-4 w-4" />
-                                   </div>
-                                   <div>
-                                       <p className="text-sm font-semibold text-foreground">Training Complete</p>
-                                       <p className="text-[10px] text-muted-foreground">Ready to answer questions.</p>
-                                   </div>
-                               </div>
-                               <CheckCircle className="h-5 w-5 text-green-600" />
-                           </div>
-                       </div>
-                       
-                       <div className="space-y-2">
-                           <div className="flex gap-2 justify-end">
-                               <div className="bg-primary text-primary-foreground text-xs px-3 py-2 rounded-2xl rounded-tr-sm max-w-[80%]">
-                                   What is the payment plan for the 3-bedroom villa?
-                               </div>
-                           </div>
-                            <div className="flex gap-2">
-                               <div className="bg-muted text-foreground text-xs px-3 py-2 rounded-2xl rounded-tl-sm max-w-[80%]">
-                                   The 3-bedroom units have a 60/40 plan: 10% down, 50% during construction, and 40% on handover in Q4 2025.
-                               </div>
-                           </div>
-                       </div>
+                <div className="flex-1 space-y-6 overflow-y-auto custom-scrollbar pr-2">
+                   <ChatMessage side="left" text="Hi! I saw the post about the new launch in Creek Beach. Can you send me the floor plans for 2BR apartments?" />
+                   <ChatMessage side="right" text="Certainly! Emaar just released the 'Creek Waters' phase. 2BR apartments start from AED 2.1M. Here is the floor plan PDF." />
+                   <div className="bg-zinc-900 border border-white/5 rounded-2xl p-4 flex items-center justify-between group cursor-pointer hover:bg-zinc-800 transition-colors">
+                      <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                            <FileText className="h-5 w-5 text-red-500" />
+                         </div>
+                         <div className="text-left">
+                            <p className="text-xs font-bold text-white">2BR_Creek_Waters.pdf</p>
+                            <p className="text-[10px] text-zinc-500">2.4 MB • PDF Document</p>
+                         </div>
+                      </div>
+                      <Download className="h-4 w-4 text-zinc-500 group-hover:text-white transition-colors" />
+                   </div>
+                   <ChatMessage side="right" text="Would you like to schedule a private viewing or speak to an area specialist?" />
+                </div>
 
-                    </div>
-                </Card>
-            </div>
-          </motion.div>
+                <div className="mt-8 pt-6 border-t border-white/5 flex gap-3">
+                   <div className="flex-1 h-12 rounded-full bg-zinc-900 border border-white/5 px-6 flex items-center text-sm text-zinc-500">
+                      Type your message...
+                   </div>
+                   <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                      <Send className="h-5 w-5" />
+                   </div>
+                </div>
+             </div>
+          </div>
+
         </div>
       </div>
     </section>
   );
 }
 
-function CheckCircle(props: any) {
+function Feature({ icon: Icon, title, desc }: any) {
     return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  )
+        <div className="space-y-2">
+            <div className="flex items-center gap-2 text-zinc-200">
+                <Icon className="h-4 w-4 text-blue-500" />
+                <span className="font-bold text-sm">{title}</span>
+            </div>
+            <p className="text-xs text-zinc-500 leading-relaxed">{desc}</p>
+        </div>
+    )
 }
+
+function ChatMessage({ side, text }: { side: 'left' | 'right', text: string }) {
+    return (
+        <div className={cn(
+            "flex",
+            side === 'right' ? "justify-start" : "justify-end"
+        )}>
+            <div className={cn(
+                "max-w-[85%] p-4 rounded-3xl text-sm leading-relaxed",
+                side === 'right' 
+                    ? "bg-zinc-800 text-zinc-100 rounded-tl-none" 
+                    : "bg-blue-600 text-white rounded-tr-none shadow-lg shadow-blue-900/20"
+            )}>
+                {text}
+            </div>
+        </div>
+    )
+}
+
+import { cn } from '@/lib/utils';
+import { FileText, Download } from 'lucide-react';
