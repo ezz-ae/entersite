@@ -4,7 +4,16 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, ArrowRight } from 'lucide-react';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { GET } from '@/app/api/images/route';
+
+type ImagePlaceholder = {
+  id: string;
+  description: string;
+  imageUrl: string;
+  width: number;
+  height: number;
+  imageHint: string;
+};
 
 export const metadata: Metadata = {
   title: 'Blog | EntreSite AI',
@@ -50,7 +59,10 @@ const POSTS = [
   }
 ];
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const imageResponse = await GET();
+  const images: ImagePlaceholder[] = await imageResponse.json();
+
   return (
     <main className="min-h-screen bg-background py-20">
       <div className="container mx-auto px-4">
@@ -64,7 +76,7 @@ export default function BlogPage() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {POSTS.map((post) => {
-              const image = PlaceHolderImages.find(p => p.id === post.imageId);
+              const image = images.find(p => p.id === post.imageId);
               return (
                 <Link key={post.id} href={`/blog/${post.id}`} className="group">
                     <Card className="h-full overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300">

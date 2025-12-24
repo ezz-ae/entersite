@@ -1,6 +1,3 @@
-'use client';
-
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Share2 } from 'lucide-react';
@@ -8,13 +5,25 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/site-footer';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { GET } from '@/app/api/images/route';
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
+type ImagePlaceholder = {
+  id: string;
+  description: string;
+  imageUrl: string;
+  width: number;
+  height: number;
+  imageHint: string;
+};
+
+
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
   // In a real app, we'd fetch data based on params.slug
   // For now, we'll render a generic high-quality article template
-  const authorImage = PlaceHolderImages.find(p => p.id === 'user-avatar-4');
-  const coverImage = PlaceHolderImages.find(p => p.id === 'blog-cover-1');
+  const imageResponse = await GET();
+  const images: ImagePlaceholder[] = await imageResponse.json();
+  const authorImage = images.find(p => p.id === 'user-avatar-4');
+  const coverImage = images.find(p => p.id === 'blog-cover-1');
   
   return (
     <main className="min-h-screen bg-background flex flex-col">
@@ -94,7 +103,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                 </blockquote>
 
                 <p>
-                    As we move into 2026, we expect to see a consolidation of tools. The "Operating System" model—where ads, sites, and CRM live under one roof—will become the standard for high-growth teams.
+                    As we move into 2025, we expect to see a consolidation of tools. The "Operating System" model—where ads, sites, and CRM live under one roof—will become the standard for high-growth teams.
                 </p>
             </div>
 

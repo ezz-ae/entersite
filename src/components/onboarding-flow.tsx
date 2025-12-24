@@ -1,167 +1,153 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ArrowRight, Sparkles, Command, MessageCircle, X } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Bot, Palette, Sparkles } from 'lucide-react';
 
-const promptCategories = [
-  {
-    name: "General & Vision",
-    prompts: [
-      { id: "vision-luxury", title: "Luxury & Premium", description: "Black/gold, feels like a high-end brand." },
-      { id: "vision-minimal", title: "Minimal & Modern", description: "Clean, white-space, for international investors." },
-      { id: "vision-countdown", title: "Launch Countdown", description: "A site that builds hype for a future release." },
-    ]
-  },
-  {
-    name: "Company Hub",
-    prompts: [
-        { id: "company-full", title: "Full Company Website", description: "With listings, agents, and contact pages." },
-        { id: "company-luxury", title: "Luxury Property Agency", description: "A premium, black-and-gold showcase site." },
-        { id: "company-bilingual", title: "Bilingual Corporate Site", description: "English + Arabic support." },
-    ]
-  },
-  {
-    name: "Project Launchpad",
-    prompts: [
-        { id: "launch-single", title: "Single Project Launch", description: "High-conversion page for a new off-plan project." },
-        { id: "launch-event", title: "Developer Event Launch", description: "Roadshow page with RSVP and event details." },
-        { id: "launch-ads", title: "Google Ads Funnel", description: "Lean, fast page optimized for paid traffic." },
-    ]
-  },
-  {
-    name: "Agent Portfolio - The Essentials",
-    prompts: [
-        { id: "personal_agent_portfolio", title: "Personal Agent Portfolio", description: "A clean, professional site to showcase your profile, track record, and active listings." },
-        { id: "modern_agent_site", title: "Modern Agent Site", description: "A contemporary site with bold visuals, featured listings, and a prominent WhatsApp contact." },
-        { id: "social_media_landing_page", title: "Social Media Landing Page", description: "Perfect for agents linking from TikTok, Instagram, and YouTube." },
-    ]
-  },
-  {
-    name: "Agent - High Performance & Niche",
-    prompts: [
-        { id: "luxury_agent_portfolio", title: "Luxury Agent Portfolio", description: "A premium, black-and-gold showcase site for agents targeting high-net-worth buyers." },
-        { id: "offplan_specialist_page", title: "Off-Plan Specialist Page", description: "A dedicated funnel for agents selling new-launch off-plan projects." },
-        { id: "rent_to_own_specialist_site", title: "Rent-to-Own Specialist Site", description: "A niche positioning site with calculators, guides, and lead-optimized forms." },
-        { id: "international_buyer_landing", title: "International Buyer Landing Page", description: "A trust-building page for overseas investors with FAQ, guides, and WhatsApp CTA." },
-        { id: "whatsapp_only_lead_page", title: "WhatsApp-Only Lead Page", description: "Ultra-lightweight page designed purely to convert into WhatsApp chats." },
-    ]
-  },
-  {
-    name: "Agent - Brand & Authority",
-    prompts: [
-        { id: "team_agent_site", title: "Team Agent Site (2-10 Agents)", description: "A multi-agent portfolio with individual pages, shared listings, and team branding." },
-        { id: "top_agent_reputation_page", title: "Top Agent Reputation Page", description: "A credibility-heavy page with awards, testimonials, certifications, and reviews." },
-        { id: "exclusive_listing_showcase", title: "Exclusive Listing Showcase", description: "A page dedicated to ONE special listing that the agent wants to push hard." },
-        { id: "prequalification_funnel_site", title: "Pre-Qualification Funnel Site", description: "A mini-funnel with lead scoring, budget selector, and automated WhatsApp follow-up." },
-        { id: "agent_press_media_kit", title: "Agent Press & Media Kit Page", description: "For agents doing PR, interviews, or public branding — downloadable materials included." },
-        { id: "area_specialist_page", title: "Area Specialist Page", description: "Hyper-local branding: 'Downtown Dubai Specialist' / 'Palm Jumeirah Expert'." },
-        { id: "lead_magnet_mini_site", title: "Lead Magnet Mini-Site", description: "For agents offering PDF guides, market reports, or WhatsApp newsletters." },
-    ]
-  },
-];
+interface OnboardingFlowProps {
+  onComplete: (data: any) => void;
+  initialData?: any;
+  onBack?: () => void;
+}
 
+export function OnboardingFlow({ onComplete, initialData = {}, onBack }: OnboardingFlowProps) {
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    projectName: '',
+    projectDescription: '',
+    brandColor: '#6366f1',
+    ...initialData,
+  });
 
-export function OnboardingFlow({ onComplete }: { onComplete: (data: any) => void; }) {
-  const [prompt, setPrompt] = useState('');
-
-  const handlePromptSubmit = () => {
-    if (!prompt.trim()) return;
-    onComplete({ prompt });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handlePresetClick = (presetPrompt: string) => {
-    setPrompt(presetPrompt);
-    onComplete({ prompt: presetPrompt });
+  const handleColorChange = (color: string) => {
+    setFormData(prev => ({ ...prev, brandColor: color }));
+  };
+
+  const nextStep = () => setStep(s => s + 1);
+  const prevStep = () => setStep(s => s - 1);
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return <Step1Description formData={formData} handleChange={handleChange} nextStep={nextStep} onBack={onBack} />;
+      case 2:
+        return <Step2Branding formData={formData} handleChange={handleChange} handleColorChange={handleColorChange} prevStep={prevStep} onComplete={() => onComplete(formData)} />;
+      default:
+        return <div>Unknown Step</div>;
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background flex items-center justify-center p-4 md:p-8">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-full max-w-6xl h-[85vh] bg-card border rounded-2xl shadow-2xl flex overflow-hidden"
-      >
-        {/* Left Side: Prompt Input */}
-        <div className="flex-1 flex flex-col p-8">
-           <AnimatePresence mode="wait">
-               <motion.div
-                   key="prompt-input-view"
-                   initial={{ opacity: 0, x: -50 }}
-                   animate={{ opacity: 1, x: 0 }}
-                   exit={{ opacity: 0, x: 50 }}
-                   transition={{ duration: 0.3 }}
-                   className="flex-1 flex flex-col"
-               >
-                   <div className="mb-8">
-                      <h1 className="text-2xl font-bold tracking-tight mb-2">Describe the website you want to build</h1>
-                      <p className="text-muted-foreground">
-                        Be as descriptive as possible, or choose a starting point from our library.
-                      </p>
-                   </div>
-                   
-                   <div className="flex-grow flex flex-col">
-                      <Textarea
-                        placeholder="e.g., A luxury real estate site for Emaar with a video hero, featured listings, and a simple lead form..."
-                        className="flex-grow text-base p-4 resize-none border rounded-lg bg-muted/20 focus-visible:ring-primary"
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        autoFocus
-                      />
-                   </div>
+    <Card className="w-full max-w-2xl bg-zinc-900 border-zinc-800 text-white shadow-2xl">
+      {renderStep()}
+    </Card>
+  );
+}
 
-                    <div className="mt-6">
-                        <Button 
-                            size="lg" 
-                            className="w-full h-12 text-base font-semibold" 
-                            disabled={!prompt.trim()}
-                            onClick={handlePromptSubmit}
-                        >
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Generate Site
-                        </Button>
+// --- Step Components ---
+
+const StepHeader = ({ icon, title, subtitle }: { icon: React.ReactNode, title: string, subtitle: string }) => (
+    <CardHeader className="text-center">
+        <div className="mx-auto bg-zinc-800 p-3 rounded-full mb-4 w-fit">{icon}</div>
+        <CardTitle className="text-2xl font-bold">{title}</CardTitle>
+        <p className="text-zinc-400">{subtitle}</p>
+    </CardHeader>
+);
+
+function Step1Description({ formData, handleChange, nextStep, onBack }: any) {
+    const hasDescription = formData.projectDescription.trim().length > 5;
+    return (
+        <>
+            <StepHeader 
+                icon={<Bot className="h-6 w-6 text-zinc-300"/>}
+                title="Describe Your Project"
+                subtitle="Tell our AI what you want to build. Be as specific as you can!"
+            />
+            <CardContent className="px-6 py-0">
+                <div className="space-y-4">
+                    <div>
+                        <Label htmlFor="projectName" className="text-zinc-400">Project Name</Label>
+                        <Input 
+                            id="projectName" 
+                            name="projectName"
+                            placeholder="e.g., Miami Waterfront Properties"
+                            value={formData.projectName}
+                            onChange={handleChange}
+                            className="bg-zinc-950 border-zinc-700 mt-2 h-12 text-base focus-visible:ring-blue-500"
+                        />
                     </div>
-               </motion.div>
-           </AnimatePresence>
-        </div>
-
-        {/* Right Side: Prompt Library */}
-        <div className="w-1/2 bg-muted/30 border-l flex flex-col">
-            <div className="p-8 pb-4">
-                 <h2 className="text-xl font-bold">Inspiration Gallery</h2>
-                 <p className="text-muted-foreground text-sm mt-1">Click any prompt to start.</p>
-            </div>
-            <ScrollArea className="flex-1 px-8 pb-8">
-                <div className="space-y-6">
-                    {promptCategories.map(category => (
-                        <div key={category.name}>
-                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">{category.name}</h3>
-                            <div className="space-y-2">
-                                {category.prompts.map(p => (
-                                    <div
-                                        key={p.id}
-                                        onClick={() => handlePresetClick(p.description)}
-                                        className="p-3 rounded-lg border bg-background hover:bg-muted hover:border-primary/50 transition-all cursor-pointer group"
-                                    >
-                                        <div className="flex justify-between items-center">
-                                            <p className="font-medium text-sm">{p.title}</p>
-                                            <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mt-1 opacity-70 line-clamp-2">{p.description}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
+                    <div>
+                        <Label htmlFor="projectDescription" className="text-zinc-400">Project Description</Label>
+                        <Textarea
+                            id="projectDescription"
+                            name="projectDescription"
+                            value={formData.projectDescription}
+                            onChange={handleChange}
+                            placeholder="e.g., A luxury real estate site for waterfront homes in Miami, featuring a gallery, map, and agent profiles."
+                            className="min-h-[150px] bg-zinc-950 border-zinc-700 mt-2 text-base focus-visible:ring-blue-500"
+                            rows={6}
+                        />
+                    </div>
                 </div>
-            </ScrollArea>
-        </div>
-      </motion.div>
-    </div>
+            </CardContent>
+            <CardFooter className="p-6 flex justify-between">
+                {onBack ? (
+                    <Button variant="ghost" onClick={onBack}><ArrowLeft className="h-4 w-4 mr-2"/> Back</Button>
+                ) : <div/>}
+                <Button onClick={nextStep} disabled={!hasDescription} className="bg-blue-600 hover:bg-blue-700 text-white">Continue <ArrowRight className="h-4 w-4 ml-2"/></Button>
+            </CardFooter>
+        </>
+    );
+}
+
+const colorSwatches = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'];
+
+function Step2Branding({ formData, handleChange, handleColorChange, prevStep, onComplete }: any) {
+  return (
+    <>
+        <StepHeader 
+            icon={<Palette className="h-6 w-6 text-zinc-300"/>}
+            title="Add Your Branding"
+            subtitle="Customize the look and feel of your site."
+        />
+        <CardContent className="px-6">
+            <div className="space-y-6">
+                <div>
+                    <Label className="text-zinc-400">Primary Color</Label>
+                    <div className="flex items-center gap-4 mt-2">
+                        <div className="relative">
+                            <div className="w-10 h-10 rounded-full border-2 border-zinc-600" style={{ backgroundColor: formData.brandColor }}/>
+                        </div>
+                        <div className="flex gap-2">
+                            {colorSwatches.map(color => (
+                                <button key={color} onClick={() => handleColorChange(color)} className={`w-8 h-8 rounded-full transition-all duration-150 ${formData.brandColor === color ? 'ring-2 ring-offset-2 ring-offset-zinc-900 ring-white' : ''}`} style={{backgroundColor: color}} />
+                            ))}
+                        </div>
+                         <Input 
+                            type="text"
+                            value={formData.brandColor}
+                            onChange={(e) => handleColorChange(e.target.value)}
+                            className="bg-zinc-800 border-zinc-700 w-28 h-10"
+                        />
+                    </div>
+                </div>
+            </div>
+        </CardContent>
+        <CardFooter className="p-6 flex justify-between">
+            <Button variant="ghost" onClick={prevStep}><ArrowLeft className="h-4 w-4 mr-2"/> Back</Button>
+            <Button onClick={onComplete} className="bg-green-600 hover:bg-green-700 text-white">
+                <Sparkles className="h-4 w-4 mr-2"/> Build My Site
+            </Button>
+        </CardFooter>
+    </>
   );
 }

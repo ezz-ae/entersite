@@ -4,11 +4,11 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 interface Props {
-  params: Promise<{ siteId: string }>;
+  params: { siteId: string };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { siteId } = await params;
+  const { siteId } = params;
   const page = await getPublishedSite(siteId);
 
   if (!page) {
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PublishedPage({ params }: Props) {
-  const { siteId } = await params;
+  const { siteId } = params;
   const page = await getPublishedSite(siteId);
 
   if (!page) {

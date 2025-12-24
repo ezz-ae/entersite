@@ -1,56 +1,92 @@
-import { LandingHero } from '@/components/marketing/landing-hero';
-import { BuilderMotionShowcase } from '@/components/marketing/feature-showcase/builder-motion-showcase';
-import { AdsShowcase } from '@/components/marketing/feature-showcase/ads-showcase';
-import { SeoShowcase } from '@/components/marketing/feature-showcase/seo-showcase';
-import { ChatAgentShowcase } from '@/components/marketing/feature-showcase/chat-agent-showcase';
-import { TemplateShowcase } from '@/components/showcase/template-showcase';
-import { ReadyBuilds } from '@/components/marketing/feature-showcase/ready-builds';
-import { DomainSearchBlock } from '@/components/marketing/domain-search-block';
-import { SiteFooter } from '@/components/site-footer';
-import { SiteHeader } from '@/components/layout/site-header';
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'EntreSite AI | The Real Estate Operating System',
-  description: 'Build high-converting real estate websites in seconds with AI. The only platform with 3,750+ verified project listings.',
-};
+import React from 'react';
+import Link from 'next/link';
+import { ArrowRight, Bot, Globe, Mail, Megaphone, Search, User } from 'lucide-react';
 
-export default function MarketingPage() {
+// --- Service Configuration ---
+const SERVICES = [
+  {
+    key: 'website',
+    title: 'AI Websites',
+    description: 'Generate a complete, conversion-focused website in minutes.',
+    icon: Globe,
+    href: '/website'
+  },
+  {
+    key: 'sms-campaign',
+    title: 'SMS Campaigns',
+    description: 'Launch targeted SMS blasts that get opened and drive action.',
+    icon: Megaphone,
+    href: '/sms-campaign'
+  },
+   {
+    key: 'ai-market-expert',
+    title: 'AI Market Expert',
+    description: 'Get real-time strategic insights on any market or competitor.',
+    icon: Bot,
+    href: '/ai-market-expert'
+  },
+  {
+    key: 'email-campaign',
+    title: 'Email Campaigns',
+    description: 'Automated email sequences to nurture leads and retain customers.',
+    icon: Mail,
+    href: '/email-campaign'
+  },
+  {
+    key: 'google-ads',
+    title: 'Google Ads',
+    description: 'Create and manage high-ROI Google Ad campaigns effortlessly.',
+    icon: Search,
+    href: '/google-ads'
+  },
+  {
+    key: 'meta-lead-gen',
+    title: 'Meta Lead Generation',
+    description: 'Run powerful lead generation campaigns on Facebook and Instagram.',
+    icon: User,
+    href: '/meta-lead-gen'
+  },
+];
+
+// --- Home Page Component ---
+export default function HomePage() {
   return (
-    <main className="min-h-screen bg-black flex flex-col font-sans selection:bg-orange-500/30">
-      {/* Header is included here to ensure it's part of the marketing layout */}
-      <SiteHeader />
-      
-      {/* 1. The Brain: AI Generation */}
-      <LandingHero />
-      
-      {/* 2. The Tool: Visual Builder */}
-      <BuilderMotionShowcase />
-      
-      {/* 3. The Foundation: Ready-Made Sites */}
-      <ReadyBuilds />
-      
-      {/* 4. The Growth Engine: Marketing Tools */}
-      <div className="space-y-0 bg-background text-foreground relative z-10">
-        <div className="border-t border-border/40">
-            <AdsShowcase />
+    <div className="min-h-screen w-full bg-black text-white flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="max-w-5xl w-full">
+        {/* Header */}
+        <div className="text-center mb-12 md:mb-16">
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-400 mb-4">Your AI Co-Pilot for Growth</h1>
+          <p className="text-lg md:text-xl text-zinc-400 max-w-3xl mx-auto">Select a service to begin. Our intelligent system will guide you from idea to execution in record time.</p>
         </div>
-        <div className="border-t border-border/40">
-            <SeoShowcase />
-        </div>
-        <div className="border-t border-border/40">
-            <ChatAgentShowcase />
-        </div>
-      </div>
 
-      {/* 5. The Polish: Templates & Domains */}
-      <TemplateShowcase headline="Design That Converts" subtext="Award-winning layouts for every niche." />
-      
-      <div className="bg-background border-t border-border/40">
-        <DomainSearchBlock />
+        {/* Service Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {SERVICES.map((service) => (
+            <ServiceCard key={service.key} service={service} />
+          ))}
+        </div>
       </div>
-      
-      <SiteFooter />
-    </main>
+    </div>
+  );
+}
+
+// --- Sub-component: ServiceCard ---
+function ServiceCard({ service }: { service: typeof SERVICES[0] }) {
+  const Icon = service.icon;
+  return (
+    <Link href={service.href} passHref>
+      <div className="h-full bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex flex-col hover:bg-zinc-800/80 hover:border-blue-500/80 transition-all duration-300 group cursor-pointer">
+        <div className="mb-4">
+          <Icon className="h-8 w-8 text-zinc-400 group-hover:text-blue-400 transition-colors" />
+        </div>
+        <h3 className="text-xl font-bold text-white mb-2">{service.title}</h3>
+        <p className="text-zinc-400 flex-grow">{service.description}</p>
+        <div className="text-blue-500 font-semibold flex items-center mt-6 group-hover:text-blue-400 transition-colors">
+          Get Started <ArrowRight className="ml-2 h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+        </div>
+      </div>
+    </Link>
   );
 }

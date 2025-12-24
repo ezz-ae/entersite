@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +10,6 @@ import { Download, Filter, Search, Mail, Phone } from 'lucide-react';
 
 export default function LeadsDashboardPage() {
   return (
-    <DashboardLayout>
       <div className="space-y-8">
         
         <div className="flex justify-between items-center">
@@ -87,6 +85,5 @@ export default function LeadsDashboardPage() {
         </Card>
 
       </div>
-    </DashboardLayout>
   );
 }

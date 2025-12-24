@@ -1,5 +1,6 @@
-{
-  "placeholderImages": [
+import { NextResponse } from 'next/server';
+
+const placeholderImages = [
     {
       "id": "user-avatar",
       "description": "Default user avatar",
@@ -81,4 +82,7 @@
       "imageHint": "company logo"
     }
   ]
+
+export async function GET() {
+  return NextResponse.json(placeholderImages);
 }
