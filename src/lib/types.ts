@@ -30,7 +30,6 @@ export interface ProjectData {
       quarter: number;
       year: number;
   } | null;
-  // deliveryYear is a helper for sorting/filtering
   deliveryYear?: number;
   status?: string;
   description: {
@@ -41,6 +40,14 @@ export interface ProjectData {
   price: {
     from: number;
     label: string;
+    sqftAvg?: number;
+  };
+  performance: {
+    roi: number;             // Expected annual yield %
+    capitalAppreciation: number; // Expected value growth %
+    rentalYield: number;     // Annual rent %
+    marketTrend: 'up' | 'stable' | 'down';
+    priceHistory: { year: number, avgPrice: number }[];
   };
   availability: 'Available' | 'Sold Out' | 'Coming Soon';
   images: string[];
@@ -62,7 +69,7 @@ export interface ProjectData {
 
 export interface Block {
   blockId: string;
-  type: 'hero' | 'listing-grid' | 'cta-form' | string; // making it extensible
+  type: 'hero' | 'listing-grid' | 'cta-form' | string;
   data: Record<string, any>;
   order: number;
 }

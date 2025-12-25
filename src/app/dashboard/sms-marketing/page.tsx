@@ -1,0 +1,135 @@
+'use client';
+
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Smartphone, Send, Users, MessageCircle, Zap, Clock, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+
+export default function SmsMarketingPage() {
+  return (
+    <div className="space-y-10 animate-in fade-in duration-700">
+      <div className="flex justify-between items-center border-b border-white/5 pb-8">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight text-white">SMS VIP Broadcast</h1>
+          <p className="text-zinc-500 text-lg font-light">Launch targeted SMS/WhatsApp blasts to your investor lists.</p>
+        </div>
+        <Button className="bg-green-600 hover:bg-green-700 rounded-full px-8 h-12 font-bold gap-2">
+           <Send className="h-4 w-4" /> Create Broadcast
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <MetricCard label="Total Sent" value="12,400" icon={Send} trend="+1.2K" />
+          <MetricCard label="Open Rate" value="98.2%" icon={Zap} trend="+0.4%" />
+          <MetricCard label="WhatsApp Conversions" value="452" icon={MessageCircle} trend="+84" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+         {/* Campaigns List */}
+         <Card className="bg-zinc-900/50 border-white/5 rounded-[2.5rem] overflow-hidden">
+            <CardHeader className="p-8 border-b border-white/5">
+                <CardTitle className="text-xl">Active Campaigns</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="divide-y divide-white/5">
+                    <CampaignRow 
+                        name="Creek Waters Launch" 
+                        status="Delivered" 
+                        recipients="2,400" 
+                        openRate="99%" 
+                    />
+                    <CampaignRow 
+                        name="Palm Jebel Ali VIP" 
+                        status="In Progress" 
+                        recipients="1,200" 
+                        openRate="84%" 
+                        active
+                    />
+                    <CampaignRow 
+                        name="Investor Yield Report" 
+                        status="Draft" 
+                        recipients="450" 
+                        openRate="0%" 
+                    />
+                </div>
+            </CardContent>
+         </Card>
+
+         {/* Composer Side */}
+         <Card className="bg-zinc-900/50 border-white/5 rounded-[2.5rem] overflow-hidden">
+            <CardHeader className="p-8">
+                <CardTitle className="text-xl">Quick Send</CardTitle>
+                <CardDescription>Send a fast update to your most active lead segment.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-8 pt-0 space-y-6">
+                <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Select Audience</label>
+                    <div className="h-12 bg-black/40 border border-white/10 rounded-xl flex items-center px-4 text-sm text-zinc-300">
+                        <Users className="h-4 w-4 mr-2 text-zinc-600" /> High-Intent Investors (450)
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Message Content</label>
+                    <textarea 
+                        className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-green-500/50 min-h-[120px] resize-none"
+                        placeholder="Hi {name}, Emaar just released 5 cancelled units in Creek Beach. Instant 8% ROI. Call me now to book."
+                    />
+                </div>
+                <Button className="w-full h-14 rounded-2xl bg-green-600 hover:bg-green-700 font-bold text-lg gap-3">
+                    Send VIP Broadcast <Send className="h-5 w-5" />
+                </Button>
+            </CardContent>
+         </Card>
+      </div>
+    </div>
+  );
+}
+
+function CampaignRow({ name, status, recipients, openRate, active }: any) {
+    return (
+        <div className="p-6 flex items-center justify-between group hover:bg-white/5 transition-all">
+            <div className="flex items-center gap-4">
+                <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center border",
+                    active ? "bg-green-600/10 border-green-500/20 text-green-500" : "bg-white/5 border-white/10 text-zinc-500"
+                )}>
+                    <Smartphone className="h-5 w-5" />
+                </div>
+                <div>
+                    <h4 className="font-bold text-white text-sm">{name}</h4>
+                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mt-1">{status}</p>
+                </div>
+            </div>
+            <div className="flex gap-8 text-right">
+                <div>
+                    <p className="text-[10px] font-bold text-zinc-600 uppercase mb-0.5">Reach</p>
+                    <p className="text-sm font-bold text-white">{recipients}</p>
+                </div>
+                <div>
+                    <p className="text-[10px] font-bold text-zinc-600 uppercase mb-0.5">Open</p>
+                    <p className="text-sm font-bold text-green-500">{openRate}</p>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function MetricCard({ label, value, icon: Icon, trend }: any) {
+    return (
+        <Card className="bg-zinc-900/50 border-white/5 rounded-[2rem]">
+            <CardContent className="p-8">
+                <div className="flex justify-between items-start mb-6">
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{label}</p>
+                    <Icon className="h-4 w-4 text-zinc-700" />
+                </div>
+                <div className="flex items-end gap-2">
+                    <span className="text-3xl font-black text-white">{value}</span>
+                    <span className="text-[10px] font-bold text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full">{trend}</span>
+                </div>
+            </CardContent>
+        </Card>
+    )
+}

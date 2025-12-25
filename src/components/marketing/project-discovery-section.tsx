@@ -1,167 +1,164 @@
-
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Loader2, Rocket, ArrowRight } from "lucide-react";
-import type { ProjectFilter, ProjectData } from '@/lib/types';
-import Link from 'next/link';
-import { useToast } from '@/hooks/use-toast';
-import { getDevelopers, getLocations } from '@/lib/project-service';
-import { useRealisteProjects } from '@/hooks/useRealisteProjects';
+import { Search, Loader2, Activity, MapPin } from "lucide-react";
+import { getRealisteProjects } from '@/lib/realiste-projects';
 import { ProjectCard } from '@/components/project-card';
 
 export function ProjectDiscoverySection() {
-  const { projects, loading, error, search, currentFilter, setCurrentFilter } = useRealisteProjects();
-  
-  const [developers, setDevelopers] = useState<string[]>([]);
-  const [locations, setLocations] = useState<{city: string, areas: string[]}[]>([]);
-  const { toast } = useToast();
+  const [query, setQuery] = useState('');
+  const [city, setCity] = useState('Dubai');
+  const [status, setStatus] = useState('all');
+  const [loading, setLoading] = useState(false);
+  const [displayProjects, setDisplayProjects] = useState<any[]>([]);
 
-  const loadFilterOptions = useCallback(async () => {
-    try {
-      const [devs, locs] = await Promise.all([getDevelopers(), getLocations()]);
-      setDevelopers(devs);
-      setLocations(locs);
-    } catch (err) {
-      console.error("Failed to load filter options", err);
-      toast({ title: "Error", description: "Could not load filter options.", variant: "destructive" });
-    }
-  }, [toast]);
+  // Memoize all projects to avoid repeated heavy processing
+  const allProjects = useMemo(() => getRealisteProjects(), []);
 
   useEffect(() => {
-    loadFilterOptions();
-  }, [loadFilterOptions]);
+    setLoading(true);
+    // Initial display
+    const initial = allProjects.filter(p => p.location.city === 'Dubai').slice(0, 6);
+    setDisplayProjects(initial);
+    setLoading(false);
+  }, [allProjects]);
 
-  const handleFilterChange = (key: keyof ProjectFilter, value: any) => {
-    setCurrentFilter(prev => ({
-      ...prev,
-      [key]: value === "all" ? undefined : value,
-    }));
+  const handleSearch = () => {
+    setLoading(true);
+    
+    // Slight delay to simulate data retrieval
+    setTimeout(() => {
+        let results = allProjects;
+
+        if (query) {
+            const q = query.toLowerCase();
+            results = results.filter(p => 
+                p.name.toLowerCase().includes(q) || 
+                p.developer.toLowerCase().includes(q) ||
+                p.location.area.toLowerCase().includes(q)
+            );
+        }
+
+        if (city && city !== 'all') {
+            results = results.filter(p => p.location.city.toLowerCase() === city.toLowerCase());
+        }
+
+        if (status && status !== 'all') {
+            results = results.filter(p => p.status === status);
+        }
+
+        setDisplayProjects(results.slice(0, 6));
+        setLoading(false);
+    }, 400);
   };
-  
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    search(currentFilter);
-  }
 
-  if (error) {
-    return (
-      <div className="text-center py-16 text-red-500">
-        Error loading projects: {error.message}
-      </div>
-    );
-  }
+  // Immediate effect for filter changes
+  useEffect(() => {
+    handleSearch();
+  }, [city, status]);
 
   return (
-    <section className="bg-background text-foreground py-24">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <section className="bg-black text-white py-40 border-y border-white/5 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
+      
+      <div className="container mx-auto px-6 max-w-[1800px] relative z-10">
         
-        <div className="text-center max-w-5xl mx-auto mb-20 space-y-8">
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.1]"
-          >
-            The <span className="text-primary">AI Operating System</span> for Real Estate Growth.
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
-          >
-            Leverage <span className="font-semibold text-foreground">3,750+ verified projects</span> and advanced AI agents to build, market, and manage your real estate empire.
-          </motion.p>
-           <Link href="/builder">
-                <Button size="lg" className="h-14 px-8 text-base rounded-full shadow-lg hover:scale-105 transition-transform mt-8">
-                    <Rocket className="mr-2 h-4 w-4" /> Launch Your Platform
-                </Button>
-            </Link>
+        <div className="flex flex-col lg:flex-row justify-between items-end mb-24 gap-12 border-b border-white/5 pb-16">
+            <div className="max-w-4xl space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[10px] font-bold uppercase tracking-widest">
+                    <Activity className="h-3 w-3" /> Live Inventory
+                </div>
+                <h2 className="text-6xl md:text-8xl font-bold tracking-tighter leading-none">
+                    Verified <br/>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">Market Intelligence.</span>
+                </h2>
+                <p className="text-2xl text-zinc-400 max-w-2xl font-light">
+                    Direct access to the Entrestate database of 3,750+ projects. Verified prices, real-time ROI, and developer inventory.
+                </p>
+            </div>
+            <div className="flex gap-4">
+                <div className="bg-zinc-900 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-bold text-zinc-500 uppercase">Data Sync</p>
+                        <p className="text-xs font-mono text-green-500">Live</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="bg-card border rounded-3xl p-8 shadow-xl mb-20"
-        >
-          <div className="text-center mb-12 space-y-4">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Explore <span className="text-primary">Real Project Data</span></h2>
-              <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-                  Search our unparalleled database of UAE real estate projects, with verified information and media.
-              </p>
-          </div>
+        <div className="mb-20">
+            <div className="bg-zinc-900/50 backdrop-blur-3xl border border-white/10 p-2 rounded-[2.5rem] flex flex-col lg:flex-row gap-2 max-w-6xl mx-auto shadow-2xl">
+                <div className="flex-1 flex items-center px-6 gap-4 border-b lg:border-b-0 lg:border-r border-white/5 py-4 lg:py-0">
+                    <Search className="h-5 w-5 text-zinc-600" />
+                    <input 
+                        type="text" 
+                        placeholder="Search projects, developers, or areas..."
+                        className="bg-transparent border-0 focus:ring-0 text-white placeholder:text-zinc-700 w-full text-lg font-medium"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    />
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-2 p-2">
+                    <Select onValueChange={setCity} defaultValue="Dubai">
+                        <SelectTrigger className="h-14 rounded-2xl bg-white/5 border-white/5 text-zinc-300 w-full sm:w-40 hover:bg-white/10 transition-all font-bold uppercase tracking-widest text-[10px]">
+                            <SelectValue placeholder="City" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                            <SelectItem value="Dubai">Dubai</SelectItem>
+                            <SelectItem value="Abu Dhabi">Abu Dhabi</SelectItem>
+                            <SelectItem value="Sharjah">Sharjah</SelectItem>
+                        </SelectContent>
+                    </Select>
 
-          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 max-w-6xl mx-auto mb-8">
-             <Input 
-                placeholder="Search by name..."
-                className="h-12 rounded-xl bg-muted/30 border-muted-foreground/20 focus:ring-primary col-span-1 md:col-span-2 lg:col-span-1"
-                value={currentFilter.query || ''}
-                onChange={(e) => handleFilterChange('query', e.target.value)}
-              />
-            <Select onValueChange={(val) => handleFilterChange('city', val)} defaultValue={currentFilter.city}>
-              <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-muted-foreground/20 focus:ring-primary">
-                <SelectValue placeholder="City" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Cities</SelectItem>
-                {locations.map(loc => (
-                    <SelectItem key={loc.city} value={loc.city.toLowerCase()}>{loc.city}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    <Select onValueChange={setStatus} defaultValue="all">
+                        <SelectTrigger className="h-14 rounded-2xl bg-white/5 border-white/5 text-zinc-300 w-full sm:w-40 hover:bg-white/10 transition-all font-bold uppercase tracking-widest text-[10px]">
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="On Sale">On Sale</SelectItem>
+                            <SelectItem value="New Launch">New Launch</SelectItem>
+                            <SelectItem value="Coming Soon">Coming Soon</SelectItem>
+                            <SelectItem value="Ready">Ready</SelectItem>
+                        </SelectContent>
+                    </Select>
 
-            <Select onValueChange={(val) => handleFilterChange('developer', val)}>
-              <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-muted-foreground/20 focus:ring-primary">
-                <SelectValue placeholder="Developer" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Developers</SelectItem>
-                {developers.map(dev => (
-                    <SelectItem key={dev} value={dev}>{dev}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select onValueChange={(val) => handleFilterChange('availability', val)}>
-              <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-muted-foreground/20 focus:ring-primary">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="Available">Available</SelectItem>
-                  <SelectItem value="Sold Out">Sold Out</SelectItem>
-                  <SelectItem value="Coming Soon">Coming Soon</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button type="submit" size="lg" className="h-12 px-8 rounded-xl shadow-lg w-full">
-              <Search className="h-5 w-5 mr-2" />
-              Search
-            </Button>
-          </form>
-
-          {loading ? (
-            <div className="h-96 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-3 text-lg text-muted-foreground">Loading projects...</span>
+                    <Button onClick={handleSearch} className="h-14 px-10 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg shadow-blue-900/40">
+                        Query Data
+                    </Button>
+                </div>
             </div>
-          ) : projects.length > 0 ? (
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                 {projects.slice(0, 6).map((project, index) => (
-                     <ProjectCard key={project.id || index} project={project} index={index} />
-                 ))}
-             </div>
-          ) : (
-              <div className="text-center py-16 text-muted-foreground text-lg">
-                  No projects found matching your criteria.
-              </div>
-          )}
-        </motion.div>
+        </div>
+
+        {loading ? (
+            <div className="h-[600px] flex flex-col items-center justify-center gap-6">
+                <div className="relative">
+                    <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
+                    <div className="absolute inset-0 bg-blue-500 blur-2xl opacity-20 animate-pulse" />
+                </div>
+                <p className="text-zinc-500 font-mono text-xs uppercase tracking-[0.3em]">Querying Data Nodes...</p>
+            </div>
+        ) : displayProjects.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {displayProjects.map((project, index) => (
+                    <ProjectCard key={project.id || index} project={project} />
+                ))}
+            </div>
+        ) : (
+            <div className="h-60 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[3rem] bg-white/5">
+                <MapPin className="h-10 w-10 text-zinc-800 mb-4" />
+                <p className="text-zinc-500 font-medium text-lg">No matches found in current data cluster.</p>
+                <button onClick={() => { setQuery(''); setCity('Dubai'); setStatus('all'); }} className="mt-4 text-blue-500 font-bold uppercase tracking-widest text-[10px] hover:underline">Reset Filters</button>
+            </div>
+        )}
       </div>
     </section>
   );

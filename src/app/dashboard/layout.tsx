@@ -4,62 +4,95 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from "@/lib/utils";
+import { motion } from 'framer-motion';
 
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Bell, Home, LineChart, Package, Package2, Settings, ShoppingCart, Users, PlusCircle } from 'lucide-react';
+import { 
+  Bell, 
+  Home, 
+  LineChart, 
+  Package, 
+  Settings, 
+  ShoppingCart, 
+  Zap,
+  Sparkles,
+  Search,
+  Instagram,
+  Users,
+  MessageSquare,
+  Mail,
+  Smartphone,
+  Globe
+} from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { UserNav } from "@/components/user-nav";
+import { EntrestateLogo } from "@/components/icons";
 
 const mainNavItems = [
-    { href: "/dashboard", icon: Home, label: "Dashboard" },
-    { href: "/dashboard/sites", icon: Package, label: "Sites" },
-    { href: "/dashboard/leads", icon: ShoppingCart, label: "Leads" },
-    { href: "/dashboard/marketing", icon: LineChart, label: "Marketing" },
+    { href: "/dashboard", icon: Home, label: "Overview" },
+    { href: "/dashboard/sites", icon: Globe, label: "Site Architect" },
+    { href: "/dashboard/chat-agent", icon: MessageSquare, label: "Expert Chat Agent" },
+    { href: "/dashboard/google-ads", icon: Search, label: "Google Ads Engine" },
+    { href: "/dashboard/meta-audience", icon: Users, label: "Audience Architect" },
+    { href: "/dashboard/sms-marketing", icon: Smartphone, label: "SMS VIP Broadcast" },
+    { href: "/dashboard/email-marketing", icon: Mail, label: "Email Marketing" },
+    { href: "/dashboard/leads", icon: Target, label: "Lead CRM" },
 ];
 
 const secondaryNavItems = [
-    { href: "/dashboard/settings", icon: Settings, label: "Settings" },
+    { href: "/dashboard/settings", icon: Settings, label: "Infrastructure" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex min-h-screen w-full flex-col bg-muted/40">
-            <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
-                <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-                    <Link href="#" className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base">
-                         <Package2 className="h-4 w-4 transition-all group-hover:scale-110" />
-                        <span className="sr-only">Acme Inc</span>
+        <div className="flex min-h-screen w-full bg-black text-white">
+            {/* Master Sidebar */}
+            <aside className="fixed inset-y-0 left-0 z-50 hidden w-20 flex-col border-r border-white/5 bg-zinc-950 sm:flex">
+                <div className="flex h-20 items-center justify-center border-b border-white/5">
+                    <Link href="/">
+                        <EntrestateLogo showText={false} className="scale-75" />
                     </Link>
-                    <TooltipProvider>
+                </div>
+                
+                <nav className="flex flex-col items-center gap-4 py-8 overflow-y-auto custom-scrollbar no-scrollbar">
+                    <TooltipProvider delayDuration={0}>
                         {mainNavItems.map(item => (
                             <NavItem key={item.href} item={item} />
                         ))}
                     </TooltipProvider>
                 </nav>
-                <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-                    <TooltipProvider>
+                
+                <nav className="mt-auto flex flex-col items-center gap-4 py-8 border-t border-white/5">
+                    <TooltipProvider delayDuration={0}>
                          {secondaryNavItems.map(item => (
                             <NavItem key={item.href} item={item} />
                         ))}
                     </TooltipProvider>
                 </nav>
             </aside>
-            <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-                 <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-                    {/* This space can be used for breadcrumbs or page titles if needed */}
-                    <div className="ml-auto flex items-center gap-2">
-                        <Button variant="outline" size="icon" className="h-8 w-8">
-                            <Bell className="h-4 w-4" />
-                            <span className="sr-only">Toggle notifications</span>
+
+            {/* Main Area */}
+            <div className="flex flex-1 flex-col sm:pl-20">
+                 <header className="sticky top-0 z-40 flex h-20 items-center gap-4 border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl px-8">
+                    <div className="flex items-center gap-4">
+                        <span className="text-xs font-black uppercase tracking-[0.3em] text-white">Entrestate OS</span>
+                        <div className="h-4 w-px bg-white/10" />
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Active Cluster: DIFC-01</span>
+                    </div>
+                    
+                    <div className="ml-auto flex items-center gap-6">
+                        <div className="hidden lg:flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/5 border border-blue-500/10">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                            <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">System Optimal</span>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-10 w-10 text-zinc-500 hover:text-white hover:bg-white/5 rounded-full relative transition-colors">
+                            <Bell className="h-5 w-5" />
                         </Button>
-                        <Link href="/builder" passHref>
-                            <Button size="sm" className="h-8 gap-1">
-                                <PlusCircle className="h-3.5 w-3.5" />
-                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">New Site</span>
-                            </Button>
-                        </Link>
+                        <UserNav />
                     </div>
                 </header>
-                <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+
+                <main className="flex-1 p-8 md:p-12 overflow-x-hidden">
                     {children}
                 </main>
             </div>
@@ -74,12 +107,27 @@ function NavItem({ item }: { item: typeof mainNavItems[0] }) {
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <Link href={item.href} className={cn("flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>
+                <Link href={item.href} className={cn(
+                    "flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-300 relative group", 
+                    isActive 
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20" 
+                        : "text-zinc-500 hover:text-white hover:bg-white/5"
+                )}>
                     <item.icon className="h-5 w-5" />
-                    <span className="sr-only">{item.label}</span>
+                    {isActive && (
+                        <motion.div 
+                            layoutId="active-nav-indicator"
+                            className="absolute -left-2 w-1 h-6 bg-blue-600 rounded-r-full"
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        />
+                    )}
                 </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">{item.label}</TooltipContent>
+            <TooltipContent side="right" className="bg-zinc-900 border-white/10 text-white text-[10px] font-bold uppercase tracking-widest ml-2 px-3 py-1.5 rounded-lg shadow-2xl">
+                {item.label}
+            </TooltipContent>
         </Tooltip>
     );
 }
+
+import { Target } from 'lucide-react';

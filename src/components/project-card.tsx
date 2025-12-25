@@ -1,104 +1,126 @@
-
 'use client';
 
 import React from "react";
+import { motion } from "framer-motion";
 import { 
-  Card, 
-  CardContent, 
-  CardFooter, 
-} from "@/components/ui/card";
+  TrendingUp, 
+  MapPin, 
+  Building2, 
+  ArrowUpRight, 
+  BarChart3, 
+  Calendar,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, BedDouble, Bath, Square, ArrowRight, Heart } from "lucide-react";
-import Image from "next/image";
-import type { ProjectData } from "@/lib/types";
-import { motion } from "framer-motion";
+import { ProjectData } from "@/lib/types";
+import { ResponsiveImage } from "@/components/ui/responsive-image";
 
 interface ProjectCardProps {
   project: ProjectData;
-  index?: number;
 }
 
-export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
+export function ProjectCard({ project }: ProjectCardProps) {
   return (
-    <motion.div
+    <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: index * 0.08 }}
-        viewport={{ once: true, amount: 0.5 }}
+        className="group relative bg-zinc-900 border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-blue-500/30 transition-all duration-500"
     >
-        <Card className="group overflow-hidden border border-border/50 bg-card hover:bg-muted/20 transition-colors duration-500 flex flex-col h-full rounded-2xl shadow-sm hover:shadow-xl">
-        <div className="relative aspect-[4/3] overflow-hidden m-2 rounded-xl">
-            <Image
-                src={project.images?.[0] || 'https://picsum.photos/seed/1/800/600'}
+        {/* Visual Top */}
+        <div className="relative aspect-[16/10] overflow-hidden">
+            <ResponsiveImage 
+                src={project.images[0]} 
                 alt={project.name}
                 fill
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="group-hover:scale-105 transition-transform duration-1000"
             />
-            <div className="absolute top-4 left-4">
-                <Badge variant="secondary" className="bg-white/90 backdrop-blur text-black border-0 shadow-sm font-medium px-3 py-1">
-                    {project.availability}
-                </Badge>
-            </div>
-            <Button size="icon" variant="ghost" className="absolute top-4 right-4 bg-black/20 hover:bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                <Heart className="h-5 w-5" />
-            </Button>
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
             
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="flex gap-2">
-                    {project.features?.slice(0, 2).map((f, i) => (
-                        <Badge key={i} variant="outline" className="text-white border-white/30 bg-black/20 backdrop-blur-sm text-[10px]">
-                            {f}
-                        </Badge>
-                    ))}
+            <div className="absolute top-6 left-6 flex gap-2">
+                <Badge className="bg-white/10 backdrop-blur-xl border-white/10 text-white text-[9px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">
+                    {project.status}
+                </Badge>
+                {project.performance.marketTrend === 'up' && (
+                    <Badge className="bg-green-500/20 backdrop-blur-xl border-green-500/20 text-green-500 text-[9px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full gap-1.5">
+                        <TrendingUp className="h-3 w-3" /> Trending
+                    </Badge>
+                )}
+            </div>
+
+            <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+                <div className="space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-white/60 text-xs font-medium">
+                        <MapPin className="h-3.5 w-3.5" /> {project.location.area}, {project.location.city}
+                    </div>
+                    <h3 className="text-3xl font-bold text-white tracking-tighter">{project.name}</h3>
+                </div>
+                <div className="text-right">
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Starting</p>
+                    <p className="text-2xl font-black text-white">{project.price.label}</p>
                 </div>
             </div>
         </div>
-        
-        <CardContent className="p-6 space-y-4 flex-grow">
-            <div className="flex justify-between items-start">
-                <div>
-                    <h3 className="font-bold text-xl mb-1 group-hover:text-primary transition-colors line-clamp-1">{project.name}</h3>
-                    <div className="flex items-center text-muted-foreground text-sm">
-                        <MapPin className="h-3.5 w-3.5 mr-1" />
-                        {project.location?.area || project.location.city}
-                    </div>
-                </div>
-                <div className="text-right">
-                    <p className="text-xs text-muted-foreground uppercase font-medium">Starting from</p>
-                    <p className="text-lg font-bold text-primary">{project.price?.label}</p>
-                </div>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border/50">
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                        <BedDouble className="h-3.5 w-3.5" /> Beds
-                    </div>
-                    <span className="font-semibold text-sm">{project.bedrooms?.label || 'N/A'}</span>
-                </div>
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                        <Square className="h-3.5 w-3.5" /> Area
-                    </div>
-                    <span className="font-semibold text-sm">{project.areaSqft?.label || 'N/A'}</span>
-                </div>
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                        <Bath className="h-3.5 w-3.5" /> Handover
-                    </div>
-                    <span className="font-semibold text-sm">{project.handover ? `Q${project.handover.quarter} ${project.handover.year}` : 'N/A'}</span>
-                </div>
-            </div>
-        </CardContent>
 
-        <CardFooter className="p-6 pt-0">
-            <Button variant="secondary" className="w-full h-12 rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                View Details <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-        </CardFooter>
-        </Card>
+        {/* Intelligence Data Bottom */}
+        <div className="p-8 space-y-8">
+            <div className="grid grid-cols-3 gap-6">
+                <DataMetric 
+                    label="Expected ROI" 
+                    value={`${project.performance.roi}%`} 
+                    icon={BarChart3} 
+                    color="blue"
+                />
+                <DataMetric 
+                    label="Capital Gain" 
+                    value={`+${project.performance.capitalAppreciation}%`} 
+                    icon={ArrowUpRight} 
+                    color="green"
+                />
+                <DataMetric 
+                    label="Handover" 
+                    value={project.handover ? `Q${project.handover.quarter} ${project.handover.year}` : 'Ready'} 
+                    icon={Calendar} 
+                    color="orange"
+                />
+            </div>
+
+            <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                        <Building2 className="h-5 w-5 text-zinc-500" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest leading-none mb-1.5">Developer</p>
+                        <p className="text-sm font-bold text-zinc-300 leading-none">{project.developer}</p>
+                    </div>
+                </div>
+                <Button variant="outline" size="sm" className="rounded-full border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-[0.2em] h-10 px-6 hover:bg-white hover:text-black transition-all">
+                    Project Details
+                </Button>
+            </div>
+        </div>
     </motion.div>
   );
 }
+
+function DataMetric({ label, value, icon: Icon, color }: any) {
+    const colorClasses: any = {
+        blue: "text-blue-500 bg-blue-500/10",
+        green: "text-green-500 bg-green-500/10",
+        orange: "text-orange-500 bg-orange-500/10"
+    };
+
+    return (
+        <div className="space-y-3">
+            <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center", colorClasses[color])}>
+                <Icon className="h-5 w-5" />
+            </div>
+            <div>
+                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest leading-none mb-1.5">{label}</p>
+                <p className="text-lg font-black text-white leading-none">{value}</p>
+            </div>
+        </div>
+    )
+}
+
+import { cn } from "@/lib/utils";

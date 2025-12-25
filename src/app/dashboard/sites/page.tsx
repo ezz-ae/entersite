@@ -7,10 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { 
   MoreHorizontal, 
   Edit, 
-  ExternalLink, 
+  Globe, 
   Target, 
   Users, 
-  BarChart3, 
   Plus, 
   Sparkles,
   Settings,
@@ -38,6 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from '@/lib/utils';
 
 export default function SitesDashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,22 +46,22 @@ export default function SitesDashboardPage() {
     { 
         id: '1', 
         name: "Dubai Luxury Launch", 
-        url: "entresite.ai/p/dubai-lux", 
+        url: "entrestate.com/p/dubai-lux", 
         status: "Live", 
         views: 1240, 
         leads: 45, 
-        thumb: "bg-gradient-to-br from-purple-900 to-indigo-900",
+        thumb: "bg-gradient-to-br from-blue-900 to-indigo-900",
         lastEdited: "2 hours ago",
         adsActive: false
     },
     { 
         id: '2', 
         name: "Agent Portfolio - Sarah", 
-        url: "entresite.ai/p/sarah-agent", 
+        url: "entrestate.com/p/sarah-agent", 
         status: "Live", 
         views: 450, 
         leads: 12, 
-        thumb: "bg-gradient-to-br from-emerald-900 to-teal-900",
+        thumb: "bg-gradient-to-br from-blue-600 to-indigo-600",
         lastEdited: "Yesterday",
         adsActive: true
     },
@@ -79,64 +79,46 @@ export default function SitesDashboardPage() {
   ];
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 pb-20 animate-in fade-in duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Project Portfolio</h1>
-          <p className="text-muted-foreground text-lg">Manage your digital assets and their performance.</p>
+          <h1 className="text-4xl font-bold tracking-tight text-white uppercase italic">Project Portfolio</h1>
+          <p className="text-zinc-500 text-lg font-light">Manage your digital assets and their performance.</p>
         </div>
         
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
-                <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20 gap-2 px-8">
+                <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20 gap-2 px-8 h-14 text-base font-bold">
                     <Plus className="h-5 w-5" /> Start New Project
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[550px] bg-zinc-950 border-zinc-800 text-white">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                        <Sparkles className="h-6 w-6 text-blue-400" />
+            <DialogContent className="sm:max-w-[550px] bg-zinc-950 border-white/10 text-white rounded-[2.5rem]">
+                <DialogHeader className="p-4">
+                    <DialogTitle className="text-3xl font-bold flex items-center gap-3">
+                        <Sparkles className="h-8 w-8 text-blue-500" />
                         AI Site Architect
                     </DialogTitle>
-                    <DialogDescription className="text-zinc-400 text-base">
+                    <DialogDescription className="text-zinc-500 text-lg font-light mt-2">
                         Give our AI a project brief. We'll handle the sitemap, content, and data integration.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-6 py-6 text-left">
+                <div className="grid gap-6 py-8 px-4 text-left">
                     <div className="grid gap-2">
-                        <Label htmlFor="site-name" className="text-zinc-400 uppercase text-[10px] font-bold tracking-widest">Project Internal Name</Label>
-                        <Input id="site-name" placeholder="e.g., 'Palm Jebel Ali Launch'" className="bg-zinc-900 border-zinc-800 h-12" />
+                        <Label htmlFor="site-name" className="text-zinc-500 uppercase text-[10px] font-bold tracking-[0.2em]">Project Internal Name</Label>
+                        <Input id="site-name" placeholder="e.g., 'Palm Jebel Ali Launch'" className="bg-zinc-900 border-white/5 h-12 rounded-xl" />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="site-description" className="text-zinc-400 uppercase text-[10px] font-bold tracking-widest">Architect's Brief</Label>
+                        <Label htmlFor="site-description" className="text-zinc-500 uppercase text-[10px] font-bold tracking-[0.2em]">Architect's Brief</Label>
                         <Textarea 
                             id="site-description" 
-                            placeholder="Describe the project... (e.g., A luxury villa launch in Dubai South. Target: European investors. Focus on 8% ROI and immediate handover.)" 
-                            className="bg-zinc-900 border-zinc-800 min-h-[120px] text-base"
+                            placeholder="Describe the project... (e.g., A luxury villa launch in Dubai South.)" 
+                            className="bg-zinc-900 border-white/5 min-h-[120px] text-base rounded-xl resize-none"
                         />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="grid gap-2">
-                             <Label className="text-zinc-400 uppercase text-[10px] font-bold tracking-widest">Language</Label>
-                             <select className="bg-zinc-900 border-zinc-800 h-10 rounded-md px-3 text-sm focus:ring-1 focus:ring-blue-500 outline-none">
-                                <option>English</option>
-                                <option>Arabic</option>
-                                <option>Bilingual (EN/AR)</option>
-                             </select>
-                        </div>
-                        <div className="grid gap-2">
-                             <Label className="text-zinc-400 uppercase text-[10px] font-bold tracking-widest">Primary Goal</Label>
-                             <select className="bg-zinc-900 border-zinc-800 h-10 rounded-md px-3 text-sm focus:ring-1 focus:ring-blue-500 outline-none">
-                                <option>Lead Generation</option>
-                                <option>WhatsApp Direct</option>
-                                <option>Brochure Downloads</option>
-                             </select>
-                        </div>
-                    </div>
                 </div>
-                <DialogFooter className="border-t border-white/5 pt-6">
-                    <Button type="submit" className="w-full h-12 text-lg font-bold bg-blue-600 hover:bg-blue-700" onClick={() => setIsModalOpen(false)}>
+                <DialogFooter className="p-4 pt-0">
+                    <Button type="submit" className="w-full h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700 rounded-2xl" onClick={() => setIsModalOpen(false)}>
                         Generate Blueprint
                     </Button>
                 </DialogFooter>
@@ -147,92 +129,84 @@ export default function SitesDashboardPage() {
       {/* Sites List */}
       <div className="grid grid-cols-1 gap-6">
         {sites.map((site) => (
-          <Card key={site.id} className="overflow-hidden border-border/60 hover:border-primary/40 transition-all duration-300">
+          <Card key={site.id} className="overflow-hidden border-white/5 bg-zinc-900/50 backdrop-blur-3xl hover:border-blue-500/30 transition-all duration-500 rounded-[2.5rem]">
             <div className="flex flex-col lg:flex-row">
-                {/* Visual Preview */}
-                <div className={`w-full lg:w-72 h-48 lg:h-auto ${site.thumb} relative flex-shrink-0 group`}>
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button variant="secondary" className="rounded-full font-bold shadow-lg shadow-black/20">
+                <div className={`w-full lg:w-80 h-48 lg:h-auto ${site.thumb} relative flex-shrink-0 group overflow-hidden`}>
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                        <Button variant="secondary" className="rounded-full font-bold shadow-lg h-12 px-8">
                             View Site
                         </Button>
                     </div>
-                    <div className="absolute top-3 left-3">
+                    <div className="absolute top-4 left-4">
                         <Badge className={cn(
-                            "border-0 shadow-lg text-white font-bold px-3 py-1",
-                            site.status === 'Live' ? 'bg-green-600' : 'bg-zinc-600'
+                            "border-0 shadow-lg text-white font-bold px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest",
+                            site.status === 'Live' ? 'bg-green-600' : 'bg-zinc-700'
                         )}>
                             {site.status}
                         </Badge>
                     </div>
                 </div>
 
-                {/* Content Area */}
-                <CardContent className="p-8 flex-grow flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                    <div className="space-y-4">
+                <CardContent className="p-10 flex-grow flex flex-col lg:flex-row lg:items-center justify-between gap-10">
+                    <div className="space-y-6">
                         <div>
-                            <h3 className="text-2xl font-bold mb-1">{site.name}</h3>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1.5 hover:text-foreground cursor-pointer transition-colors">
-                                    <Globe className="h-3.5 w-3.5" /> {site.url}
+                            <h3 className="text-3xl font-bold mb-2 text-white">{site.name}</h3>
+                            <div className="flex items-center gap-4 text-sm font-medium text-zinc-500">
+                                <span className="flex items-center gap-2 hover:text-blue-500 cursor-pointer transition-colors">
+                                    <Globe className="h-4 w-4" /> {site.url}
                                 </span>
-                                <span>•</span>
+                                <span className="opacity-20">|</span>
                                 <span>Updated {site.lastEdited}</span>
                             </div>
                         </div>
 
-                        {/* Performance Quick Stats */}
-                        <div className="flex gap-8">
+                        <div className="flex gap-12">
                              <div className="space-y-1">
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Views</p>
-                                <p className="text-xl font-bold">{site.views.toLocaleString()}</p>
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Views</p>
+                                <p className="text-2xl font-black text-white">{site.views.toLocaleString()}</p>
                             </div>
-                             <div className="space-y-1 border-l pl-8">
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Leads</p>
-                                <p className="text-xl font-bold text-blue-600">{site.leads}</p>
+                             <div className="space-y-1 border-l border-white/5 pl-12">
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Leads</p>
+                                <p className="text-2xl font-black text-blue-500">{site.leads}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Integrated Service Actions */}
-                    <div className="flex flex-wrap items-center gap-3">
-                        <Button variant="outline" className="rounded-full gap-2 border-border/60 hover:bg-muted/50">
-                            <Edit className="h-4 w-4" /> Edit Content
+                    <div className="flex flex-wrap items-center gap-4">
+                        <Button variant="outline" className="h-11 rounded-full gap-2 border-white/10 bg-white/5 text-zinc-400 hover:text-white transition-all px-6 font-bold text-xs uppercase tracking-widest">
+                            <Edit className="h-4 w-4" /> Edit
                         </Button>
-                        <Link href="/dashboard/marketing">
+                        
+                        <Link href="/dashboard/google-ads">
                             <Button variant="outline" className={cn(
-                                "rounded-full gap-2 border-border/60",
-                                site.adsActive ? "border-green-600/30 bg-green-500/5 text-green-600" : "hover:bg-muted/50"
+                                "h-11 rounded-full gap-2 border-white/10 transition-all px-6 font-bold text-xs uppercase tracking-widest",
+                                site.adsActive ? "border-green-600/30 bg-green-500/10 text-green-500" : "bg-white/5 text-zinc-400 hover:text-white"
                             )}>
                                 <Target className="h-4 w-4" /> 
-                                {site.adsActive ? "Ads Live" : "Launch Ads"}
-                            </Button>
-                        </Link>
-                        <Link href="/dashboard/leads">
-                            <Button variant="outline" className="rounded-full gap-2 border-border/60 hover:bg-muted/50">
-                                <Users className="h-4 w-4" /> Leads
+                                {site.adsActive ? "Ads Active" : "Launch Ads"}
                             </Button>
                         </Link>
                         
-                        <div className="w-px h-8 bg-border hidden lg:block mx-2" />
+                        <div className="w-px h-10 bg-white/5 hidden lg:block mx-2" />
 
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="rounded-full border border-border/40">
+                                <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full border border-white/5 bg-white/5 text-zinc-500">
                                     <MoreHorizontal className="h-5 w-5" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56 bg-zinc-950 border-zinc-800 text-white">
-                                <DropdownMenuLabel>Project Actions</DropdownMenuLabel>
+                            <DropdownMenuContent align="end" className="w-64 bg-zinc-950 border-white/10 text-white rounded-2xl p-2 shadow-2xl">
+                                <DropdownMenuLabel className="px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest">Management</DropdownMenuLabel>
                                 <DropdownMenuSeparator className="bg-white/5" />
-                                <DropdownMenuItem className="gap-2 cursor-pointer focus:bg-white/5 focus:text-white">
-                                    <Copy className="h-4 w-4" /> Duplicate Project
+                                <DropdownMenuItem className="gap-3 cursor-pointer py-3 rounded-xl hover:bg-white/5">
+                                    <Copy className="h-4 w-4 text-zinc-500" /> Duplicate Build
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2 cursor-pointer focus:bg-white/5 focus:text-white">
-                                    <Settings className="h-4 w-4" /> Project Settings
+                                <DropdownMenuItem className="gap-3 cursor-pointer py-3 rounded-xl hover:bg-white/5">
+                                    <Settings className="h-4 w-4 text-zinc-500" /> Domain & SEO
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="bg-white/5" />
-                                <DropdownMenuItem className="gap-2 text-red-500 focus:text-red-500 focus:bg-red-500/10 cursor-pointer">
-                                    <Trash2 className="h-4 w-4" /> Delete Permanently
+                                <DropdownMenuItem className="gap-3 text-red-500 hover:bg-red-500/10 cursor-pointer py-3 rounded-xl">
+                                    <Trash2 className="h-4 w-4" /> Delete Site
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -243,10 +217,10 @@ export default function SitesDashboardPage() {
         ))}
       </div>
 
-      {/* Empty State / Pro-tip */}
-      <div className="p-8 rounded-3xl bg-muted/20 border border-dashed border-border/60 text-center">
-          <p className="text-muted-foreground font-medium italic">
-            💡 Pro-tip: Sites with active Meta Lead Gen campaigns capture 3.5x more qualified investor data.
+      <div className="p-10 rounded-[3rem] bg-blue-600/5 border border-dashed border-blue-500/20 text-center flex items-center justify-center gap-4">
+          <Sparkles className="h-6 w-6 text-blue-500" />
+          <p className="text-zinc-300 font-medium text-lg">
+            Active Meta Lead Gen campaigns capture <span className="text-white font-bold">3.5x more</span> qualified investor data.
           </p>
       </div>
     </div>

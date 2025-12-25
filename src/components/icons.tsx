@@ -1,17 +1,33 @@
-import type { SVGProps } from "react";
+'use client';
 
-export function EntreSiteLogo(props: SVGProps<SVGSVGElement>) {
+import React from 'react';
+import { cn } from '@/lib/utils';
+
+export function EntrestateLogo({ className, showText = true }: { className?: string, showText?: boolean }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 256 256"
-      {...props}
-    >
-      <path fill="none" d="M0 0h256v256H0z" />
-      <path
-        fill="currentColor"
-        d="M208 40H48a16 16 0 0 0-16 16v144a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16Zm-40 120h-32v-24h32a8 8 0 0 1 0 16Zm-40-40h40a8 8 0 0 1 0 16h-40v24h-16v-48h56a8 8 0 0 1 0 16H88v16Zm-16 56H56a8 8 0 0 1 0-16h16v-24h32v40Zm104-56h-48a8 8 0 0 1 0-16h48v40h-16v-24h-32v-16h48a8 8 0 0 1 0 16Z"
-      />
-    </svg>
+    <div className={cn("flex items-center gap-3", className)}>
+      <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+          <svg 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            className="w-6 h-6 text-white" 
+            stroke="currentColor" 
+            strokeWidth="2.5" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M12 3l1.912 5.886h6.188l-5.007 3.638 1.912 5.886-5.005-3.64-5.005 3.64 1.912-5.886-5.007-3.638h6.188z" />
+          </svg>
+      </div>
+      {showText && (
+        <span className="font-bold text-2xl tracking-tighter text-white">
+          Entrestate
+        </span>
+      )}
+    </div>
   );
+}
+
+export function EntreSiteLogo(props: any) {
+    return <EntrestateLogo className={props.className} showText={false} />;
 }

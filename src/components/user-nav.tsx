@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { CreditCard, LogOut, PlusCircle, Settings, User as UserIcon } from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,57 +14,55 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export function UserNav() {
-  const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-          <Avatar className="h-9 w-9">
-             {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt="User Avatar" data-ai-hint={userAvatar.imageHint} />}
-            <AvatarFallback>JD</AvatarFallback>
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-white/10 hover:border-white/20 transition-all">
+          <Avatar className="h-full w-full">
+            <AvatarFallback className="bg-blue-600 text-white font-bold">JD</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
+      <DropdownMenuContent className="w-56 bg-zinc-950 border-white/10 text-white rounded-2xl p-2 shadow-2xl" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal p-2">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">John Doe</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              john.doe@example.com
+            <p className="text-sm font-bold leading-none">John Doe</p>
+            <p className="text-xs leading-none text-zinc-500 mt-1">
+              john.doe@entrestate.com
             </p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <UserIcon />
-            <span>Profile</span>
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard />
-            <span>Billing</span>
-            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings />
-            <span>Settings</span>
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <PlusCircle />
-            <span>New Team</span>
-          </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-white/5" />
+        <DropdownMenuGroup className="space-y-1">
+          <Link href="/profile">
+            <DropdownMenuItem className="rounded-lg cursor-pointer hover:bg-white/5">
+                <UserIcon className="mr-2 h-4 w-4 text-zinc-500" />
+                <span>Profile</span>
+                <DropdownMenuShortcut className="text-zinc-600">⇧⌘P</DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/dashboard/billing">
+            <DropdownMenuItem className="rounded-lg cursor-pointer hover:bg-white/5">
+                <CreditCard className="mr-2 h-4 w-4 text-zinc-500" />
+                <span>Billing</span>
+                <DropdownMenuShortcut className="text-zinc-600">⌘B</DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/dashboard/settings">
+            <DropdownMenuItem className="rounded-lg cursor-pointer hover:bg-white/5">
+                <Settings className="mr-2 h-4 w-4 text-zinc-500" />
+                <span>Settings</span>
+                <DropdownMenuShortcut className="text-zinc-600">⌘S</DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <LogOut />
+        <DropdownMenuSeparator className="bg-white/5" />
+        <DropdownMenuItem className="rounded-lg cursor-pointer text-red-500 hover:bg-red-500/10 focus:bg-red-500/10">
+          <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+          <DropdownMenuShortcut className="text-red-900">⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

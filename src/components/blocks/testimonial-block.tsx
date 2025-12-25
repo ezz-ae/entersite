@@ -1,15 +1,14 @@
 'use client';
 
 import React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Star } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Star, Quote } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Testimonial {
   quote: string;
   author: string;
   role: string;
-  avatarId: string;
 }
 
 interface TestimonialBlockProps {
@@ -19,71 +18,65 @@ interface TestimonialBlockProps {
 }
 
 export function TestimonialBlock({
-  headline = "Trusted by the Best",
-  subtext = "Hear what our clients have to say about their experience with us.",
+  headline = "Trusted by Industry Leaders",
+  subtext = "Experience why the world's most innovative real estate professionals choose Entrestate.",
   testimonials = [
     {
-      quote: "Working with this team was a game-changer. Their AI-powered platform helped us launch our project website in record time, and the lead quality has been outstanding.",
+      quote: "Entrestate has completely transformed our workflow. Converting brochures into landing pages has saved us hundreds of hours and the ROI data is spot on.",
       author: "Fatima Al-Marzouqi",
       role: "CEO, Prestige Properties",
-      avatarId: "user-avatar-1",
     },
     {
-      quote: "The automated Google Ads campaigns are incredibly effective. We saw a 200% increase in qualified leads within the first month. Highly recommended for any serious developer.",
+      quote: "The automated Google Ads campaigns are incredibly effective. We saw a 200% increase in qualified leads within the first month. High-end execution.",
       author: "Johnathan Smith",
       role: "Marketing Director, Skyline Developments",
-      avatarId: "user-avatar-2",
     },
     {
-      quote: "As a boutique agency, we need to be agile. EntreSite allowed us to compete with the big players, giving us a professional web presence without the huge overhead.",
+      quote: "The AI Sales Agent is like having a top-performing broker working 24/7. It handles all our Instagram queries with real project knowledge.",
       author: "Chen Wei",
       role: "Founder, Urban Nest Realty",
-      avatarId: "user-avatar-3",
     },
   ],
 }: TestimonialBlockProps) {
   return (
-    <section className="py-24 bg-muted/20">
-      <div className="container mx-auto px-4">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl font-bold tracking-tight">{headline}</h2>
-          <p className="text-lg text-muted-foreground mt-4">{subtext}</p>
+    <section className="py-32 bg-black border-y border-white/5 relative overflow-hidden">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
+      
+      <div className="container mx-auto px-6 max-w-[1800px] relative z-10">
+        <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
+          <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-white leading-none">{headline}</h2>
+          <p className="text-xl text-zinc-500 font-light">{subtext}</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, i) => {
-            const avatar = PlaceHolderImages.find(
-              (img) => img.id === testimonial.avatarId
-            );
             return (
               <div
                 key={i}
-                className="bg-card p-8 rounded-2xl shadow-sm border flex flex-col"
+                className="bg-zinc-900/50 p-10 rounded-[3rem] border border-white/10 flex flex-col group hover:border-blue-500/30 transition-all duration-500 backdrop-blur-3xl"
               >
-                <div className="flex mb-4">
-                    {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                    ))}
+                <div className="mb-8 flex justify-between items-start">
+                    <div className="flex gap-1">
+                        {[...Array(5)].map((_, idx) => (
+                            <Star key={idx} className="h-4 w-4 text-blue-500 fill-current" />
+                        ))}
+                    </div>
+                    <Quote className="h-10 w-10 text-white/5 group-hover:text-blue-500/10 transition-colors" />
                 </div>
-                <p className="text-muted-foreground italic mb-6 flex-grow">
+                
+                <p className="text-lg text-zinc-300 font-light leading-relaxed mb-10 flex-grow italic">
                   "{testimonial.quote}"
                 </p>
-                <div className="flex items-center gap-4">
-                  {avatar && (
-                    <Avatar>
-                      <AvatarImage
-                        src={avatar.imageUrl}
-                        alt={testimonial.author}
-                        data-ai-hint={avatar.imageHint}
-                      />
-                      <AvatarFallback>
+                
+                <div className="flex items-center gap-4 pt-8 border-t border-white/5">
+                  <Avatar className="h-12 w-12 border border-white/10">
+                    <AvatarFallback className="bg-blue-600 text-white font-bold">
                         {testimonial.author.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
-                    <p className="font-semibold">{testimonial.author}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-bold text-white">{testimonial.author}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
                       {testimonial.role}
                     </p>
                   </div>

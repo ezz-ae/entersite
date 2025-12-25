@@ -1,121 +1,113 @@
-import { Metadata } from 'next';
-import { Button } from '@/components/ui/button';
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
-import { Book, Code, Layers, Zap, Rocket, Settings } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Book, 
+  Terminal, 
+  Settings, 
+  Zap, 
+  Bot, 
+  ShieldCheck, 
+  ArrowRight,
+  ChevronRight,
+  Search,
+  MessageSquare,
+  Globe
+} from 'lucide-react';
+import { motion } from 'framer-motion';
 
-export const metadata: Metadata = {
-  title: 'Documentation | EntreSite AI',
-  description: 'Learn how to use EntreSite AI to build and scale your real estate business.',
-};
-
-const SECTIONS = [
-    {
-        title: "Getting Started",
-        icon: <Rocket className="h-6 w-6 text-blue-500" />,
-        items: [
-            "Quick Start Guide",
-            "Understanding the Interface",
-            "Setting up your Brand Kit",
-            "Connecting your Domain"
-        ]
-    },
-    {
-        title: "Building Pages",
-        icon: <Layers className="h-6 w-6 text-purple-500" />,
-        items: [
-            "Working with Blocks",
-            "Managing Pages & Navigation",
-            "Using AI Generation",
-            "Mobile Responsiveness"
-        ]
-    },
-    {
-        title: "Marketing Tools",
-        icon: <Zap className="h-6 w-6 text-yellow-500" />,
-        items: [
-            "Google Ads Manager",
-            "SEO Best Practices",
-            "Lead Capture Forms",
-            "Analytics Dashboard"
-        ]
-    },
-    {
-        title: "Advanced",
-        icon: <Code className="h-6 w-6 text-green-500" />,
-        items: [
-            "Custom CSS/JS",
-            "API Integrations",
-            "Webhooks",
-            "White Labeling"
-        ]
-    }
+const DOCS_CATEGORIES = [
+  {
+    title: 'Getting Started',
+    icon: Zap,
+    links: ['Quick Start Guide', 'System Overview', 'Mobile Setup', 'Authentication']
+  },
+  {
+    title: 'AI Architect',
+    icon: Bot,
+    links: ['Brochure Ingestion', 'Prompt Engineering', 'Site Generation', 'Data Schema']
+  },
+  {
+    title: 'Chat Expert',
+    icon: MessageSquare,
+    links: ['Instagram Auth', 'Knowledge Base Setup', 'Sales Agent Training', 'Widget Embed']
+  },
+  {
+    title: 'Infrastructure',
+    icon: Globe,
+    links: ['Vercel Domains', 'PayPal Integration', 'DNS Configuration', 'Security & SSL']
+  }
 ];
 
 export default function DocsPage() {
   return (
-    <main className="min-h-screen bg-background py-20">
-      <div className="container mx-auto px-4">
+    <main className="min-h-screen bg-black text-white py-40">
+      <div className="container mx-auto px-6 max-w-6xl">
         
-        <div className="flex flex-col md:flex-row gap-12">
-            {/* Sidebar Navigation */}
-            <aside className="w-full md:w-64 flex-shrink-0 space-y-8">
-                <div className="font-bold text-2xl flex items-center gap-2">
-                    <Book className="h-6 w-6" />
-                    Docs
-                </div>
-                <div className="space-y-1">
-                    <Button variant="ghost" className="w-full justify-start font-semibold">Overview</Button>
-                    <Button variant="ghost" className="w-full justify-start text-muted-foreground">Tutorials</Button>
-                    <Button variant="ghost" className="w-full justify-start text-muted-foreground">API Reference</Button>
-                    <Button variant="ghost" className="w-full justify-start text-muted-foreground">Changelog</Button>
-                </div>
-            </aside>
-
-            {/* Main Content */}
-            <div className="flex-1 space-y-12">
-                <section className="space-y-4">
-                    <h1 className="text-4xl font-bold tracking-tight">Welcome to EntreSite Docs</h1>
-                    <p className="text-xl text-muted-foreground leading-relaxed">
-                        Your complete guide to building, launching, and scaling real estate websites with our AI-powered operating system.
-                    </p>
-                </section>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                    {SECTIONS.map((section, i) => (
-                        <Card key={i} className="border-0 shadow-md">
-                            <CardContent className="p-6">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="p-2 bg-muted rounded-lg">
-                                        {section.icon}
-                                    </div>
-                                    <h3 className="font-bold text-lg">{section.title}</h3>
-                                </div>
-                                <ul className="space-y-2">
-                                    {section.items.map((item, j) => (
-                                        <li key={j}>
-                                            <a href="#" className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-border" />
-                                                {item}
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-
-                <section className="bg-muted/30 p-8 rounded-2xl border">
-                    <h3 className="text-2xl font-bold mb-4">Need help?</h3>
-                    <p className="text-muted-foreground mb-6">
-                        Can't find what you're looking for? Our support team is here to assist you 24/7.
-                    </p>
-                    <div className="flex gap-4">
-                        <Button>Contact Support</Button>
-                        <Button variant="outline">Join Community</Button>
-                    </div>
-                </section>
+        {/* Header */}
+        <div className="text-center space-y-8 mb-24">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
+                <Book className="h-3 w-3" /> Documentation
             </div>
+            <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none">
+                The OS <br/>
+                <span className="text-zinc-600">Manual.</span>
+            </h1>
+            <p className="text-xl text-zinc-400 font-light max-w-2xl mx-auto">
+                Everything you need to master the Entrestate Operating System and scale your real estate business.
+            </p>
+            
+            <div className="max-w-xl mx-auto pt-8">
+                <div className="relative group">
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-600 group-focus-within:text-blue-500 transition-colors" />
+                    <input 
+                        placeholder="Search for a topic, tool, or guide..." 
+                        className="w-full h-16 bg-zinc-900 border border-white/5 rounded-2xl pl-16 pr-6 text-lg focus:outline-none focus:border-blue-500/50 transition-all"
+                    />
+                </div>
+            </div>
+        </div>
+
+        {/* Categories Grid */}
+        <div className="grid md:grid-cols-2 gap-8">
+            {DOCS_CATEGORIES.map((cat, i) => (
+                <motion.div
+                    key={cat.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                >
+                    <Card className="bg-zinc-900/50 border-white/5 hover:border-blue-500/30 transition-all duration-500 h-full p-8 rounded-[2.5rem]">
+                        <div className="flex items-center gap-4 mb-10">
+                            <div className="w-14 h-14 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500">
+                                <cat.icon className="h-7 w-7" />
+                            </div>
+                            <h3 className="text-2xl font-bold">{cat.title}</h3>
+                        </div>
+                        
+                        <div className="space-y-3">
+                            {cat.links.map(link => (
+                                <Link key={link} href="#" className="flex items-center justify-between p-4 rounded-xl hover:bg-white/5 group transition-colors">
+                                    <span className="text-zinc-400 group-hover:text-white font-medium">{link}</span>
+                                    <ChevronRight className="h-4 w-4 text-zinc-700 group-hover:text-blue-500 transition-colors" />
+                                </Link>
+                            ))}
+                        </div>
+                    </Card>
+                </motion.div>
+            ))}
+        </div>
+
+        {/* Footer Support */}
+        <div className="mt-40 border-t border-white/5 pt-20 text-center space-y-6">
+            <h4 className="text-2xl font-bold">Still need help?</h4>
+            <p className="text-zinc-500">Our engineering team is live in the community discord 24/7.</p>
+            <button className="h-14 px-10 rounded-full border border-white/10 bg-white/5 text-white font-bold hover:bg-white/10 transition-all">
+                Join Community
+            </button>
         </div>
 
       </div>

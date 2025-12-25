@@ -1,41 +1,56 @@
 import { generateObject, generateText } from 'ai';
-import { google } from '@ai-sdk/google';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { z } from 'zod';
-import { AI_CONFIG } from './cost-optimizer';
 
 /**
- * Vertex AI Marketing Service - COST OPTIMIZED
+ * Entrestate Master Intelligence Layer
+ * COST OPTIMIZED: Uses 1.5 Flash for speed/cost, Pro for complex architecture.
  */
 
-const IS_PROD = process.env.NODE_ENV === 'production';
+const API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY;
 
-export const generateMarketingStrategy = async (projectContext: string) => {
-    // Use FLASH for strategy unless in production for final delivery
-    const modelId = AI_CONFIG.models.chat; 
-    
-    const { text } = await generateText({
-        model: google(modelId),
-        system: `You are a Real Estate Marketing Strategist. Use UAE market context. Be concise.`,
-        prompt: `Marketing blueprint for: ${projectContext}.`,
-    });
-    return text;
-};
+const google = createGoogleGenerativeAI({
+  apiKey: API_KEY,
+});
+
+// Model Tiering Logic: 
+// 1.5 FLASH is 10x cheaper and sufficient for marketing/chat.
+// 1.5 PRO is used only for the heavy "Site Architect" structure.
+const FLASH_MODEL = 'gemini-1.5-flash';
+const PRO_MODEL = 'gemini-1.5-pro';
 
 export const generateSiteStructure = async (prompt: string) => {
-    // Use FLASH for rapid structural generation (much cheaper)
-    const modelId = AI_CONFIG.models.architect;
-
     return generateObject({
-        model: google(modelId),
+        model: google(PRO_MODEL), // Pro for the core architecture
         schema: z.object({
             title: z.string(),
             description: z.string(),
             blocks: z.array(z.object({
-                type: z.string(),
+                type: z.enum([
+                    'hero', 'launch-hero', 'stats', 'listing-grid', 
+                    'chat-agent', 'sms-lead', 'roi-calculator', 
+                    'gallery', 'faq', 'contact-details'
+                ]),
                 data: z.record(z.any())
-            }))
+            })),
+            seo: z.object({
+                title: z.string(),
+                description: z.string(),
+                keywords: z.array(z.string())
+            })
         }),
-        system: "You are the EntreSite AI Architect. Generate efficient site structures.",
-        prompt: `Design a landing page for: "${prompt}".`,
+        system: `You are the Entrestate AI Architect. Design high-converting real estate landing pages.
+                 Always include a chat-agent and an sms-lead block.`,
+        prompt: `Design a high-fidelity landing page for: "${prompt}"`,
     });
+};
+
+export const generateMarketingCopy = async (context: string) => {
+    // USE FLASH for marketing copy - much faster and extremely cheap
+    const { text } = await generateText({
+        model: google(FLASH_MODEL),
+        system: "You are a world-class real estate copywriter. Be concise.",
+        prompt: `Write 3 ad headlines and 2 descriptions for: ${context}.`,
+    });
+    return text;
 };

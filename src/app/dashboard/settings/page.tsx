@@ -1,139 +1,46 @@
 'use client';
 
 import React from 'react';
-import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DomainManager } from '@/components/dashboard/settings/domain-manager';
+import { Settings, Globe, Shield, Bell } from 'lucide-react';
 
-export default function SettingsDashboardPage() {
+export default function SettingsPage() {
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-
-        <Tabs defaultValue="general">
-            <TabsList>
-                <TabsTrigger value="general">General</TabsTrigger>
-                <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                <TabsTrigger value="security">Security</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="general" className="space-y-6 mt-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Profile Information</CardTitle>
-                        <CardDescription>Update your personal details and public profile.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                         <div className="flex items-center gap-6">
-                            <Avatar className="h-20 w-20">
-                                <AvatarImage src="https://github.com/shadcn.png" />
-                                <AvatarFallback>JD</AvatarFallback>
-                            </Avatar>
-                            <Button variant="outline">Change Avatar</Button>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>First Name</Label>
-                                <Input defaultValue="John" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Last Name</Label>
-                                <Input defaultValue="Doe" />
-                            </div>
-                             <div className="space-y-2 md:col-span-2">
-                                <Label>Email</Label>
-                                <Input defaultValue="john@example.com" disabled />
-                            </div>
-                        </div>
-                        <div className="flex justify-end">
-                            <Button>Save Changes</Button>
-                        </div>
-                    </CardContent>
-                </Card>
-                
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Company Details</CardTitle>
-                        <CardDescription>Used for invoices and legal footer.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Company Name</Label>
-                            <Input defaultValue="Acme Real Estate" />
-                        </div>
-                         <div className="space-y-2">
-                            <Label>Address</Label>
-                            <Input defaultValue="123 Business Bay, Dubai" />
-                        </div>
-                         <div className="flex justify-end">
-                            <Button>Save Company Info</Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-
-            <TabsContent value="notifications" className="mt-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Email Notifications</CardTitle>
-                        <CardDescription>Manage what emails you receive.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                                <Label>New Lead Alerts</Label>
-                                <p className="text-sm text-muted-foreground">Get notified immediately when a form is submitted.</p>
-                            </div>
-                            <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                                <Label>Weekly Performance Report</Label>
-                                <p className="text-sm text-muted-foreground">Summary of site traffic and ad performance.</p>
-                            </div>
-                            <Switch defaultChecked />
-                        </div>
-                         <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                                <Label>Product Updates</Label>
-                                <p className="text-sm text-muted-foreground">News about new features and templates.</p>
-                            </div>
-                            <Switch />
-                        </div>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-            
-            <TabsContent value="security" className="mt-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Password</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Current Password</Label>
-                            <Input type="password" />
-                        </div>
-                         <div className="space-y-2">
-                            <Label>New Password</Label>
-                            <Input type="password" />
-                        </div>
-                        <div className="flex justify-end">
-                            <Button>Update Password</Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-        </Tabs>
-
+    <div className="container mx-auto py-10 px-6 max-w-[1800px]">
+      <div className="mb-12 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center">
+            <Settings className="h-6 w-6 text-zinc-400" />
+        </div>
+        <div>
+            <h1 className="text-4xl font-bold tracking-tight text-white">System Settings</h1>
+            <p className="text-xl text-muted-foreground font-light">Configure your infrastructure and domains.</p>
+        </div>
       </div>
-    </DashboardLayout>
+
+      <Tabs defaultValue="domain" className="space-y-10">
+        <div className="border-b border-white/5">
+            <TabsList className="bg-transparent h-auto p-0 gap-8">
+                <TabsTrigger value="domain" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none pb-4 px-0 h-auto text-lg font-medium transition-all gap-2 text-zinc-500 data-[state=active]:text-white">
+                    <Globe className="h-5 w-5" /> Domain Connection
+                </TabsTrigger>
+                <TabsTrigger value="security" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none pb-4 px-0 h-auto text-lg font-medium transition-all gap-2 text-zinc-500 data-[state=active]:text-white">
+                    <Shield className="h-5 w-5" /> Security & SSL
+                </TabsTrigger>
+                <TabsTrigger value="notifications" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none pb-4 px-0 h-auto text-lg font-medium transition-all gap-2 text-zinc-500 data-[state=active]:text-white">
+                    <Bell className="h-5 w-5" /> Webhooks
+                </TabsTrigger>
+            </TabsList>
+        </div>
+
+        <TabsContent value="domain">
+          <DomainManager />
+        </TabsContent>
+        
+        <TabsContent value="security" className="h-40 flex items-center justify-center text-zinc-600 font-mono text-xs uppercase tracking-widest bg-white/5 rounded-[2.5rem] border border-dashed border-white/10">
+            Automated via Vercel Edge
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
