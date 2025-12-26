@@ -14,7 +14,7 @@ const app = initializeApp({
 });
 const db = getFirestore(app);
 
-const allProjects = [
+const allProjects: any[] = [
     ...dubaiProjects,
     ...abuDhabiProjects,
     ...rasAlKhaimahProjects,

@@ -22,8 +22,11 @@ import {
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { getDashboardStats } from '@/lib/dashboard-service';
 
 export default function DashboardOverviewPage() {
+  const stats = getDashboardStats();
+
   return (
     <div className="space-y-12 pb-20 animate-in fade-in duration-700">
       {/* 1. Header with Stats Summary */}
@@ -31,7 +34,7 @@ export default function DashboardOverviewPage() {
         <div>
           <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-2">Command Center</h1>
           <p className="text-lg text-zinc-500 font-light">
-            Welcome back. Your OS is running with <span className="text-white font-medium">3 active projects</span> and <span className="text-green-500 font-medium">12 new leads</span> today.
+            Welcome back. Your OS is running with <span className="text-white font-medium">{stats.totalProjects} active projects</span> and <span className="text-green-500 font-medium">{stats.newLeads} new leads</span> today.
           </p>
         </div>
         <div className="flex gap-3">
@@ -75,7 +78,7 @@ export default function DashboardOverviewPage() {
             icon={Globe}
             href="/dashboard/sites"
             color="orange"
-            count="3 Sites"
+            count={`${stats.totalProjects} Sites`}
           />
           <ServiceBox 
             title="Audience Pro"

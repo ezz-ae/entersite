@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
         // Direct call to Imagen 3 via AI SDK
         // This will always call the API and incur costs as requested
         const { image } = await generateImage({
-            model: google.image('imagen-3.0-generate-001'),
+            model: 'google/imagen-3.0-generate-001',
             prompt: `High-end architectural photography, ${prompt}, luxury real estate, 8k resolution, cinematic lighting`,
         });
 

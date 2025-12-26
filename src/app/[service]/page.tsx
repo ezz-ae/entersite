@@ -57,7 +57,7 @@ const SERVICE_DATA = {
         "AI-powered copy and subject line generation",
         "Beautiful, responsive email templates",
         "Automated drip campaigns for lead nurturing",
-        "Integration with your CRM contact lists",
+        "Integration with your CRM or contact lists",
         "Advanced open and click-through analytics"
     ],
     cta: "Create Email Campaign",
@@ -93,8 +93,13 @@ const SERVICE_DATA = {
   },
 };
 
+interface PageProps {
+  params: { service: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
 // --- Page Component ---
-export default function ServicePage({ params }: { params: { service: string } }) {
+export default function ServicePage({ params }: PageProps) {
   const serviceKey = params.service as keyof typeof SERVICE_DATA;
   const service = SERVICE_DATA[serviceKey];
 

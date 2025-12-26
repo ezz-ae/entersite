@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, MapPin, Filter, LayoutGrid, List as ListIcon, TrendingUp, BarChart3, Building2, SlidersHorizontal, X, ArrowRight, Zap, Globe, Activity } from "lucide-react";
+import { Search, MapPin, Filter, LayoutGrid, List as ListIcon, TrendingUp, BarChart3, Building2, SlidersHorizontal, X, ArrowRight, Zap, Globe, Activity, Loader2 } from "lucide-react";
 import { getRealisteProjects, searchRealisteProjects } from '@/lib/realiste-projects';
 import type { ProjectData } from '@/lib/types';
 import { ResponsiveImage } from '@/components/ui/responsive-image';

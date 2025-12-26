@@ -38,45 +38,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from '@/lib/utils';
+import { getRealisteProjects } from '@/lib/realiste-projects';
 
 export default function SitesDashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const sites = [
-    { 
-        id: '1', 
-        name: "Dubai Luxury Launch", 
-        url: "entrestate.com/p/dubai-lux", 
-        status: "Live", 
-        views: 1240, 
-        leads: 45, 
-        thumb: "bg-gradient-to-br from-blue-900 to-indigo-900",
-        lastEdited: "2 hours ago",
-        adsActive: false
-    },
-    { 
-        id: '2', 
-        name: "Agent Portfolio - Sarah", 
-        url: "entrestate.com/p/sarah-agent", 
-        status: "Live", 
-        views: 450, 
-        leads: 12, 
-        thumb: "bg-gradient-to-br from-blue-600 to-indigo-600",
-        lastEdited: "Yesterday",
-        adsActive: true
-    },
-    { 
-        id: '3', 
-        name: "Emaar Beachfront - Phase 2", 
-        url: "-", 
-        status: "Draft", 
-        views: 0, 
-        leads: 0, 
-        thumb: "bg-zinc-800",
-        lastEdited: "3 days ago",
-        adsActive: false
-    },
-  ];
+  const sites = getRealisteProjects();
 
   return (
     <div className="space-y-10 pb-20 animate-in fade-in duration-700">
@@ -131,7 +97,7 @@ export default function SitesDashboardPage() {
         {sites.map((site) => (
           <Card key={site.id} className="overflow-hidden border-white/5 bg-zinc-900/50 backdrop-blur-3xl hover:border-blue-500/30 transition-all duration-500 rounded-[2.5rem]">
             <div className="flex flex-col lg:flex-row">
-                <div className={`w-full lg:w-80 h-48 lg:h-auto ${site.thumb} relative flex-shrink-0 group overflow-hidden`}>
+                <div className={`w-full lg:w-80 h-48 lg:h-auto bg-gradient-to-br from-blue-900 to-indigo-900 relative flex-shrink-0 group overflow-hidden`}>
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
                         <Button variant="secondary" className="rounded-full font-bold shadow-lg h-12 px-8">
                             View Site
@@ -153,21 +119,21 @@ export default function SitesDashboardPage() {
                             <h3 className="text-3xl font-bold mb-2 text-white">{site.name}</h3>
                             <div className="flex items-center gap-4 text-sm font-medium text-zinc-500">
                                 <span className="flex items-center gap-2 hover:text-blue-500 cursor-pointer transition-colors">
-                                    <Globe className="h-4 w-4" /> {site.url}
+                                    <Globe className="h-4 w-4" /> entrestate.com/p/{site.id}
                                 </span>
                                 <span className="opacity-20">|</span>
-                                <span>Updated {site.lastEdited}</span>
+                                <span>Updated 2 hours ago</span>
                             </div>
                         </div>
 
                         <div className="flex gap-12">
                              <div className="space-y-1">
                                 <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Views</p>
-                                <p className="text-2xl font-black text-white">{site.views.toLocaleString()}</p>
+                                <p className="text-2xl font-black text-white">{Math.floor(Math.random() * 10000)}</p>
                             </div>
                              <div className="space-y-1 border-l border-white/5 pl-12">
                                 <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Leads</p>
-                                <p className="text-2xl font-black text-blue-500">{site.leads}</p>
+                                <p className="text-2xl font-black text-blue-500">{Math.floor(Math.random() * 100)}</p>
                             </div>
                         </div>
                     </div>
@@ -180,10 +146,10 @@ export default function SitesDashboardPage() {
                         <Link href="/dashboard/google-ads">
                             <Button variant="outline" className={cn(
                                 "h-11 rounded-full gap-2 border-white/10 transition-all px-6 font-bold text-xs uppercase tracking-widest",
-                                site.adsActive ? "border-green-600/30 bg-green-500/10 text-green-500" : "bg-white/5 text-zinc-400 hover:text-white"
+                                false ? "border-green-600/30 bg-green-500/10 text-green-500" : "bg-white/5 text-zinc-400 hover:text-white"
                             )}>
                                 <Target className="h-4 w-4" /> 
-                                {site.adsActive ? "Ads Active" : "Launch Ads"}
+                                {false ? "Ads Active" : "Launch Ads"}
                             </Button>
                         </Link>
                         
