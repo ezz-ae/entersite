@@ -1,129 +1,126 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getJobs, createJob, processJob, Job } from '@/lib/jobs';
+import { subscribeToJobs, createJob, processJob, Job } from '@/lib/jobs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { RefreshCw, Play, Terminal } from 'lucide-react';
+import { RefreshCw, Play, Terminal, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { getAuth } from 'firebase/auth';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { cn } from '@/lib/utils';
 
 export default function JobsDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const fetchJobs = async () => {
-    setLoading(true);
-    const data = await getJobs();
-    setJobs(data);
-    setLoading(false);
-  };
+  const [user] = useAuthState(getAuth());
 
   useEffect(() => {
-    fetchJobs();
+    const unsubscribe = subscribeToJobs((data) => {
+        setJobs(data);
+        setLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
   const handleCreateTestJob = async () => {
-    const newJob = await createJob('test-user-1', 'site_generation', { prompt: 'Luxury Villa' });
-    // Simulate the backend picking it up
+    if (!user) return;
+    const newJob = await createJob(user.uid, 'site_generation', { prompt: 'Luxury Villa' });
     processJob(newJob.id as string);
-    fetchJobs();
   };
 
   return (
-    <main className="min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <main className="min-h-screen bg-black text-white p-8 font-sans">
+      <div className="max-w-7xl mx-auto space-y-12">
         
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-white/5 pb-10">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Job Orchestrator</h1>
-            <p className="text-muted-foreground">Monitor and manage background AI workflows.</p>
+            <h1 className="text-4xl font-black tracking-tighter uppercase italic text-white">Infrastructure Logs</h1>
+            <p className="text-zinc-500 text-lg font-light">Monitor real-time AI workload and system orchestration.</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={fetchJobs} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-            <Button onClick={handleCreateTestJob}>
-              <Play className="h-4 w-4 mr-2" />
-              Trigger Test Job
+          <div className="flex gap-3">
+            <Button 
+                onClick={handleCreateTestJob}
+                className="h-14 px-8 rounded-2xl bg-blue-600 hover:bg-blue-700 font-bold text-lg shadow-xl shadow-blue-600/20"
+            >
+              <Play className="h-5 w-5 mr-2" />
+              Trigger System Test
             </Button>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Total Jobs</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">{jobs.length}</div>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Processing</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold text-yellow-500">
-                        {jobs.filter(j => j.status === 'running').length}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <StatsCard label="Active Nodes" value={jobs.filter(j => j.status === 'running').length.toString()} icon={RefreshCw} color="blue" />
+            <StatsCard label="Queue Depth" value={jobs.filter(j => j.status === 'queued').length.toString()} icon={Terminal} color="zinc" />
+            <StatsCard label="Completed" value={jobs.filter(j => j.status === 'done').length.toString()} icon={CheckCircle2} color="green" />
+            <StatsCard label="System Faults" value={jobs.filter(j => j.status === 'error').length.toString()} icon={AlertCircle} color="red" />
+        </div>
+
+        <Card className="border-white/5 bg-zinc-900/50 backdrop-blur-3xl rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <CardHeader className="p-8 border-b border-white/5">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center">
+                        <Terminal className="h-5 w-5 text-blue-500" />
                     </div>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Success Rate</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold text-green-500">100%</div>
-                </CardContent>
-            </Card>
-        </div>
-
-        <Card className="border-0 shadow-md">
-            <CardHeader>
-                <div className="flex items-center gap-2">
-                    <Terminal className="h-5 w-5" />
-                    <CardTitle>Live Job Queue</CardTitle>
+                    <CardTitle className="text-xl font-bold text-white">Execution Pipeline</CardTitle>
                 </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Job ID</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Steps Completed</TableHead>
-                            <TableHead>Created</TableHead>
+                    <TableHeader className="bg-white/5">
+                        <TableRow className="border-white/5 hover:bg-transparent">
+                            <TableHead className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest px-8">Process ID</TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Orchestrator</TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Status</TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Progress</TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest text-right px-8">Timestamp</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {jobs.length === 0 ? (
+                        {loading ? (
                             <TableRow>
-                                <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                    No jobs found. Start a new workflow.
+                                <TableCell colSpan={5} className="h-40 text-center">
+                                    <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
+                                </TableCell>
+                            </TableRow>
+                        ) : jobs.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={5} className="text-center h-40 text-zinc-500 font-light text-lg">
+                                    No active processes in pipeline.
                                 </TableCell>
                             </TableRow>
                         ) : (
                             jobs.map((job) => (
-                                <TableRow key={job.id}>
-                                    <TableCell className="font-mono text-xs">{job.id.slice(0, 8)}...</TableCell>
+                                <TableRow key={job.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                                    <TableCell className="font-mono text-xs text-blue-500 px-8"># {job.id.slice(0, 12)}</TableCell>
                                     <TableCell>
-                                        <Badge variant="outline">{job.type}</Badge>
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-sm text-white capitalize">{job.type.replace('_', ' ')}</span>
+                                            <span className="text-[10px] text-zinc-600 font-mono italic">{job.plan.flowId}</span>
+                                        </div>
                                     </TableCell>
                                     <TableCell>
                                         <StatusBadge status={job.status} />
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex items-center gap-1">
-                                            <span className="font-medium">{job.steps?.length || 0}</span>
-                                            <span className="text-muted-foreground">/ {job.plan?.steps?.length || 4}</span>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                                <div 
+                                                    className={cn(
+                                                        "h-full transition-all duration-1000",
+                                                        job.status === 'done' ? "bg-green-500 w-full" : 
+                                                        job.status === 'running' ? "bg-blue-500 w-1/2 animate-pulse" : 
+                                                        "bg-zinc-700 w-0"
+                                                    )}
+                                                />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-zinc-500">{job.steps?.length || 0}/{job.plan.steps.length}</span>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-muted-foreground text-sm">
-                                        {job.createdAt ? formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true }) : '-'}
+                                    <TableCell className="text-zinc-500 text-xs text-right px-8 font-mono">
+                                        {job.createdAt ? formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true }) : 'Now'}
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -138,16 +135,37 @@ export default function JobsDashboard() {
   );
 }
 
+function StatsCard({ label, value, icon: Icon, color }: any) {
+    const colors: any = {
+        blue: "text-blue-500 bg-blue-500/10",
+        zinc: "text-zinc-500 bg-zinc-500/10",
+        green: "text-green-500 bg-green-500/10",
+        red: "text-red-500 bg-red-500/10"
+    };
+
+    return (
+        <Card className="border-white/5 bg-zinc-900/30 rounded-3xl p-6 shadow-xl">
+            <div className="flex justify-between items-start mb-4">
+                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{label}</p>
+                <div className={cn("p-2 rounded-lg", colors[color])}>
+                    <Icon className="h-4 w-4" />
+                </div>
+            </div>
+            <p className="text-3xl font-black text-white">{value}</p>
+        </Card>
+    );
+}
+
 function StatusBadge({ status }: { status: string }) {
     const styles = {
-        queued: "bg-zinc-100 text-zinc-600 border-zinc-200",
-        running: "bg-blue-100 text-blue-700 border-blue-200 animate-pulse",
-        done: "bg-green-100 text-green-700 border-green-200",
-        error: "bg-red-100 text-red-700 border-red-200",
+        queued: "bg-zinc-900 text-zinc-500 border-zinc-800",
+        running: "bg-blue-600/10 text-blue-500 border-blue-500/20 animate-pulse",
+        done: "bg-green-600/10 text-green-500 border-green-500/20",
+        error: "bg-red-600/10 text-red-500 border-red-500/20",
     };
     return (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${styles[status as keyof typeof styles]}`}>
-            {status.toUpperCase()}
+        <span className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border", styles[status as keyof typeof styles])}>
+            {status}
         </span>
     )
 }

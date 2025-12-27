@@ -1,5 +1,5 @@
 import rawData from '../../realiste_buildings_raw.json';
-import type { ProjectData } from './types';
+import type { ProjectData, ProjectFilter } from './types';
 
 export const getRealisteProjects = (): ProjectData[] => {
   const buildings = Array.isArray(rawData) ? rawData : (rawData as any).data || [];
@@ -21,17 +21,19 @@ export const getRealisteProjects = (): ProjectData[] => {
       let area = "Downtown Dubai"; 
       
       if (b.publicUrl) {
-          if (b.publicUrl.includes("uae-abu-dhabi")) { city = "Abu Dhabi"; area = "Saadiyat Island"; }
-          else if (b.publicUrl.includes("uae-sharjah")) { city = "Sharjah"; area = "Aljada"; }
-          else if (b.publicUrl.includes("uae-ras-al-khaimah")) { city = "Ras Al Khaimah"; area = "Al Marjan Island"; }
-          else if (b.publicUrl.includes("uae-ajman")) { city = "Ajman"; area = "Ajman Corniche"; }
-          else if (b.publicUrl.includes("ind-bali")) { city = "Bali"; area = "Canggu"; }
-          else if (b.publicUrl.includes("phuket")) { city = "Phuket"; area = "Bang Tao"; }
-          else if (b.publicUrl.includes("tur-istanbul")) { city = "Istanbul"; area = "Sisli"; }
-          else if (b.publicUrl.includes("gbr-london")) { city = "London"; area = "Canary Wharf"; }
-          else if (b.publicUrl.includes("usa-new-york")) { city = "New York"; area = "Manhattan"; }
-          else if (b.publicUrl.includes("miami")) { city = "Miami"; area = "Brickell"; }
-          else if (b.publicUrl.includes("singapore")) { city = "Singapore"; area = "Orchard"; }
+          const url = b.publicUrl.toLowerCase();
+          if (url.includes("uae-abu-dhabi")) { city = "Abu Dhabi"; area = "Saadiyat Island"; }
+          else if (url.includes("uae-sharjah")) { city = "Sharjah"; area = "Aljada"; }
+          else if (url.includes("uae-ras-al-khaimah")) { city = "Ras Al Khaimah"; area = "Al Marjan Island"; }
+          else if (url.includes("uae-ajman")) { city = "Ajman"; area = "Ajman Corniche"; }
+          else if (url.includes("umm-al-quwain")) { city = "Umm Al Quwain"; area = "Siniyah Island"; }
+          else if (url.includes("ind-bali")) { city = "Bali"; area = "Canggu"; }
+          else if (url.includes("phuket")) { city = "Phuket"; area = "Bang Tao"; }
+          else if (url.includes("tur-istanbul")) { city = "Istanbul"; area = "Sisli"; }
+          else if (url.includes("gbr-london")) { city = "London"; area = "Canary Wharf"; }
+          else if (url.includes("usa-new-york")) { city = "New York"; area = "Manhattan"; }
+          else if (url.includes("miami")) { city = "Miami"; area = "Brickell"; }
+          else if (url.includes("singapore")) { city = "Singapore"; area = "Orchard"; }
           
           if (city === "Dubai") {
              if (b.name?.toLowerCase().includes("marina")) area = "Dubai Marina";
@@ -107,8 +109,42 @@ export const getRealisteProjects = (): ProjectData[] => {
             ]
         },
         availability: status === "Sold Out" ? "Sold Out" : "Available",
-        images: b.images || [],
+        images: b.images || ["https://firebasestorage.googleapis.com/v0/b/studio-7730943652-a28e0.firebasestorage.app/o/U10759_EXT_ZED739.webp?alt=media&token=be7418eb-0f7f-4df3-8c89-8fa5b070a7aa"],
         publicUrl: b.publicUrl
       };
   });
+};
+
+export const searchRealisteProjects = async (query: string, filters?: ProjectFilter): Promise<ProjectData[]> => {
+    let results = getRealisteProjects();
+
+    if (query) {
+        const q = query.toLowerCase();
+        results = results.filter(p => 
+            p.name.toLowerCase().includes(q) || 
+            p.developer.toLowerCase().includes(q) ||
+            p.location.area.toLowerCase().includes(q) ||
+            p.location.city.toLowerCase().includes(q)
+        );
+    }
+
+    if (filters) {
+        if (filters.city && filters.city !== 'all') {
+            results = results.filter(p => p.location.city.toLowerCase() === filters.city?.toLowerCase());
+        }
+        if (filters.developer) {
+            results = results.filter(p => p.developer.toLowerCase().includes(filters.developer!.toLowerCase()));
+        }
+        if (filters.minPrice) {
+            results = results.filter(p => p.price.from >= filters.minPrice!);
+        }
+        if (filters.maxPrice) {
+            results = results.filter(p => p.price.from <= filters.maxPrice!);
+        }
+        if (filters.availability) {
+            results = results.filter(p => p.availability === filters.availability);
+        }
+    }
+
+    return results;
 };

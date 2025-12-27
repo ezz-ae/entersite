@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from '@/components/theme-provider';
 import { LayoutWrapper } from '@/components/layout-wrapper';
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'Entrestate OS | Real Estate Intelligence',
@@ -36,6 +37,29 @@ export default function RootLayout({
           </FirebaseClientProvider>
           <Toaster />
         </ThemeProvider>
+        <Script id="fb-sdk" strategy="afterInteractive">
+          {`
+            window.fbAsyncInit = function() {
+              FB.init({
+                appId      : '1117024043144362',
+                cookie     : true,
+                xfbml      : true,
+                version    : 'v19.0'
+              });
+              
+              FB.AppEvents.logPageView();   
+                
+            };
+
+            (function(d, s, id){
+               var js, fjs = d.getElementsByTagName(s)[0];
+               if (d.getElementById(id)) {return;}
+               js = d.createElement(s); js.id = id;
+               js.src = "https://connect.facebook.net/en_US/sdk.js";
+               fjs.parentNode.insertBefore(js, fjs);
+             }(document, 'script', 'facebook-jssdk'));
+          `}
+        </Script>
       </body>
     </html>
   );

@@ -59,7 +59,6 @@ export function BillingManager() {
       <div className="grid md:grid-cols-2 gap-10">
         {PLANS.map((plan) => (
           <div key={plan.id} className="group relative">
-            {/* Glow effect on hover */}
             <div className={cn(
                 "absolute -inset-1 rounded-[3.5rem] blur-2xl opacity-0 group-hover:opacity-20 transition-all duration-1000",
                 plan.accent === 'blue' ? "bg-blue-600" : "bg-orange-600"
@@ -110,7 +109,7 @@ export function BillingManager() {
                                     }} 
                                     createOrder={(data, actions) => {
                                         return actions.order.create({
-                                            purchase_units: [{ amount: { value: plan.price } }],
+                                            purchase_units: [{ amount: { value: plan.price, currency_code: "USD" } }],
                                             intent: "CAPTURE"
                                         });
                                     }}

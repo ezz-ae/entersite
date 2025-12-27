@@ -97,3 +97,21 @@ export interface ProjectFilter {
   bedrooms?: number;
   availability?: 'Available' | 'Sold Out' | 'Coming Soon';
 }
+
+export interface SiteTemplate {
+  id: string;
+  name: string;
+  siteType: 'roadshow' | 'developer-focus' | 'partner-launch' | 'full-company' | 'freelancer' | 'map-focused' | 'ads-launch' | 'ready-made' | 'agent-portfolio' | 'custom';
+  pages: SitePage[];
+  thumbnail?: string;
+  description?: string;
+}
+
+export interface BlockConfig {
+  type: string;
+  name: string;
+  description: string;
+  icon: any;
+  category: 'hero' | 'content' | 'listings' | 'forms' | 'data' | 'social' | 'ai' | 'finance' | 'info' | 'marketing' | 'search';
+  defaultData: Record<string, any>;
+}

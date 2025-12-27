@@ -15,11 +15,14 @@ import {
   Bot, 
   Target,
   Home,
-  Layers
+  Layers,
+  ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EntrestateLogo } from './icons';
 import { Button } from './ui/button';
+import { auth } from '@/firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 /**
  * THE GLOBAL NAVIGATION TRUTH
@@ -27,22 +30,31 @@ import { Button } from './ui/button';
  */
 
 const NAV_LINKS = [
-    { href: "/trending", label: "Market Experts", icon: Bot },
-    { href: "/discover", label: "Project Data", icon: Globe },
-    { href: "/blog", label: "Blog", icon: Layers },
-    { href: "/docs", label: "System Docs", icon: Layout },
+    { href: "/trending", label: "Market Experts", icon: Bot, description: "AI Sales Agents for Instagram" },
+    { href: "/discover", label: "Project Data", icon: Globe, description: "3,750+ UAE Real Estate Projects" },
+    { href: "/blog", label: "Insights", icon: Layers, description: "Market Trends & AI Analysis" },
+    { href: "/docs", label: "System Docs", icon: Layout, description: "Operator Manual & API Reference" },
 ];
 
 export function SiteHeader() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user] = useAuthState(auth);
   
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = 'unset';
+    }
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -86,7 +98,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-4">
             <Link href="/dashboard" className="hidden sm:block">
                 <Button className="h-12 px-8 rounded-full bg-white text-black font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-white/10 group">
-                    Start Now <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    {user ? 'Dashboard' : 'Start Now'} <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
             </Link>
             
@@ -101,7 +113,7 @@ export function SiteHeader() {
             {/* Mobile Toggle */}
             <button 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-3 rounded-xl bg-white/5 text-zinc-400 hover:text-white transition-all"
+                className="lg:hidden p-3 rounded-xl bg-white/5 text-zinc-400 hover:text-white transition-all z-[120]"
             >
                 {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -111,51 +123,102 @@ export function SiteHeader() {
       {/* Mobile Menu - The Truth Overlay */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="fixed inset-0 top-0 z-[110] bg-black p-8 lg:hidden flex flex-col justify-between"
-          >
-            <div className="space-y-12">
-                <div className="flex justify-between items-center">
-                    <EntrestateLogo />
-                    <button onClick={() => setIsMobileMenuOpen(false)} className="p-3 rounded-xl bg-white/5 text-white"><X className="h-6 w-6" /></button>
-                </div>
-                
-                <nav className="flex flex-col gap-8">
-                    {NAV_LINKS.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                                "text-4xl font-black tracking-tighter transition-all flex items-center gap-4",
-                                pathname === link.href ? "text-white" : "text-zinc-800"
-                            )}
-                        >
-                            <link.icon className={cn("h-8 w-8", pathname === link.href ? "text-blue-600" : "text-zinc-900")} />
-                            {link.label}
-                        </Link>
-                    ))}
-                    <Link href="/dashboard" className="text-4xl font-black tracking-tighter text-blue-600 flex items-center gap-4">
-                         <Target className="h-8 w-8" /> Command Center
-                    </Link>
-                </nav>
-            </div>
+          <>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-md z-[105] lg:hidden"
+            />
+            <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="fixed inset-y-0 right-0 w-full sm:w-[400px] z-[110] bg-zinc-950 border-l border-white/10 lg:hidden flex flex-col"
+            >
+                <div className="flex-1 overflow-y-auto px-8 pt-24 pb-12">
+                    <div className="space-y-12">
+                        <div>
+                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-8">Navigation</p>
+                            <nav className="flex flex-col gap-6">
+                                {NAV_LINKS.map((link) => (
+                                    <Link
+                                        key={link.href}
+                                        href={link.href}
+                                        className="group flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-5">
+                                            <div className={cn(
+                                                "w-12 h-12 rounded-2xl flex items-center justify-center border transition-all",
+                                                pathname === link.href ? "bg-blue-600 border-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]" : "bg-white/5 border-white/5 text-zinc-500 group-hover:text-white"
+                                            )}>
+                                                <link.icon className="h-6 w-6" />
+                                            </div>
+                                            <div>
+                                                <h4 className={cn("text-xl font-bold tracking-tight", pathname === link.href ? "text-white" : "text-zinc-400 group-hover:text-white")}>{link.label}</h4>
+                                                <p className="text-xs text-zinc-600 font-medium">{link.description}</p>
+                                            </div>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 text-zinc-800 group-hover:text-zinc-500 transition-colors" />
+                                    </Link>
+                                ))}
+                            </nav>
+                        </div>
 
-            <div className="pt-8 border-t border-white/5 grid grid-cols-2 gap-4">
-                <Link href="/dashboard">
-                    <Button className="w-full h-16 rounded-[2rem] bg-white text-black font-black text-xl shadow-2xl">
-                        Start Now
-                    </Button>
-                </Link>
-                <Link href="/profile">
-                    <Button variant="outline" className="w-full h-16 rounded-[2rem] border-white/10 bg-white/5 text-white font-black text-xl">
-                        Profile
-                    </Button>
-                </Link>
-            </div>
-          </motion.div>
+                        <div>
+                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-8">Account</p>
+                            <div className="space-y-4">
+                                <Link href="/dashboard" className="block">
+                                    <div className="p-6 rounded-[2rem] bg-blue-600 text-white shadow-2xl shadow-blue-600/20 group hover:scale-[1.02] transition-all">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <Target className="h-6 w-6" />
+                                            <ArrowRight className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-all" />
+                                        </div>
+                                        <h4 className="text-xl font-black tracking-tight">Command Center</h4>
+                                        <p className="text-blue-100/60 text-xs font-medium">Manage your sites, ads, and leads.</p>
+                                    </div>
+                                </Link>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Link href="/profile" className="p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col gap-2 hover:bg-white/10 transition-all">
+                                        <User className="h-5 w-5 text-zinc-500" />
+                                        <span className="text-sm font-bold text-white">Profile</span>
+                                    </Link>
+                                    <Link href="/docs" className="p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col gap-2 hover:bg-white/10 transition-all">
+                                        <Layout className="h-5 w-5 text-zinc-500" />
+                                        <span className="text-sm font-bold text-white">Help Center</span>
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-8 border-t border-white/5 bg-zinc-950/50 backdrop-blur-xl">
+                    {!user ? (
+                        <Link href="/dashboard">
+                            <Button className="w-full h-16 rounded-[2rem] bg-white text-black font-black text-xl shadow-2xl">
+                                Start Building Free
+                            </Button>
+                        </Link>
+                    ) : (
+                        <div className="flex items-center gap-4">
+                             <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-black text-white">
+                                {user.email?.substring(0, 2).toUpperCase()}
+                             </div>
+                             <div className="flex-1 min-w-0">
+                                <p className="text-white font-bold truncate">{user.displayName || user.email?.split('@')[0]}</p>
+                                <p className="text-zinc-500 text-xs truncate">{user.email}</p>
+                             </div>
+                             <Button variant="ghost" size="icon" className="text-zinc-500" onClick={() => auth.signOut()}>
+                                <X className="h-5 w-5" />
+                             </Button>
+                        </div>
+                    )}
+                </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>

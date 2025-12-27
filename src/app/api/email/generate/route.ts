@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         if (!topic) return NextResponse.json({ error: 'Topic required' }, { status: 400 });
 
         const { text } = await generateText({
-            model: google(MODEL_ID),
+            model: google(MODEL_ID) as any,
             system: "You are a real estate expert. Write a concise, professional email. Include 'Subject: ' on the first line.",
             prompt: `Email about: ${topic}. Context: ${context}.`,
         });

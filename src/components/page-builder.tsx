@@ -219,7 +219,7 @@ const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: 
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.1 }}
                                 key={suggestion.blockId}
-                                onClick={() => handleSelect(suggestion.blockId, { ...suggestion.defaultContent, ...suggestion.recommendedStyleOverrides })}
+                                onClick={() => handleSelect(suggestion.blockId, { ...(suggestion.defaultContent as any), ...(suggestion.recommendedStyleOverrides as any) })}
                                 className="w-full text-left p-3 rounded-lg bg-white dark:bg-black/20 hover:shadow-md hover:scale-[1.02] transition-all text-sm flex items-center justify-between group border border-transparent hover:border-indigo-100"
                             >
                                 <div>
@@ -290,7 +290,7 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
 
   const addBlock = (blockType: string, data?: any, index?: number) => {
     const newBlock: BlockType = {
-      blockId: `${blockType}-${Date.now()}`,
+      blockId: blockType + "-" + Date.now(),
       type: blockType,
       order: 0,
       data: data || {
@@ -336,8 +336,8 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
       const blockToClone = blocks[blockIndex];
       const newBlock = {
           ...blockToClone,
-          blockId: `${blockToClone.type}-${Date.now()}-copy`,
-          data: { ...blockToClone.data, headline: `${blockToClone.data.headline || ''} (Copy)` }
+          blockId: blockToClone.type + "-" + Date.now() + "-copy",
+          data: { ...blockToClone.data, headline: (blockToClone.data.headline || '') + " (Copy)" }
       };
       
       const newBlocksList = [...blocks];

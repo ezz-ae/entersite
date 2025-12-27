@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowRight, ArrowLeft, Building, User, FileText, Bot, LayoutTemplate, UploadCloud, Sparkles } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const projectCategories = {
-  brochure: {
+const projectCategories = [
+  {
     key: 'brochure',
     title: "Convert a Brochure",
     icon: FileText,
@@ -15,21 +16,23 @@ const projectCategories = {
     action: "Upload PDF",
     isPrimary: true
   },
-  agent: {
+  {
     key: 'agent',
     title: "Personal Portfolio",
     icon: User,
     desc: "Build a high-end site for yourself or your real estate team.",
-    action: "Select"
+    action: "Select",
+    isPrimary: false
   },
-  campaign: {
+  {
     key: 'campaign',
     title: "Specific Launch",
     icon: Sparkles,
     desc: "A single-page engine for an upcoming property launch.",
-    action: "Select"
+    action: "Select",
+    isPrimary: false
   },
-};
+];
 
 interface BuilderLandingPageProps {
   onStartWithAI: (initialPrompt: string) => void;
@@ -86,7 +89,7 @@ function CategorySelectionScreen({ onSelect }: { onSelect: (cat: any) => void; }
         <p className="text-zinc-500 text-xl max-w-2xl mx-auto font-light leading-relaxed">Select a starting point. Every path is powered by Entrestate Intelligence.</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full">
-        {Object.values(projectCategories).map(cat => (
+        {projectCategories.map(cat => (
           <button key={cat.key} onClick={() => onSelect(cat)} className="text-left group">
             <Card className={cn(
                 "bg-zinc-900/50 border-white/5 backdrop-blur-3xl hover:border-blue-500/50 transition-all duration-500 flex flex-col p-8 h-full rounded-[2.5rem]",
@@ -110,5 +113,3 @@ function CategorySelectionScreen({ onSelect }: { onSelect: (cat: any) => void; }
     </div>
   );
 }
-
-import { cn } from '@/lib/utils';

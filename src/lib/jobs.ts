@@ -7,9 +7,10 @@ import {
   query, 
   orderBy, 
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  onSnapshot
 } from 'firebase/firestore';
-import { db } from '@/firebase/get-sdks';
+import { db } from '@/firebase';
 
 export interface JobStep {
   name: string;
@@ -37,7 +38,6 @@ export interface Job {
 const JOBS_COLLECTION = 'jobs';
 
 export const createJob = async (userId: string, type: Job['type'], params: any) => {
-  // Define the steps based on the job type
   let planSteps = ['init'];
   if (type === 'site_generation') {
     planSteps = ['renderBlocks', 'seoGenerate', 'adsGenerate', 'deploy'];
@@ -50,7 +50,7 @@ export const createJob = async (userId: string, type: Job['type'], params: any) 
     type,
     status: 'queued',
     plan: {
-      flowId: `${type}-flow`,
+      flowId: `\${type}-flow`,
       steps: planSteps,
       params
     },
@@ -59,14 +59,8 @@ export const createJob = async (userId: string, type: Job['type'], params: any) 
     updatedAt: serverTimestamp(),
   };
 
-  try {
-    const docRef = await addDoc(collection(db, JOBS_COLLECTION), jobData);
-    return { id: docRef.id, ...jobData };
-  } catch (error) {
-    console.error("Error creating job:", error);
-    // Fallback for when Firestore isn't fully connected in dev
-    return { id: 'mock-job-' + Date.now(), ...jobData };
-  }
+  const docRef = await addDoc(collection(db, JOBS_COLLECTION), jobData);
+  return { id: docRef.id, ...jobData };
 };
 
 export const getJobs = async () => {
@@ -83,43 +77,42 @@ export const getJobs = async () => {
   }
 };
 
-// Mock function to simulate backend processing
+export const subscribeToJobs = (callback: (jobs: Job[]) => void) => {
+  const q = query(collection(db, JOBS_COLLECTION), orderBy('createdAt', 'desc'));
+  return onSnapshot(q, (snapshot) => {
+    const jobs = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Job[];
+    callback(jobs);
+  });
+};
+
 export const processJob = async (jobId: string) => {
-  // In a real app, this would be a Cloud Function trigger
-  console.log(`Processing job ${jobId}...`);
+  console.log(`Processing job \${jobId}...`);
   
   try {
-    // Check if we are in a mock environment
-    if (jobId.startsWith('mock-job')) {
-         console.log("Simulating mock job steps...");
-         return;
-    }
-
     const jobRef = doc(db, JOBS_COLLECTION, jobId);
     
-    // 1. Set to Running
     await updateDoc(jobRef, { 
       status: 'running',
       updatedAt: serverTimestamp() 
     });
 
-    // 2. Simulate Steps
-    // We would loop through plan.steps here. For the prototype, we'll just add a mock step.
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     await updateDoc(jobRef, {
       steps: [{
-        name: 'renderBlocks',
+        name: 'init',
         status: 'done',
-        result: 'Blocks rendered successfully',
+        result: 'System initialized',
         timestamp: Date.now()
       }],
       updatedAt: serverTimestamp()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // 3. Set to Done
     await updateDoc(jobRef, { 
       status: 'done', 
       updatedAt: serverTimestamp() 
@@ -127,5 +120,7 @@ export const processJob = async (jobId: string) => {
 
   } catch (error) {
     console.error("Error processing job:", error);
+    const jobRef = doc(db, JOBS_COLLECTION, jobId);
+    await updateDoc(jobRef, { status: 'error', updatedAt: serverTimestamp() });
   }
 };

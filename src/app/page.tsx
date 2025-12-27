@@ -8,6 +8,7 @@ import { AdsShowcase } from '@/components/marketing/feature-showcase/ads-showcas
 import { ChatAgentShowcase } from '@/components/marketing/feature-showcase/chat-agent-showcase';
 import { SeoShowcase } from '@/components/marketing/feature-showcase/seo-showcase';
 import { ProjectDiscoverySection } from '@/components/marketing/project-discovery-section';
+import { SystemInsights } from '@/components/marketing/system-insights';
 import { motion } from 'framer-motion';
 
 /**
@@ -40,6 +41,9 @@ export default function LandingPage() {
       {/* The Intelligence Core: Project Discovery */}
       <ProjectDiscoverySection />
 
+      {/* System Explanation: SEO, Marketing & Infrastructure */}
+      <SystemInsights />
+
       {/* Strategic Showcase: Blueprints & Conversion */}
       <ReadyBuilds />
 
@@ -63,7 +67,7 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
           >
-            <h2 className="text-8xl md:text-[12rem] font-black tracking-tighter mb-12 leading-none">
+            <h2 className="text-8xl md:text-[12rem] font-black tracking-tighter mb-12 leading-none text-white">
                 Build with <br/>
               <span className="text-zinc-600">Entrestate.</span>
             </h2>

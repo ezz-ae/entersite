@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { UserNav } from "@/components/user-nav";
 import { EntreSiteLogo } from "@/components/icons";
-import { Monitor, Smartphone, Tablet, Rocket, Eye, ChevronLeft, Save } from 'lucide-react';
+import { Monitor, Smartphone, Tablet, Rocket, Eye, ChevronLeft, Save, Layout } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SitePage } from '@/lib/types';
 
@@ -14,13 +14,15 @@ interface EditorHeaderProps {
   onSave?: () => void;
   onPreview?: () => void;
   onPublish?: () => void;
+  isPreviewMode?: boolean;
 }
 
 export function EditorHeader({ 
   page,
   onSave,
   onPreview,
-  onPublish
+  onPublish,
+  isPreviewMode = false
 }: EditorHeaderProps) {
   const [device, setDevice] = React.useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
@@ -65,9 +67,17 @@ export function EditorHeader({
 
       {/* Right Side: Actions */}
       <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="hidden lg:flex text-zinc-400 hover:text-white hover:bg-white/5 gap-2 h-9 px-4" onClick={onPreview}>
-              <Eye className="h-4 w-4"/>
-              Preview
+          <Button 
+            variant={isPreviewMode ? "secondary" : "ghost"} 
+            size="sm" 
+            className={cn(
+                "hidden lg:flex gap-2 h-9 px-4 transition-all",
+                isPreviewMode ? "bg-blue-600/10 text-blue-500 border-blue-500/20" : "text-zinc-400 hover:text-white hover:bg-white/5"
+            )} 
+            onClick={onPreview}
+          >
+              {isPreviewMode ? <Layout className="h-4 w-4"/> : <Eye className="h-4 w-4"/>}
+              {isPreviewMode ? "Exit Preview" : "Preview"}
           </Button>
           <Button variant="secondary" size="sm" className="hidden lg:flex gap-2 h-9 px-4 border border-white/5" onClick={onSave}>
               <Save className="h-4 w-4"/>
@@ -91,7 +101,7 @@ export function EditorHeader({
 const DeviceButton = ({ label, icon: Icon, isActive, onClick }: any) => (
     <button 
         onClick={onClick} 
-        aria-label={`Switch to ${label} view`}
+        aria-label={`Switch to \${label} view`}
         className={cn(
             "p-2 rounded-lg transition-all",
             isActive 

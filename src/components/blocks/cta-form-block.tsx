@@ -1,14 +1,17 @@
 'use client';
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { Phone, Mail, Clock, Send, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { Phone, Mail, Clock, Send, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "@/firebase";
 
 interface CtaFormBlockProps {
   headline?: string;
@@ -19,6 +22,46 @@ export function CtaFormBlock({
     headline = "Schedule a Private Viewing", 
     subtext = "Our experts are ready to assist you in finding your dream property." 
 }: CtaFormBlockProps) {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      message: ''
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+        await addDoc(collection(db, 'leads'), {
+            ...formData,
+            source: 'Web CTA Form',
+            createdAt: serverTimestamp(),
+            status: 'new'
+        });
+
+        setIsSubmitted(true);
+        toast({
+            title: "Message Sent",
+            description: "Your inquiry has been received. Our team will contact you shortly.",
+        });
+    } catch (error) {
+        console.error("Lead submission error:", error);
+        toast({
+            title: "Submission Error",
+            description: "Failed to send message. Please try again.",
+            variant: "destructive"
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
   return (
     <section className="relative py-32 overflow-hidden bg-muted/10">
       
@@ -77,46 +120,115 @@ export function CtaFormBlock({
             </div>
 
             {/* Right Side: Intelligent Form */}
-            <div className="p-12 lg:p-16 bg-background">
-                <form className="space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="firstName" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">First Name</Label>
-                            <Input id="firstName" placeholder="John" className="h-12 bg-muted/30 border-border/40 focus:bg-background transition-colors rounded-xl" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="lastName" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Last Name</Label>
-                            <Input id="lastName" placeholder="Doe" className="h-12 bg-muted/30 border-border/40 focus:bg-background transition-colors rounded-xl" />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Email</Label>
-                        <Input id="email" type="email" placeholder="john@example.com" className="h-12 bg-muted/30 border-border/40 focus:bg-background transition-colors rounded-xl" />
-                    </div>
-                    <div className="space-y-2">
-                         <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Phone Number</Label>
-                         <Input id="phone" type="tel" placeholder="+971..." className="h-12 bg-muted/30 border-border/40 focus:bg-background transition-colors rounded-xl" />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="message" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Message</Label>
-                        <Textarea id="message" placeholder="I'm interested in..." className="min-h-[140px] bg-muted/30 border-border/40 focus:bg-background transition-colors rounded-xl resize-none p-4" />
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                        <Checkbox id="terms" />
-                        <label
-                            htmlFor="terms"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
+            <div className="p-12 lg:p-16 bg-background relative min-h-[600px]">
+                <AnimatePresence mode="wait">
+                    {isSubmitted ? (
+                        <motion.div 
+                            key="success"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="h-full flex flex-col items-center justify-center text-center space-y-6"
                         >
-                            I agree to the terms and privacy policy.
-                        </label>
-                    </div>
+                            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center shadow-lg shadow-green-100/50">
+                                <CheckCircle2 className="h-10 w-10 text-green-600" />
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-3xl font-bold">Request Received</h3>
+                                <p className="text-muted-foreground">Our senior property advisor has been notified and will contact you via phone within 2 hours.</p>
+                            </div>
+                            <Button variant="outline" className="rounded-xl px-8 h-12" onClick={() => setIsSubmitted(false)}>
+                                Send Another Inquiry
+                            </Button>
+                        </motion.div>
+                    ) : (
+                        <motion.form 
+                            key="form"
+                            onSubmit={handleSubmit}
+                            initial={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="space-y-6"
+                        >
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="firstName" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">First Name</Label>
+                                    <Input 
+                                        id="firstName" 
+                                        required 
+                                        placeholder="John" 
+                                        className="h-12 bg-muted/30 border-border/40 focus:bg-background transition-colors rounded-xl"
+                                        value={formData.firstName}
+                                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="lastName" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Last Name</Label>
+                                    <Input 
+                                        id="lastName" 
+                                        required 
+                                        placeholder="Doe" 
+                                        className="h-12 bg-muted/30 border-border/40 focus:bg-background transition-colors rounded-xl"
+                                        value={formData.lastName}
+                                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Email</Label>
+                                <Input 
+                                    id="email" 
+                                    type="email" 
+                                    required 
+                                    placeholder="john@example.com" 
+                                    className="h-12 bg-muted/30 border-border/40 focus:bg-background transition-colors rounded-xl"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                 <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Phone Number</Label>
+                                 <Input 
+                                    id="phone" 
+                                    type="tel" 
+                                    required 
+                                    placeholder="+971..." 
+                                    className="h-12 bg-muted/30 border-border/40 focus:bg-background transition-colors rounded-xl"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                 />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="message" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Message</Label>
+                                <Textarea 
+                                    id="message" 
+                                    placeholder="I'm interested in floor plans for corner units..." 
+                                    className="min-h-[140px] bg-muted/30 border-border/40 focus:bg-background transition-colors rounded-xl resize-none p-4"
+                                    value={formData.message}
+                                    onChange={(e) => setFormData({...formData, message: e.target.value})}
+                                />
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                                <Checkbox id="terms" required />
+                                <label
+                                    htmlFor="terms"
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
+                                >
+                                    I agree to the terms and privacy policy.
+                                </label>
+                            </div>
 
-                    <Button type="button" size="lg" className="w-full h-14 text-base font-bold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99] gap-2">
-                        Send Message
-                        <ArrowRight className="h-4 w-4" />
-                    </Button>
-                </form>
+                            <Button 
+                                type="submit" 
+                                size="lg" 
+                                disabled={isSubmitting}
+                                className="w-full h-14 text-base font-bold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99] gap-2"
+                            >
+                                {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Send Message"}
+                                {!isSubmitting && <ArrowRight className="h-4 w-4" />}
+                            </Button>
+                        </motion.form>
+                    )}
+                </AnimatePresence>
             </div>
           </div>
         </div>

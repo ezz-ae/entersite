@@ -16,6 +16,8 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { Badge } from '@/components/ui/badge';
 
 export function ImageGenTool() {
   const [prompt, setPrompt] = useState('');
@@ -169,5 +171,3 @@ function TipItem({ text }: { text: string }) {
       </div>
    )
 }
-
-import { Badge } from '@/components/ui/badge';

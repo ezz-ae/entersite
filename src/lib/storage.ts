@@ -1,7 +1,7 @@
 import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from "firebase/storage";
-import { app } from "@/firebase"; // Assuming you have a firebase init file
+import { firebaseApp } from "@/firebase";
 
-const storage = getStorage(app);
+const storage = getStorage(firebaseApp);
 
 export interface UploadResult {
   url: string;
@@ -14,7 +14,7 @@ export const ProjectLibrary = {
    * Uploads a file to the specific project folder
    */
   uploadAsset: async (projectId: string, file: File, type: 'images' | 'brochures' | 'floorplans'): Promise<UploadResult> => {
-    const path = `projects/${projectId}/${type}/${file.name}`;
+    const path = `projects/\${projectId}/\${type}/\${file.name}`;
     const storageRef = ref(storage, path);
     
     await uploadBytes(storageRef, file);
@@ -27,10 +27,10 @@ export const ProjectLibrary = {
    * Lists all assets for a project
    */
   getAssets: async (projectId: string): Promise<string[]> => {
-    const projectRef = ref(storage, `projects/${projectId}`);
+    const projectRef = ref(storage, `projects/\${projectId}`);
     // This assumes a flat structure or requires recursive listing. 
     // For V1, we'll listing images.
-    const imagesRef = ref(storage, `projects/${projectId}/images`);
+    const imagesRef = ref(storage, `projects/\${projectId}/images`);
     
     try {
       const res = await listAll(imagesRef);
@@ -53,17 +53,17 @@ export const ProjectLibrary = {
         
         // 2. Generate a filename
         const ext = externalUrl.split('.').pop()?.split('?')[0] || 'jpg';
-        const filename = `imported-${Date.now()}.${ext}`;
+        const filename = `imported-\${Date.now()}.\${ext}`;
         
         // 3. Upload to our storage
-        const path = `projects/${projectId}/${type}/${filename}`;
+        const path = `projects/\${projectId}/\${type}/\${filename}`;
         const storageRef = ref(storage, path);
         await uploadBytes(storageRef, blob);
         
         // 4. Return our new internal URL
         return await getDownloadURL(storageRef);
     } catch (error) {
-        console.error(`Failed to migrate asset for ${projectId}:`, error);
+        console.error(`Failed to migrate asset for \${projectId}:`, error);
         return externalUrl; // Fallback to original if fail
     }
   }

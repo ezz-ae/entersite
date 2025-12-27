@@ -1,4 +1,4 @@
-import { SiteTemplate } from './templates';
+import { SiteTemplate } from './types';
 
 /**
  * Logic to transform raw Agent output into a usable SiteTemplate.

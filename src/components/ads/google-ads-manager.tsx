@@ -17,7 +17,7 @@ import {
     Sparkles
 } from "lucide-react";
 import { generateAdsFromPageContent, GenerateAdsOutput } from "@/ai/flows/generate-ads-from-page-content";
-import { createJob } from "@/lib/jobs";
+// import { createJob } from "@/lib/jobs"; // If used later
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -67,7 +67,8 @@ export function GoogleAdsManager({ pageTitle, pageDescription, userEmail }: Goog
             keywordGroups: [
                 { category: "High Intent", keywords: ["buy apartment dubai marina", "luxury flats for sale dubai", "emaar beachfront sale"] },
                 { category: "Investment", keywords: ["dubai property investment", "real estate roi dubai"] }
-            ]
+            ],
+            estimatedCpc: 1.25
           });
           setStatus('draft');
       }, 2000);
@@ -384,6 +385,6 @@ function MetricCard({ label, value, icon: Icon, highlight, trend, positive = tru
         </div>
     )
 }
-// Helper icons
+
 function ArrowRight(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg> }
 function X(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> }

@@ -6,8 +6,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 
 interface SortableItemContextProps {
-  attributes: Record<string, any>;
-  listeners: Record<string, any>;
+  attributes: any;
+  listeners: any;
   setNodeRef: (node: HTMLElement | null) => void;
   isDragging: boolean;
 }
@@ -43,7 +43,7 @@ export function SortableItem({ id, children, className }: { id: string, children
   const contextValue = useMemo(
     () => ({
       attributes,
-      listeners,
+      listeners: listeners || {},
       setNodeRef,
       isDragging,
     }),

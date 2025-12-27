@@ -1,27 +1,58 @@
-import { nanoid } from 'nanoid';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/firebase';
 import type { SitePage } from '@/lib/types';
+import { nanoid } from 'nanoid';
 
-// In-memory store for published sites (mock database)
-const publishedSites: Record<string, SitePage> = {};
+export const publishSite = async (page: SitePage, userId?: string) => {
+  const siteId = page.id || nanoid(10);
+  const siteRef = doc(db, 'sites', siteId);
+  
+  // Create a subdomain friendly slug from title
+  const slug = page.title.toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .substring(0, 30);
+    
+  const siteData = {
+    ...page,
+    id: siteId,
+    userId: userId || 'anonymous',
+    published: true,
+    slug: slug,
+    updatedAt: new Date().toISOString(),
+  };
 
-export const publishSite = async (page: SitePage) => {
-  // In a real app, this would save to Firestore/Database
-  const siteId = nanoid(10); // Generate a short, unique ID
-  const publishedUrl = `${window.location.origin}/p/${siteId}`;
+  await setDoc(siteRef, {
+    ...siteData,
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
+
+  const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+  const rootDomain = isDev ? 'localhost:3000' : 'entrestate.com';
   
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  publishedSites[siteId] = page;
+  // Real subdomain logic would require wildcard DNS + middleware, 
+  // for this prototype we'll use the [siteId] path but label it as subdomain in UI
+  const publishedUrl = isDev 
+    ? `http://${slug}.site.${rootDomain}/p/${siteId}`
+    : `https://${slug}.site.${rootDomain}/p/${siteId}`;
   
   return {
     siteId,
-    publishedUrl
+    publishedUrl: `https://${slug}.site.entrestate.com` // Final display URL
   };
 };
 
-export const getPublishedSite = async (siteId: string) => {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return publishedSites[siteId];
-}
+export const getPublishedSite = async (siteId: string): Promise<SitePage | null> => {
+  try {
+    const docRef = doc(db, 'sites', siteId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as SitePage;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching published site:", error);
+    return null;
+  }
+};

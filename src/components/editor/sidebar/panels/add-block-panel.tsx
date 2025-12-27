@@ -12,10 +12,17 @@ import {
   BarChart, 
   Sparkles,
   Search,
-  Users
+  Users,
+  Plus
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import type { SitePage, Block } from '@/lib/types';
+
+interface AddBlockPanelProps {
+    page: SitePage;
+    onPageUpdate: (page: SitePage) => void;
+}
 
 const BLOCK_LIBRARY = [
     {
@@ -43,7 +50,24 @@ const BLOCK_LIBRARY = [
     }
 ];
 
-export function AddBlockPanel() {
+export function AddBlockPanel({ page, onPageUpdate }: AddBlockPanelProps) {
+  
+  const addBlock = (blockType: string) => {
+    const newBlock: Block = {
+        blockId: `\${blockType}-\${Date.now()}`,
+        type: blockType,
+        order: page.blocks.length,
+        data: {
+            headline: `New \${blockType} Section`,
+        }
+    };
+    
+    onPageUpdate({
+        ...page,
+        blocks: [...page.blocks, newBlock]
+    });
+  };
+
   return (
     <div className="flex-1 overflow-y-auto custom-scrollbar">
        <div className="p-4 border-b border-white/5 bg-zinc-950/30">
@@ -61,7 +85,10 @@ export function AddBlockPanel() {
                 <span className="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Architect Suggestion</span>
              </div>
              <p className="text-xs text-zinc-400 mb-3">Add the <strong>SMS VIP</strong> block to increase lead volume by ~30% for this project type.</p>
-             <button className="text-[10px] font-bold text-white bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors">
+             <button 
+                onClick={() => addBlock('sms-lead')}
+                className="text-[10px] font-bold text-white bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
+             >
                 Apply Suggestion
              </button>
           </div>
@@ -73,6 +100,7 @@ export function AddBlockPanel() {
                    {group.blocks.map((block) => (
                       <div 
                         key={block.type}
+                        onClick={() => addBlock(block.type)}
                         className="group p-4 rounded-xl bg-zinc-800/30 border border-white/5 hover:border-blue-500/50 hover:bg-blue-500/5 cursor-pointer transition-all"
                       >
                          <div className="flex items-center justify-between mb-1">
@@ -96,5 +124,3 @@ export function AddBlockPanel() {
     </div>
   );
 }
-
-import { Plus } from 'lucide-react';

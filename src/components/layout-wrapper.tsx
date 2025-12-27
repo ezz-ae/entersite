@@ -10,14 +10,19 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   
   const isEditor = pathname?.startsWith('/builder');
   const isDashboard = pathname?.startsWith('/dashboard');
+  const isAdmin = pathname?.startsWith('/admin');
+  const isProfile = pathname?.startsWith('/profile');
+  const isPublished = pathname?.startsWith('/p/');
+
+  const hideChrome = isEditor || isDashboard || isAdmin || isProfile || isPublished;
 
   return (
     <>
-      {(!isEditor && !isDashboard) && <SiteHeader />}
+      {!hideChrome && <SiteHeader />}
       <div className="min-h-screen">
           {children}
       </div>
-      {(!isEditor && !isDashboard) && <SiteFooter />}
+      {!hideChrome && <SiteFooter />}
     </>
   );
 }

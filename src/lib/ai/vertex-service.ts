@@ -21,7 +21,7 @@ const PRO_MODEL = 'gemini-1.5-pro';
 
 export const generateSiteStructure = async (prompt: string) => {
     return generateObject({
-        model: google(PRO_MODEL), // Pro for the core architecture
+        model: google(PRO_MODEL) as any, // Pro for the core architecture
         schema: z.object({
             title: z.string(),
             description: z.string(),
@@ -48,7 +48,7 @@ export const generateSiteStructure = async (prompt: string) => {
 export const generateMarketingCopy = async (context: string) => {
     // USE FLASH for marketing copy - much faster and extremely cheap
     const { text } = await generateText({
-        model: google(FLASH_MODEL),
+        model: google(FLASH_MODEL) as any,
         system: "You are a world-class real estate copywriter. Be concise.",
         prompt: `Write 3 ad headlines and 2 descriptions for: ${context}.`,
     });

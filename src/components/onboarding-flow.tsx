@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Bot, Palette, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Bot, Palette, Sparkles } from 'lucide-react';
 
 interface OnboardingFlowProps {
   onComplete: (data: any) => void;
@@ -25,11 +25,11 @@ export function OnboardingFlow({ onComplete, initialData = {}, onBack }: Onboard
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const handleColorChange = (color: string) => {
-    setFormData(prev => ({ ...prev, brandColor: color }));
+    setFormData((prev: any) => ({ ...prev, brandColor: color }));
   };
 
   const nextStep = () => setStep(s => s + 1);
@@ -82,7 +82,7 @@ function Step1Description({ formData, handleChange, nextStep, onBack }: any) {
                             placeholder="e.g., Miami Waterfront Properties"
                             value={formData.projectName}
                             onChange={handleChange}
-                            className="bg-zinc-950 border-zinc-700 mt-2 h-12 text-base focus-visible:ring-blue-500"
+                            className="bg-zinc-950 border-zinc-700 mt-2 h-12 text-base focus-visible:ring-blue-500 text-white"
                         />
                     </div>
                     <div>
@@ -93,7 +93,7 @@ function Step1Description({ formData, handleChange, nextStep, onBack }: any) {
                             value={formData.projectDescription}
                             onChange={handleChange}
                             placeholder="e.g., A luxury real estate site for waterfront homes in Miami, featuring a gallery, map, and agent profiles."
-                            className="min-h-[150px] bg-zinc-950 border-zinc-700 mt-2 text-base focus-visible:ring-blue-500"
+                            className="min-h-[150px] bg-zinc-950 border-zinc-700 mt-2 text-base focus-visible:ring-blue-500 text-white"
                             rows={6}
                         />
                     </div>
@@ -129,14 +129,14 @@ function Step2Branding({ formData, handleChange, handleColorChange, prevStep, on
                         </div>
                         <div className="flex gap-2">
                             {colorSwatches.map(color => (
-                                <button key={color} onClick={() => handleColorChange(color)} className={`w-8 h-8 rounded-full transition-all duration-150 ${formData.brandColor === color ? 'ring-2 ring-offset-2 ring-offset-zinc-900 ring-white' : ''}`} style={{backgroundColor: color}} />
+                                <button key={color} onClick={() => handleColorChange(color)} className={`w-8 h-8 rounded-full transition-all duration-150 \${formData.brandColor === color ? 'ring-2 ring-offset-2 ring-offset-zinc-900 ring-white' : ''}`} style={{backgroundColor: color}} />
                             ))}
                         </div>
                          <Input 
                             type="text"
                             value={formData.brandColor}
                             onChange={(e) => handleColorChange(e.target.value)}
-                            className="bg-zinc-800 border-zinc-700 w-28 h-10"
+                            className="bg-zinc-800 border-zinc-700 w-28 h-10 text-white"
                         />
                     </div>
                 </div>

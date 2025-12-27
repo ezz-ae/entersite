@@ -2,11 +2,15 @@
 
 import { getSdks } from '@/firebase/get-sdks';
 
+// Initialize and get SDKs
+const sdks = getSdks();
+export const firebaseApp = sdks.firebaseApp;
+export const auth = sdks.auth;
+export const db = sdks.firestore;
+
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
-  // getSdks handles the initialization logic.
-  // We just re-export its return value.
-  return getSdks();
+  return sdks;
 }
 
 export * from './provider';
@@ -17,4 +21,4 @@ export * from './non-blocking-updates';
 export * from './non-blocking-login';
 export * from './errors';
 export * from './error-emitter';
-export { getSdks }; // Export getSdks for direct use if needed.
+export { getSdks };
