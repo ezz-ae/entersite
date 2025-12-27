@@ -134,7 +134,6 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                                 </DialogClose>
                             </div>
                             <div className="absolute bottom-10 left-10 right-10">
-                                <Badge className="mb-4 bg-blue-600 border-none text-white font-black uppercase tracking-widest px-4 py-1.5">Master Node: {project.id}</Badge>
                                 <h2 className="text-6xl font-black tracking-tighter text-white leading-none uppercase italic">{project.name}</h2>
                                 <p className="text-xl text-zinc-400 font-light mt-4 flex items-center gap-2">
                                     <MapPin className="h-5 w-5 text-blue-500" /> {project.location.area}, {project.location.city}
@@ -180,14 +179,14 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                                 </div>
                                 
                                 <div className="space-y-10">
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">Market Performance Node</h4>
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">Market Performance</h4>
                                     <div className="h-64 flex items-end gap-3 px-4 bg-black/40 rounded-[2.5rem] border border-white/5 pt-12 pb-6">
                                         {project.performance.priceHistory.map((h, i) => (
                                             <div key={i} className="flex-1 flex flex-col items-center gap-4 h-full justify-end group">
                                                 <div className="relative w-full">
                                                     <motion.div 
                                                         initial={{ height: 0 }}
-                                                        whileInView={{ height: `${(h.avgPrice / project.price.from) * 100}%` }}
+                                                        whileInView={{ height: `${(h.avgPrice / Math.max(...project.performance.priceHistory.map(ph => ph.avgPrice))) * 100}%` }}
                                                         transition={{ duration: 1, delay: i * 0.1 }}
                                                         className="bg-blue-600/40 w-full rounded-t-xl group-hover:bg-blue-500 transition-all border-t border-blue-400" 
                                                     />
@@ -202,9 +201,9 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                                         </div>
                                         <div className="flex items-center gap-3 mb-3 relative z-10">
                                             <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                                            <p className="font-black uppercase tracking-widest text-xs text-white">Sentiment: Aggressive</p>
+                                            <p className="font-black uppercase tracking-widest text-xs text-white">Sentiment: {project.performance.marketTrend === 'up' ? 'Aggressive' : 'Stable'}</p>
                                         </div>
-                                        <p className="text-sm text-zinc-400 leading-relaxed font-light relative z-10">This project is outperforming the {project.location.city} luxury index by 2.4% this quarter.</p>
+                                        <p className="text-sm text-zinc-400 leading-relaxed font-light relative z-10">This project is {project.performance.marketTrend === 'up' ? 'outperforming' : 'aligning with'} the {project.location.city} luxury index by {project.performance.capitalAppreciation / 5}% this quarter.</p>
                                     </div>
                                 </div>
                             </div>
