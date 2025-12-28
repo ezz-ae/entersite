@@ -15,6 +15,7 @@ import { ProjectDetailBlock } from './blocks/project-detail-block';
 import { BrochureFormBlock } from './blocks/forms/brochure-form-block';
 import { OfferBlock } from './blocks/forms/offer-block';
 import { HeroLeadFormBlock } from './blocks/forms/hero-lead-form-block';
+import { LeadInterestFormBlock } from './blocks/forms/lead-interest-form-block';
 import { FloorPlanBlock } from './blocks/floor-plan-block';
 import { FeaturesBlock } from './blocks/features-block';
 import { LaunchBlock } from './blocks/launch-block';
@@ -28,6 +29,7 @@ import { ContactDetailsBlock } from './blocks/info/contact-details-block';
 import { PartnersBlock } from './blocks/content/partners-block';
 import { StatsBlock } from './blocks/info/stats-block';
 import { NewsletterBlock } from './blocks/forms/newsletter-block';
+import { BookingViewingBlock } from './blocks/forms/booking-viewing-block';
 import { SplitContentBlock } from './blocks/content/split-content-block';
 import { FeaturedListingBlock } from './blocks/listings/featured-listing-block';
 import { SearchWithFiltersBlock } from './blocks/search/search-with-filters-block';
@@ -39,6 +41,7 @@ import { ComingSoonHeroBlock } from './blocks/hero/coming-soon-hero-block';
 import { CtaGridBlock } from './blocks/cta/cta-grid-block';
 import { BannerCtaBlock } from './blocks/cta/banner-cta-block';
 import { MapBlock } from './blocks/map-block';
+import { LEAD_CAPTURE_BLOCKS, SiteBlockContext } from './blocks/block-context';
 
 const blockComponents: Record<string, React.ComponentType<any>> = {
   'hero': HeroBlock,
@@ -54,6 +57,7 @@ const blockComponents: Record<string, React.ComponentType<any>> = {
   'brochure-form': BrochureFormBlock,
   'offer': OfferBlock,
   'hero-lead-form': HeroLeadFormBlock,
+  'lead-interest-form': LeadInterestFormBlock,
   'floor-plan': FloorPlanBlock,
   'features': FeaturesBlock,
   'launch': LaunchBlock,
@@ -67,6 +71,7 @@ const blockComponents: Record<string, React.ComponentType<any>> = {
   'partners': PartnersBlock,
   'stats': StatsBlock,
   'newsletter': NewsletterBlock,
+  'booking-viewing': BookingViewingBlock,
   'split-content': SplitContentBlock,
   'featured-listing': FeaturedListingBlock,
   'search-filters': SearchWithFiltersBlock,
@@ -79,26 +84,40 @@ const blockComponents: Record<string, React.ComponentType<any>> = {
   'banner-cta': BannerCtaBlock,
 };
 
-const renderBlock = (block: BlockType) => {
+const renderBlock = (block: BlockType, context?: SiteBlockContext) => {
   const Component = blockComponents[block.type];
   if (!Component) {
     return null;
   }
-  return <Component key={block.blockId} {...block.data} />;
+  const leadProps = LEAD_CAPTURE_BLOCKS.has(block.type)
+    ? {
+        tenantId: context?.tenantId,
+        projectName: context?.projectName,
+        siteId: context?.siteId,
+      }
+    : {};
+  return <Component {...block.data} {...leadProps} />;
 };
 
 interface PageRendererProps {
   page: SitePage;
+  tenantId?: string;
+  projectName?: string;
 }
 
-export function PageRenderer({ page }: PageRendererProps) {
+export function PageRenderer({ page, tenantId, projectName }: PageRendererProps) {
   const sortedBlocks = [...page.blocks].sort((a, b) => a.order - b.order);
+  const context: SiteBlockContext = {
+    tenantId: tenantId || page.tenantId || 'public',
+    projectName: projectName || page.title || 'Entrestate Site',
+    siteId: page.id,
+  };
 
   return (
     <div className="min-h-screen bg-background relative">
       {sortedBlocks.map((block) => (
         <div key={block.blockId}>
-          {renderBlock(block)}
+          {renderBlock(block, context)}
         </div>
       ))}
     </div>

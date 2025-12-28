@@ -1,8 +1,22 @@
+const requiredEnvVars = [
+  'NEXT_PUBLIC_FIREBASE_API_KEY',
+  'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
+  'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
+  'NEXT_PUBLIC_FIREBASE_APP_ID',
+  'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
+] as const;
+
+requiredEnvVars.forEach((key) => {
+  if (!process.env[key]) {
+    throw new Error(`Missing required Firebase environment variable: ${key}`);
+  }
+});
+
 export const firebaseConfig = {
-  "projectId": "studio-7730943652-a28e0",
-  "appId": "1:622785056226:web:36f7c27873e950997a7dbb",
-  "apiKey": "AIzaSyByDVWTUBxg6XAYaq0l1aIvDqsvc4CU8YI",
-  "authDomain": "studio-7730943652-a28e0.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "622785056226"
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID ?? '',
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
 };

@@ -1,8 +1,4 @@
-import { allProjects } from '@/lib/projects';
 import type { ProjectData } from './types';
-
-// In a real ecosystem, this would call an API endpoint or query Firestore directly
-// endpoint: https://api.entrestate.com/v1/projects/search
 
 export interface ProjectFilter {
   city?: string;
@@ -13,68 +9,42 @@ export interface ProjectFilter {
   availability?: 'Available' | 'Sold Out' | 'Coming Soon';
 }
 
+const DEFAULT_LIMIT = 24;
+
 export const searchProjects = async (query: string, filters?: ProjectFilter): Promise<ProjectData[]> => {
-  // Simulate network latency
-  await new Promise(resolve => setTimeout(resolve, 300));
+  const params = new URLSearchParams();
+  if (query) params.set('query', query);
+  if (filters?.city) params.set('city', filters.city);
+  if (filters?.developer) params.set('developer', filters.developer);
+  if (filters?.availability) params.set('status', filters.availability);
+  if (filters?.minPrice) params.set('minPrice', String(filters.minPrice));
+  if (filters?.maxPrice) params.set('maxPrice', String(filters.maxPrice));
+  params.set('limit', String(DEFAULT_LIMIT));
 
-  let results = allProjects;
+  const res = await fetch(`/api/projects/search?${params.toString()}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+  });
 
-  // 1. Text Search (Name, Area, Developer)
-  if (query) {
-    const q = query.toLowerCase();
-    results = results.filter(p => 
-      p.name.toLowerCase().includes(q) || 
-      p.developer.toLowerCase().includes(q) ||
-      p.location.area.toLowerCase().includes(q) ||
-      p.location.city.toLowerCase().includes(q)
-    );
+  if (!res.ok) {
+    throw new Error('Failed to search projects');
   }
 
-  // 2. Apply Filters
-  if (filters) {
-    if (filters.city) {
-      results = results.filter(p => p.location.city.toLowerCase() === filters.city?.toLowerCase());
-    }
-    if (filters.developer) {
-      results = results.filter(p => p.developer.toLowerCase().includes(filters.developer!.toLowerCase()));
-    }
-    if (filters.minPrice) {
-      results = results.filter(p => p.price.from >= filters.minPrice!);
-    }
-    if (filters.maxPrice) {
-        // Note: Our current mock data only has 'from' price. In real app, we'd check range.
-        results = results.filter(p => p.price.from <= filters.maxPrice!);
-    }
-    if (filters.availability) {
-        results = results.filter(p => p.availability === filters.availability);
-    }
-  }
-
-  return results;
+  const data = await res.json();
+  return data.data || [];
 };
 
 export const getDevelopers = async (): Promise<string[]> => {
-    // Extract unique developers from the dataset
-    const developerNames = new Set(allProjects.map(p => p.developer).filter(Boolean));
-    return Array.from(developerNames).sort();
+    const res = await fetch('/api/projects/meta', { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.developers || [];
 }
 
 export const getLocations = async (): Promise<{city: string, areas: string[]}[]> => {
-    // Group areas by city
-    const locationMap = new Map<string, Set<string>>();
-    
-    allProjects.forEach(p => {
-        if (!p.location.city) return; // Skip if no city
-        if (!locationMap.has(p.location.city)) {
-            locationMap.set(p.location.city, new Set());
-        }
-        if (p.location.area) {
-            locationMap.get(p.location.city)?.add(p.location.area);
-        }
-    });
-
-    return Array.from(locationMap.entries()).map(([city, areas]) => ({
-        city,
-        areas: Array.from(areas).sort()
-    })).sort((a,b) => a.city.localeCompare(b.city));
+    const res = await fetch('/api/projects/meta', { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.locations || [];
 }

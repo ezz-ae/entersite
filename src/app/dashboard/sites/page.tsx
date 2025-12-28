@@ -44,6 +44,89 @@ import { auth } from '@/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import type { SitePage } from '@/lib/types';
 import { useRouter } from 'next/navigation';
+import { formatDistanceToNow } from 'date-fns';
+import { fetchSiteStats, type SiteStatsMap } from '@/lib/sites';
+
+type RefinerMeta = {
+  badgeLabel: string;
+  badgeClassName: string;
+  description: string;
+  timeLabel: string;
+  ctaLabel: string;
+  ctaHref: string;
+  ctaClassName: string;
+};
+
+const getRefinerMeta = (site: SitePage): RefinerMeta => {
+  const status = site.refinerStatus;
+  const baseHref = site.id ? `/builder?siteId=${site.id}` : '/builder';
+  const reviewHref = `${baseHref}${baseHref.includes('?') ? '&' : '?'}variant=refined`;
+  const lastRefinedDate = parseRefinerDate(site.lastRefinedAt);
+  const timeDistance = lastRefinedDate ? formatDistanceToNow(lastRefinedDate, { addSuffix: true }) : '';
+
+  if (status === 'review') {
+    return {
+      badgeLabel: 'Draft Ready',
+      badgeClassName: 'bg-amber-500/15 text-amber-200 border border-amber-300/40',
+      description: 'Review the Refiner AI polish and apply it to go live.',
+      timeLabel: lastRefinedDate ? `Draft saved ${timeDistance}` : 'Awaiting review',
+      ctaLabel: 'Review Draft',
+      ctaHref: reviewHref,
+      ctaClassName: 'border-amber-300 bg-amber-500/20 text-amber-50 hover:bg-amber-500/30'
+    };
+  }
+
+  if (status === 'running' || status === 'queued') {
+    return {
+      badgeLabel: status === 'running' ? 'Refiner Running' : 'Refiner Queued',
+      badgeClassName: 'bg-blue-500/10 text-blue-100 border border-blue-400/40',
+      description: 'We are polishing this page now. You will be notified once a draft is ready.',
+      timeLabel: lastRefinedDate ? `Last run ${timeDistance}` : 'First pass in progress',
+      ctaLabel: 'View in Builder',
+      ctaHref: baseHref,
+      ctaClassName: 'border-blue-500 text-blue-100 bg-blue-500/10 hover:bg-blue-500/20'
+    };
+  }
+
+  if (status === 'done') {
+    return {
+      badgeLabel: 'Refiner Applied',
+      badgeClassName: 'bg-emerald-500/10 text-emerald-100 border border-emerald-400/30',
+      description: 'Latest Refiner tweaks are already on this site. Run it again for a fresh pass anytime.',
+      timeLabel: lastRefinedDate ? `Polished ${timeDistance}` : 'Up to date',
+      ctaLabel: 'Run Again',
+      ctaHref: baseHref,
+      ctaClassName: ''
+    };
+  }
+
+  return {
+    badgeLabel: 'Refiner Available',
+    badgeClassName: 'bg-white/5 text-zinc-200 border border-white/10',
+    description: 'Run Refiner AI to tighten copy, spacing, and conversions before you launch.',
+    timeLabel: 'Never refined',
+    ctaLabel: 'Run Refiner AI',
+    ctaHref: baseHref,
+    ctaClassName: ''
+  };
+};
+
+const parseRefinerDate = (value: SitePage['lastRefinedAt']): Date | null => {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value === 'string') {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof (value as any)?.toDate === 'function') {
+    try {
+      return (value as any).toDate();
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
 
 export default function SitesDashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,6 +135,8 @@ export default function SitesDashboardPage() {
   const [user] = useAuthState(auth);
   const router = useRouter();
   const [newSitePrompt, setNewSitePrompt] = useState('');
+  const [siteStats, setSiteStats] = useState<SiteStatsMap>({});
+  const [statsLoading, setStatsLoading] = useState(false);
 
   useEffect(() => {
     async function loadSites() {
@@ -72,9 +157,38 @@ export default function SitesDashboardPage() {
     loadSites();
   }, [user]);
 
+  useEffect(() => {
+    let isMounted = true;
+    const loadStats = async () => {
+      if (!user) return;
+      const ids = sites.map((site) => site.id).filter((id): id is string => Boolean(id));
+      if (ids.length === 0) {
+        setSiteStats({});
+        return;
+      }
+      setStatsLoading(true);
+      try {
+        const stats = await fetchSiteStats(ids);
+        if (isMounted) {
+          setSiteStats(stats);
+        }
+      } catch (error) {
+        console.error('Failed to load site stats', error);
+      } finally {
+        if (isMounted) {
+          setStatsLoading(false);
+        }
+      }
+    };
+    loadStats();
+    return () => {
+      isMounted = false;
+    };
+  }, [sites, user]);
+
   const handleCreateSite = () => {
     if (newSitePrompt) {
-        router.push(`/builder?prompt=\${encodeURIComponent(newSitePrompt)}`);
+        router.push(`/builder?prompt=${encodeURIComponent(newSitePrompt)}`);
     } else {
         router.push('/builder');
     }
@@ -126,6 +240,13 @@ export default function SitesDashboardPage() {
         </Dialog>
       </div>
 
+      {!loading && statsLoading && (
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-zinc-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Syncing site metrics...
+          </div>
+      )}
+
       {/* Sites List */}
       {loading ? (
           <div className="h-64 flex flex-col items-center justify-center gap-4">
@@ -147,12 +268,19 @@ export default function SitesDashboardPage() {
           </div>
       ) : (
           <div className="grid grid-cols-1 gap-6">
-            {sites.map((site) => (
+            {sites.map((site) => {
+              const refinerMeta = getRefinerMeta(site);
+              const stats = site.id ? siteStats[site.id] : undefined;
+              const views = stats?.views ?? 0;
+              const leads = stats?.leads ?? 0;
+              const conversionRate = leads > 0 && views > 0 ? (leads / views) * 100 : 0;
+              const conversionLabel = conversionRate > 0 ? `${conversionRate.toFixed(1)}%` : '—';
+              return (
               <Card key={site.id} className="overflow-hidden border-white/5 bg-zinc-900/50 backdrop-blur-3xl hover:border-blue-500/30 transition-all duration-500 rounded-[2.5rem]">
                 <div className="flex flex-col lg:flex-row">
                     <div className={`w-full lg:w-80 h-48 lg:h-auto bg-gradient-to-br from-blue-900 to-indigo-900 relative flex-shrink-0 group overflow-hidden`}>
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                            <Link href={`/p/\${site.id}`} target="_blank">
+                            <Link href={`/p/${site.id}`} target="_blank">
                                 <Button variant="secondary" className="rounded-full font-bold shadow-lg h-12 px-8">
                                     View Site
                                 </Button>
@@ -172,7 +300,7 @@ export default function SitesDashboardPage() {
                             <div>
                                 <h3 className="text-3xl font-bold mb-2 text-white">{site.title}</h3>
                                 <div className="flex items-center gap-4 text-sm font-medium text-zinc-500">
-                                    <Link href={`/p/\${site.id}`} target="_blank" className="flex items-center gap-2 hover:text-blue-500 cursor-pointer transition-colors">
+                                    <Link href={`/p/${site.id}`} target="_blank" className="flex items-center gap-2 hover:text-blue-500 cursor-pointer transition-colors">
                                         <Globe className="h-4 w-4" /> entrestate.com/p/{site.id}
                                     </Link>
                                     <span className="opacity-20">|</span>
@@ -180,20 +308,32 @@ export default function SitesDashboardPage() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-12">
+                            <div className="flex flex-wrap gap-12">
                                  <div className="space-y-1">
                                     <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Views</p>
-                                    <p className="text-2xl font-black text-white">0</p>
+                                    <p className="text-2xl font-black text-white">{views.toLocaleString()}</p>
+                                    <p className="text-xs text-zinc-500">All-time interactions</p>
                                 </div>
                                  <div className="space-y-1 border-l border-white/5 pl-12">
                                     <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Leads</p>
-                                    <p className="text-2xl font-black text-blue-500">0</p>
+                                    <p className="text-2xl font-black text-blue-500">{leads.toLocaleString()}</p>
+                                    <p className="text-xs text-zinc-500">Conversion {conversionLabel}</p>
+                                </div>
+                                <div className="space-y-2 border-l border-white/5 pl-12 min-w-[220px]">
+                                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Refiner</p>
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <Badge className={cn("text-[10px] font-bold uppercase tracking-[0.3em] px-4 py-1 rounded-full border", refinerMeta.badgeClassName)}>
+                                            {refinerMeta.badgeLabel}
+                                        </Badge>
+                                        <span className="text-xs text-zinc-500">{refinerMeta.timeLabel}</span>
+                                    </div>
+                                    <p className="text-xs text-zinc-500 max-w-xs">{refinerMeta.description}</p>
                                 </div>
                             </div>
                         </div>
 
                         <div className="flex flex-wrap items-center gap-4">
-                            <Link href={`/builder?siteId=\${site.id}`}>
+                            <Link href={`/builder?siteId=${site.id}`}>
                                 <Button variant="outline" className="h-11 rounded-full gap-2 border-white/10 bg-white/5 text-zinc-400 hover:text-white transition-all px-6 font-bold text-xs uppercase tracking-widest">
                                     <Edit className="h-4 w-4" /> Edit
                                 </Button>
@@ -205,6 +345,16 @@ export default function SitesDashboardPage() {
                                 )}>
                                     <Target className="h-4 w-4" /> 
                                     Launch Ads
+                                </Button>
+                            </Link>
+
+                            <Link href={refinerMeta.ctaHref}>
+                                <Button variant="outline" className={cn(
+                                    "h-11 rounded-full gap-2 border-white/10 transition-all px-6 font-bold text-xs uppercase tracking-widest bg-white/5 text-zinc-100 hover:text-white",
+                                    refinerMeta.ctaClassName
+                                )}>
+                                    <Sparkles className="h-4 w-4" />
+                                    {refinerMeta.ctaLabel}
                                 </Button>
                             </Link>
                             
@@ -235,7 +385,8 @@ export default function SitesDashboardPage() {
                     </CardContent>
                 </div>
               </Card>
-            ))}
+              );
+            })}
           </div>
       )}
 

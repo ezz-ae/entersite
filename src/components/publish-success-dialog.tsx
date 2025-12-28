@@ -31,13 +31,7 @@ export function PublishSuccessDialog({
   const [publishedUrl, setPublishedUrl] = React.useState("");
   const [siteId, setSiteId] = React.useState("");
 
-  React.useEffect(() => {
-      if (open && !publishedUrl) {
-          handlePublish();
-      }
-  }, [open, publishedUrl]);
-
-  const handlePublish = async () => {
+  const handlePublish = React.useCallback(async () => {
       setIsPublishing(true);
       try {
           const result = await publishSite(page);
@@ -73,7 +67,13 @@ export function PublishSuccessDialog({
       } finally {
           setIsPublishing(false);
       }
-  }
+  }, [page, toast]);
+
+  React.useEffect(() => {
+      if (open && !publishedUrl) {
+          handlePublish();
+      }
+  }, [handlePublish, open, publishedUrl]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(publishedUrl);

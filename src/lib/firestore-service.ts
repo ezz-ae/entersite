@@ -17,7 +17,7 @@ import type { SitePage } from './types';
 
 export interface Job {
   id?: string;
-  userId: string;
+  ownerUid: string;
   type: 'site_build' | 'ad_campaign' | 'seo_audit' | 'listing_sync';
   status: 'queued' | 'processing' | 'completed' | 'failed';
   data: any;
@@ -36,22 +36,41 @@ export interface UserProfile {
 
 // --- Site Operations ---
 
-export const saveSite = async (userId: string, site: SitePage) => {
+export const saveSite = async (ownerUid: string, site: SitePage) => {
   const siteRef = doc(collection(db, 'sites'));
   const siteId = site.id || siteRef.id;
   
   await setDoc(doc(db, 'sites', siteId), {
     ...site,
-    userId,
+    ownerUid,
+    tenantId: site.tenantId || 'public',
     id: siteId,
     updatedAt: serverTimestamp(),
+    createdAt: site.createdAt || serverTimestamp(),
   }, { merge: true });
 
   return siteId;
 };
 
-export const getUserSites = async (userId: string) => {
-  const q = query(collection(db, 'sites'), where('userId', '==', userId));
+export const updateSiteMetadata = async (siteId: string, data: Partial<SitePage>) => {
+  if (!siteId) {
+    throw new Error('Site ID is required to update metadata.');
+  }
+  const updates: Record<string, any> = {};
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined) {
+      updates[key] = value;
+    }
+  });
+  if (Object.keys(updates).length === 0) {
+    return;
+  }
+  updates.updatedAt = serverTimestamp();
+  await setDoc(doc(db, 'sites', siteId), updates, { merge: true });
+};
+
+export const getUserSites = async (ownerUid: string) => {
+  const q = query(collection(db, 'sites'), where('ownerUid', '==', ownerUid));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(d => d.data() as SitePage);
 };
@@ -62,9 +81,9 @@ export const getUserSites = async (userId: string) => {
  * Creates a job that your Python/Cloud Run workers will pick up.
  * This is the "Fire and Forget" trigger for AI agents.
  */
-export const createJob = async (userId: string, type: Job['type'], data: any) => {
+export const createJob = async (ownerUid: string, type: Job['type'], data: any) => {
   const jobData = {
-    userId,
+    ownerUid,
     type,
     status: 'queued',
     data,

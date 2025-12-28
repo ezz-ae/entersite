@@ -4,8 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { UserNav } from "@/components/user-nav";
-import { EntreSiteLogo } from "@/components/icons";
-import { Monitor, Smartphone, Tablet, Rocket, Eye, ChevronLeft, Save, Layout } from 'lucide-react';
+import { Monitor, Smartphone, Tablet, Rocket, Eye, ChevronLeft, Save, Layout, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SitePage } from '@/lib/types';
 
@@ -14,7 +13,9 @@ interface EditorHeaderProps {
   onSave?: () => void;
   onPreview?: () => void;
   onPublish?: () => void;
+  onRefine?: () => void;
   isPreviewMode?: boolean;
+  isRefining?: boolean;
 }
 
 export function EditorHeader({ 
@@ -22,7 +23,9 @@ export function EditorHeader({
   onSave,
   onPreview,
   onPublish,
-  isPreviewMode = false
+  onRefine,
+  isPreviewMode = false,
+  isRefining = false,
 }: EditorHeaderProps) {
   const [device, setDevice] = React.useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
@@ -82,6 +85,16 @@ export function EditorHeader({
           <Button variant="secondary" size="sm" className="hidden lg:flex gap-2 h-9 px-4 border border-white/5" onClick={onSave}>
               <Save className="h-4 w-4"/>
               Save
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hidden lg:flex gap-2 h-9 px-4 text-amber-300 border border-amber-300/30 hover:bg-amber-400/10 rounded-full"
+            onClick={onRefine}
+            disabled={isRefining}
+          >
+            <Sparkles className="h-4 w-4" />
+            {isRefining ? 'Refiner Running...' : 'Refiner AI'}
           </Button>
           <Button 
             size="sm" 

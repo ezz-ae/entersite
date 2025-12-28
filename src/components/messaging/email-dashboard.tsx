@@ -10,25 +10,69 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { 
     Mail, Users, Zap, Send, Sparkles, BarChart3, 
-    MousePointerClick, Eye, Clock, Calendar, Image as ImageIcon
+    MousePointerClick, Eye, Clock, Calendar, Image as ImageIcon,
+    Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from '@/hooks/use-toast';
+import { sendEmail } from '@/lib/messaging/emailSender';
 
 export function EmailCampaignDashboard() {
     const [subject, setSubject] = useState("Exclusive Pre-Launch: Riverside Apartments");
     const [body, setBody] = useState("Hi {Name},\n\nI wanted to personally invite you to the private viewing of Riverside Apartments this weekend.\n\nThis project offers:\n- 8% ROI Guaranteed\n- 5-Year Payment Plan\n- Prices starting from AED 1.2M\n\nSlots are limited. Click below to book yours.\n\nBest,\nSarah");
+    const [testEmail, setTestEmail] = useState('founder@entrestate.com');
+    const [isSendingTest, setIsSendingTest] = useState(false);
+    const { toast } = useToast();
+
+    const handleSendTest = async () => {
+        if (!testEmail) {
+            toast({ title: 'Add a test email', description: 'Enter a recipient before sending.', variant: 'destructive' });
+            return;
+        }
+        try {
+            setIsSendingTest(true);
+            await sendEmail({
+                to: testEmail,
+                subject,
+                body,
+            });
+            toast({ title: 'Test email sent', description: `Delivered preview to ${testEmail}` });
+        } catch (error: any) {
+            toast({
+                title: 'Failed to send test email',
+                description: error?.message || 'Verify your authentication and email configuration.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsSendingTest(false);
+        }
+    };
 
     return (
         <Card className="w-full h-full bg-background border-0 shadow-none">
             <CardHeader className="px-0 pt-0">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                         <CardTitle className="text-2xl">AI Email Architect</CardTitle>
                         <CardDescription>Design high-converting newsletters and drip campaigns in minutes.</CardDescription>
                     </div>
-                    <Button size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700">
-                        <Send className="h-4 w-4" /> Send Test
-                    </Button>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <Input
+                            value={testEmail}
+                            onChange={(e) => setTestEmail(e.target.value)}
+                            placeholder="test@entrestate.com"
+                            className="h-9 w-full sm:w-56"
+                        />
+                        <Button
+                            size="sm"
+                            className="gap-2 bg-blue-600 hover:bg-blue-700"
+                            onClick={handleSendTest}
+                            disabled={isSendingTest}
+                        >
+                            {isSendingTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                            {isSendingTest ? 'Sending...' : 'Send Test'}
+                        </Button>
+                    </div>
                 </div>
             </CardHeader>
             

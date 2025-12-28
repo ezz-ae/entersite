@@ -1,15 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { SiteFooter } from '@/components/site-footer';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, MapPin, Filter, LayoutGrid, List as ListIcon, TrendingUp, BarChart3, Building2, SlidersHorizontal, X, ArrowRight, Zap, Globe, Activity, Loader2 } from "lucide-react";
-import { getRealisteProjects, searchRealisteProjects } from '@/lib/realiste-projects';
 import type { ProjectData } from '@/lib/types';
-import { ResponsiveImage } from '@/components/ui/responsive-image';
 import {
     Select,
     SelectContent,
@@ -23,14 +20,23 @@ import { cn } from '@/lib/utils';
 import { ProjectCard } from '@/components/project-card';
 
 const PROJECTS_PER_PAGE = 12;
+const buildQueryString = (params: Record<string, string | number | undefined>) => {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') {
+      search.set(key, String(value));
+    }
+  });
+  return search.toString();
+};
 
 export default function DiscoverPage() {
-  const [allProjects, setAllProjects] = useState<ProjectData[]>([]);
-  const [displayedProjects, setDisplayedProjects] = useState<ProjectData[]>([]);
+  const [projects, setProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [totalProjects, setTotalProjects] = useState(0);
 
   // Filter State
   const [selectedCity, setSelectedCity] = useState("Dubai");
@@ -39,49 +45,42 @@ export default function DiscoverPage() {
   // Statistics
   const [stats, setStats] = useState({ total: 0, avgPrice: 0, avgRoi: 0 });
 
-  useEffect(() => {
-    loadData();
+  const fetchProjects = useCallback(async (pageParam: number, append: boolean) => {
+    setLoading(true);
+    try {
+      const queryString = buildQueryString({
+        city: selectedCity,
+        status: selectedStatus,
+        query: searchQuery,
+        page: pageParam,
+        limit: PROJECTS_PER_PAGE,
+      });
+      const res = await fetch(`/api/projects/search?${queryString}`);
+      if (!res.ok) throw new Error('Failed to fetch projects');
+      const json = await res.json();
+      setTotalProjects(json.pagination.total || 0);
+      setProjects((prev) => {
+        const nextProjects = append ? [...prev, ...json.data] : json.data;
+        const total = nextProjects.length;
+        const avgPrice = total > 0 ? nextProjects.reduce((acc: number, curr: any) => acc + (curr.price?.from || 0), 0) / total : 0;
+        setStats({ total, avgPrice, avgRoi: 8.4 });
+        return nextProjects;
+      });
+      setPage(pageParam);
+    } catch (error) {
+      console.error('Failed to load projects', error);
+    } finally {
+      setLoading(false);
+    }
   }, [selectedCity, selectedStatus, searchQuery]);
 
-  const loadData = async () => {
-    setLoading(true);
-    const data = getRealisteProjects();
-    
-    let filteredData = data;
-
-    if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        filteredData = filteredData.filter(p => 
-            p.name.toLowerCase().includes(q) || 
-            p.developer.toLowerCase().includes(q) ||
-            p.location.area.toLowerCase().includes(q) ||
-            p.location.city.toLowerCase().includes(q)
-        );
-    }
-
-    if (selectedCity && selectedCity !== 'all') {
-        filteredData = filteredData.filter(p => p.location.city.toLowerCase() === selectedCity.toLowerCase());
-    }
-
-    if (selectedStatus && selectedStatus !== 'all') {
-        filteredData = filteredData.filter(p => p.status === selectedStatus);
-    }
-    
-    setAllProjects(filteredData);
-    setDisplayedProjects(filteredData.slice(0, PROJECTS_PER_PAGE));
-    setPage(1);
-
-    const total = filteredData.length;
-    const avgPrice = total > 0 ? filteredData.reduce((acc, curr) => acc + curr.price.from, 0) / total : 0;
-    setStats({ total, avgPrice, avgRoi: 8.4 });
-    setLoading(false);
-  };
+  useEffect(() => {
+    fetchProjects(1, false);
+  }, [fetchProjects]);
 
   const loadMore = () => {
     const nextPage = page + 1;
-    const newProjects = allProjects.slice(0, nextPage * PROJECTS_PER_PAGE);
-    setDisplayedProjects(newProjects);
-    setPage(nextPage);
+    fetchProjects(nextPage, true);
   };
 
   return (
@@ -151,7 +150,7 @@ export default function DiscoverPage() {
                 <div className="flex items-center gap-4">
                     <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Cluster Activity</p>
                     <Badge variant="outline" className="bg-green-500/5 text-green-500 border-green-500/20 font-mono">
-                        {allProjects.length} Ready
+                        {totalProjects} Ready
                     </Badge>
                 </div>
                 <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/5">
@@ -160,20 +159,20 @@ export default function DiscoverPage() {
                 </div>
             </div>
 
-            {loading ? (
+            {loading && projects.length === 0 ? (
                 <div className="h-96 flex flex-col items-center justify-center gap-6">
                     <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
                     <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.4em]">Synchronizing Cluster...</p>
                 </div>
             ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {displayedProjects.map((project, idx) => (
+                    {projects.map((project, idx) => (
                         <ProjectCard key={project.id} project={project} index={idx} />
                     ))}
                 </div>
             )}
 
-            {displayedProjects.length < allProjects.length && (
+            {!loading && projects.length < totalProjects && (
                 <div className="mt-20 text-center">
                     <Button onClick={loadMore} className="h-16 px-12 rounded-full border border-white/10 bg-white/5 text-white font-bold hover:bg-white/10 transition-all text-lg">
                         Load More Projects
@@ -181,8 +180,6 @@ export default function DiscoverPage() {
                 </div>
             )}
       </div>
-      
-      <SiteFooter />
     </main>
   );
 }

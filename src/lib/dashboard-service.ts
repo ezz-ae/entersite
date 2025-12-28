@@ -1,31 +1,31 @@
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, getCountFromServer } from 'firebase/firestore';
 import { db } from '@/firebase';
-import { getRealisteProjects } from './realiste-projects';
 
-export async function getDashboardStats(userId?: string) {
-    const projects = getRealisteProjects();
-    
+export async function getDashboardStats(ownerUid?: string) {
+    let totalProjects = 0;
     let userSitesCount = 0;
-    let leadsCount = 0;
 
-    if (userId) {
+    try {
+        const countSnapshot = await getCountFromServer(collection(db, 'inventory_projects'));
+        totalProjects = countSnapshot.data().count;
+    } catch (error) {
+        console.error('Failed to count inventory projects:', error);
+    }
+
+    if (ownerUid) {
         try {
-            const sitesQuery = query(collection(db, 'sites'), where('userId', '==', userId));
+            const sitesQuery = query(collection(db, 'sites'), where('ownerUid', '==', ownerUid));
             const sitesSnap = await getDocs(sitesQuery);
             userSitesCount = sitesSnap.size;
-
-            const leadsQuery = query(collection(db, 'leads'), where('userId', '==', userId));
-            const leadsSnap = await getDocs(leadsQuery);
-            leadsCount = leadsSnap.size;
         } catch (e) {
             console.error("Error fetching dashboard stats:", e);
         }
     }
 
     return {
-        totalProjects: projects.length,
+        totalProjects,
         userSites: userSitesCount,
-        newLeads: leadsCount || 24, // Fallback for demo
+        newLeads: 0,
         systemHealth: "100%",
         aiEfficiency: "94%"
     };

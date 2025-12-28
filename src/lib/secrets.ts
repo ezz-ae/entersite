@@ -1,25 +1,21 @@
-// This service simulates interaction with Google Secret Manager
-// In production, this would use the @google-cloud/secret-manager client
+/**
+ * Minimal placeholder for a future secret manager integration (GCP Secret Manager, KMS, etc.).
+ * These APIs must never be invoked from the browser. The current implementation
+ * simply throws if you attempt to read/write secrets without a server-backed service.
+ */
+const ensureServer = () => {
+  if (typeof window !== 'undefined') {
+    throw new Error('SecretManager operations must be performed on the server.');
+  }
+};
 
 export const SecretManager = {
-  
-  /**
-   * Securely stores a user API key (e.g., OpenAI, SendGrid, CRM)
-   */
-  storeUserSecret: async (userId: string, service: string, key: string) => {
-    console.log(`[SECURE] Storing secret for ${userId} / ${service}`);
-    // In Prod: await client.createSecret(...)
-    // In Dev: LocalStorage or encrypted Firestore field
-    localStorage.setItem(`secret_${userId}_${service}`, btoa(key)); // Simple obfuscation for demo
-    return true;
+  async storeUserSecret() {
+    ensureServer();
+    throw new Error('SecretManager.storeUserSecret is not implemented yet. Wire this to your secure storage layer.');
   },
-
-  /**
-   * Retrieves a secret for backend use
-   */
-  getSecret: async (userId: string, service: string) => {
-    // In Prod: await client.accessSecretVersion(...)
-    const val = localStorage.getItem(`secret_${userId}_${service}`);
-    return val ? atob(val) : null;
-  }
+  async getSecret() {
+    ensureServer();
+    throw new Error('SecretManager.getSecret is not implemented yet. Wire this to your secure storage layer.');
+  },
 };

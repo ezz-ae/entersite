@@ -4,14 +4,16 @@
  */
 
 export interface PayPalOrderRequest {
-    planId: string;
+    planId?: string;
     amount: string;
     currency: string;
 }
 
+import { authorizedFetch } from './auth-fetch';
+
 export const createPayPalOrder = async (req: PayPalOrderRequest) => {
     try {
-        const response = await fetch('/api/payments/paypal/create', {
+        const response = await authorizedFetch('/api/payments/paypal/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req),
@@ -25,7 +27,7 @@ export const createPayPalOrder = async (req: PayPalOrderRequest) => {
 
 export const capturePayPalOrder = async (orderId: string) => {
     try {
-        const response = await fetch('/api/payments/paypal/capture', {
+        const response = await authorizedFetch('/api/payments/paypal/capture', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orderId }),

@@ -1,22 +1,58 @@
 
 'use client';
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { captureLead } from "@/lib/leads";
+import { useCampaignAttribution } from "@/hooks/useCampaignAttribution";
 
 interface NewsletterBlockProps {
   headline?: string;
   subtext?: string;
   ctaText?: string;
+  tenantId?: string;
+  projectName?: string;
+  siteId?: string;
 }
 
 export function NewsletterBlock({
   headline = "Stay Ahead of the Market",
   subtext = "Subscribe to our newsletter for exclusive off-plan alerts, market analysis, and investment tips delivered straight to your inbox.",
-  ctaText = "Subscribe Now"
+  ctaText = "Subscribe Now",
+  tenantId = "public",
+  projectName = "Newsletter",
+  siteId,
 }: NewsletterBlockProps) {
+  const attribution = useCampaignAttribution();
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!email) return;
+    setSubmitting(true);
+    try {
+      await captureLead({
+        email,
+        source: 'newsletter-block',
+        project: projectName,
+        context: { page: 'newsletter-block', buttonId: 'newsletter-submit', service: 'newsletter' },
+        metadata: { siteId },
+        attribution: attribution ?? undefined,
+        tenantId,
+        siteId,
+      });
+      setSubscribed(true);
+    } catch (error) {
+      console.error('Newsletter subscription failed', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <section className="py-24 bg-muted/50">
       <div className="container mx-auto px-4">
@@ -32,18 +68,27 @@ export function NewsletterBlock({
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{headline}</h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{subtext}</p>
                 
-                <form className="max-w-md mx-auto flex gap-2 pt-4" onSubmit={(e) => e.preventDefault()}>
-                    <Input 
-                        placeholder="Enter your email address" 
-                        type="email" 
-                        className="h-12 bg-background"
-                    />
-                    <Button size="lg" className="h-12 px-6">
-                        {ctaText}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                </form>
-                <p className="text-xs text-muted-foreground pt-4">We respect your privacy. No spam, ever.</p>
+                {subscribed ? (
+                  <p className="text-sm text-green-600 font-medium pt-4">Subscribed! Watch your inbox for the next Entrestate drop.</p>
+                ) : (
+                  <>
+                    <form className="max-w-md mx-auto flex gap-2 pt-4" onSubmit={handleSubscribe}>
+                        <Input 
+                            placeholder="Enter your email address" 
+                            type="email" 
+                            className="h-12 bg-background"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                        <Button size="lg" className="h-12 px-6" disabled={submitting}>
+                            {submitting ? 'Joining…' : ctaText}
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </form>
+                    <p className="text-xs text-muted-foreground pt-4">We respect your privacy. No spam, ever.</p>
+                  </>
+                )}
             </div>
         </div>
       </div>

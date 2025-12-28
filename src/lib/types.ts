@@ -80,6 +80,15 @@ export interface SitePage {
   blocks: Block[];
   canonicalListings: string[];
   brochureUrl: string;
+  ownerUid?: string;
+  tenantId?: string;
+  refinerStatus?: 'queued' | 'running' | 'review' | 'done' | 'error';
+  lastRefinedAt?: string | Date;
+  lastRefinerJobId?: string;
+  refinerBaseSnapshot?: SitePage;
+  refinerDraftSnapshot?: SitePage;
+  refinerDraftHtml?: string;
+  refinerPreviewUrl?: string;
   seo: {
     title: string;
     description: string;

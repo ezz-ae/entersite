@@ -1,27 +1,10 @@
 import { generateObject, generateText } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { z } from 'zod';
-
-/**
- * Entrestate Master Intelligence Layer
- * COST OPTIMIZED: Uses 1.5 Flash for speed/cost, Pro for complex architecture.
- */
-
-const API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY;
-
-const google = createGoogleGenerativeAI({
-  apiKey: API_KEY,
-});
-
-// Model Tiering Logic: 
-// 1.5 FLASH is 10x cheaper and sufficient for marketing/chat.
-// 1.5 PRO is used only for the heavy "Site Architect" structure.
-const FLASH_MODEL = 'gemini-1.5-flash';
-const PRO_MODEL = 'gemini-1.5-pro';
+import { getGoogleModel, FLASH_MODEL, PRO_MODEL } from '@/lib/ai/google';
 
 export const generateSiteStructure = async (prompt: string) => {
     return generateObject({
-        model: google(PRO_MODEL) as any, // Pro for the core architecture
+        model: getGoogleModel(PRO_MODEL),
         schema: z.object({
             title: z.string(),
             description: z.string(),
@@ -48,7 +31,7 @@ export const generateSiteStructure = async (prompt: string) => {
 export const generateMarketingCopy = async (context: string) => {
     // USE FLASH for marketing copy - much faster and extremely cheap
     const { text } = await generateText({
-        model: google(FLASH_MODEL) as any,
+        model: getGoogleModel(FLASH_MODEL),
         system: "You are a world-class real estate copywriter. Be concise.",
         prompt: `Write 3 ad headlines and 2 descriptions for: ${context}.`,
     });

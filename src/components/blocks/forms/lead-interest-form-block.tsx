@@ -1,37 +1,63 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { captureLead } from '@/lib/leads';
+import { useCampaignAttribution } from '@/hooks/useCampaignAttribution';
+import { cn } from '@/lib/utils';
 
 export function LeadInterestFormBlock({
   headline = "Register Your Interest",
-  subtext = "Get exclusive access to floor plans and pricing before the public launch."
-}: { headline?: string, subtext?: string }) {
-  
+  subtext = "Get exclusive access to floor plans and pricing before the public launch.",
+  tenantId = "public",
+  projectName = "Launch Registration",
+  siteId,
+}: { headline?: string, subtext?: string, tenantId?: string, projectName?: string, siteId?: string }) {
+  const attribution = useCampaignAttribution();
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
+  const [leadMeta, setLeadMeta] = useState<{ intent?: string; budget?: string }>({});
+  const [leadInfo, setLeadInfo] = useState({ name: "", phone: "" });
   const [loading, setLoading] = useState(false);
 
-  const handleSendOtp = async () => {
-      setLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setLoading(false);
-      setStep(3); // Go to OTP verification
+  const handleIntentSelect = (intent: string) => {
+    setLeadMeta((prev) => ({ ...prev, intent }));
   };
 
-  const handleVerifyOtp = async () => {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1500));
+  const proceedToDetails = () => {
+    setLeadMeta((prev) => ({
+      intent: prev.intent || 'Investment',
+      budget: prev.budget || 'AED 1M - 2M',
+    }));
+    setStep(2);
+  };
+
+  const handleVerify = async () => {
+    setLoading(true);
+    try {
+      await captureLead({
+        name: leadInfo.name,
+        phone: leadInfo.phone,
+        source: 'lead-interest-form',
+        project: projectName,
+        metadata: { ...leadMeta, otp, siteId },
+        context: { page: 'lead-interest', buttonId: 'lead-interest-submit', service: 'leads' },
+        attribution: attribution ?? undefined,
+        tenantId,
+        siteId,
+      });
+      setStep(4);
+    } catch (error) {
+      console.error('Failed to submit lead interest form', error);
+    } finally {
       setLoading(false);
-      setStep(4); // Success
+    }
   };
 
   return (
@@ -72,22 +98,34 @@ export function LeadInterestFormBlock({
                                  <h4 className="text-lg font-semibold mb-1">What are you looking for?</h4>
                                  <p className="text-xs text-zinc-500">Help us customize your offer.</p>
                              </div>
-                             <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-2 gap-3">
                                  {["Investment", "End Use"].map((opt) => (
-                                     <Button key={opt} variant="outline" className="border-zinc-800 hover:bg-zinc-800 hover:text-white text-zinc-400 h-12 justify-start px-4">
+                                     <Button
+                                        key={opt}
+                                        variant="outline"
+                                        className={cn(
+                                          "border-zinc-800 hover:bg-zinc-800 hover:text-white text-zinc-400 h-12 justify-start px-4",
+                                          leadMeta.intent === opt ? "bg-zinc-800 text-white" : ""
+                                        )}
+                                        onClick={() => handleIntentSelect(opt)}
+                                     >
                                          {opt}
                                      </Button>
                                  ))}
                              </div>
                              <div className="space-y-3">
                                  <Label>Budget Range</Label>
-                                 <select className="w-full h-12 bg-zinc-900 border border-zinc-800 rounded-md px-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                     <option>AED 1M - 2M</option>
-                                     <option>AED 2M - 5M</option>
-                                     <option>AED 5M+</option>
+                                 <select
+                                    className="w-full h-12 bg-zinc-900 border border-zinc-800 rounded-md px-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    value={leadMeta.budget || 'AED 1M - 2M'}
+                                    onChange={(e) => setLeadMeta((prev) => ({ ...prev, budget: e.target.value }))}
+                                 >
+                                     <option value="AED 1M - 2M">AED 1M - 2M</option>
+                                     <option value="AED 2M - 5M">AED 2M - 5M</option>
+                                     <option value="AED 5M+">AED 5M+</option>
                                  </select>
                              </div>
-                             <Button className="w-full h-12 bg-white text-black hover:bg-zinc-200" onClick={() => setStep(2)}>
+                             <Button className="w-full h-12 bg-white text-black hover:bg-zinc-200" onClick={proceedToDetails}>
                                  Continue <ArrowRight className="ml-2 h-4 w-4" />
                              </Button>
                         </div>
@@ -98,24 +136,29 @@ export function LeadInterestFormBlock({
                             <div>
                                  <h4 className="text-lg font-semibold mb-1">Your Details</h4>
                                  <p className="text-xs text-zinc-500">We'll send a verification code.</p>
-                             </div>
+                            </div>
                              <div className="space-y-4">
                                  <div className="space-y-2">
                                      <Label>Full Name</Label>
-                                     <Input className="bg-zinc-900 border-zinc-800 h-12" placeholder="John Doe" />
+                                     <Input
+                                        className="bg-zinc-900 border-zinc-800 h-12"
+                                        placeholder="John Doe"
+                                        value={leadInfo.name}
+                                        onChange={(e) => setLeadInfo((prev) => ({ ...prev, name: e.target.value }))}
+                                     />
                                  </div>
                                  <div className="space-y-2">
                                      <Label>Mobile Number</Label>
                                      <Input 
                                         className="bg-zinc-900 border-zinc-800 h-12" 
                                         placeholder="+971 50 000 0000" 
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
+                                        value={leadInfo.phone}
+                                        onChange={(e) => setLeadInfo((prev) => ({ ...prev, phone: e.target.value }))}
                                      />
-                                 </div>
-                             </div>
-                             <Button className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={handleSendOtp} disabled={loading}>
-                                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Code"}
+                                </div>
+                            </div>
+                             <Button className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={() => setStep(3)} disabled={loading || !leadInfo.name || !leadInfo.phone}>
+                                 Continue
                              </Button>
                              <Button variant="ghost" className="w-full text-zinc-500" onClick={() => setStep(1)}>Back</Button>
                         </div>
@@ -128,16 +171,29 @@ export function LeadInterestFormBlock({
                                      <Lock className="h-5 w-5 text-indigo-400" />
                                  </div>
                                  <h4 className="text-lg font-semibold mb-1">Verify Number</h4>
-                                 <p className="text-xs text-zinc-500">Enter the 4-digit code sent to {phone}</p>
+                                 <p className="text-xs text-zinc-500">Enter a quick code to confirm {leadInfo.phone}</p>
                              </div>
                              
                              <div className="flex justify-center gap-3">
                                  {[1, 2, 3, 4].map((i) => (
-                                     <Input key={i} className="w-12 h-14 text-center text-xl bg-zinc-900 border-zinc-800 font-mono" maxLength={1} />
+                                     <Input
+                                        key={i}
+                                        className="w-12 h-14 text-center text-xl bg-zinc-900 border-zinc-800 font-mono"
+                                        maxLength={1}
+                                        value={otp[i - 1] || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value.replace(/\D/g, '').slice(-1);
+                                          setOtp((prev) => {
+                                            const chars = prev.split('');
+                                            chars[i - 1] = value;
+                                            return chars.join('').slice(0, 4);
+                                          });
+                                        }}
+                                     />
                                  ))}
                              </div>
 
-                             <Button className="w-full h-12 bg-green-600 hover:bg-green-700 text-white" onClick={handleVerifyOtp} disabled={loading}>
+                             <Button className="w-full h-12 bg-green-600 hover:bg-green-700 text-white" onClick={handleVerify} disabled={loading || otp.length < 4}>
                                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify & Submit"}
                              </Button>
                              <p className="text-xs text-center text-zinc-500 cursor-pointer hover:text-white">Resend Code</p>

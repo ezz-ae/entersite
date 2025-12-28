@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Plus, Sparkles, Layout } from 'lucide-react';
 import {
   DndContext,
@@ -35,6 +35,8 @@ import { ProjectDetailBlock } from './blocks/project-detail-block';
 import { BrochureFormBlock } from './blocks/forms/brochure-form-block';
 import { OfferBlock } from './blocks/forms/offer-block';
 import { HeroLeadFormBlock } from './blocks/forms/hero-lead-form-block';
+import { LeadInterestFormBlock } from './blocks/forms/lead-interest-form-block';
+import { BookingViewingBlock } from './blocks/forms/booking-viewing-block';
 import { FloorPlanBlock } from './blocks/floor-plan-block';
 import { FeaturesBlock } from './blocks/features-block';
 import { LaunchBlock } from './blocks/launch-block';
@@ -70,10 +72,10 @@ import { BlockGallery } from './block-gallery';
 import { SortableItem } from '@/components/ui/sortable/sortable-item';
 import { suggestNextBlocks, SuggestNextBlocksOutput } from '@/ai/flows/suggest-next-blocks';
 import { Separator } from './ui/separator';
-import { allProjects } from '@/lib/projects';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { MapBlock } from './blocks/map-block';
+import { SiteBlockContext, LEAD_CAPTURE_BLOCKS } from './blocks/block-context';
 
 const blockComponents: Record<string, React.ComponentType<any>> = {
   'hero': HeroBlock,
@@ -89,6 +91,7 @@ const blockComponents: Record<string, React.ComponentType<any>> = {
   'brochure-form': BrochureFormBlock,
   'offer': OfferBlock,
   'hero-lead-form': HeroLeadFormBlock,
+  'lead-interest-form': LeadInterestFormBlock,
   'floor-plan': FloorPlanBlock,
   'features': FeaturesBlock,
   'launch': LaunchBlock,
@@ -102,6 +105,7 @@ const blockComponents: Record<string, React.ComponentType<any>> = {
   'partners': PartnersBlock,
   'stats': StatsBlock,
   'newsletter': NewsletterBlock,
+  'booking-viewing': BookingViewingBlock,
   'split-content': SplitContentBlock,
   'featured-listing': FeaturedListingBlock,
   'search-filters': SearchWithFiltersBlock,
@@ -116,7 +120,7 @@ const blockComponents: Record<string, React.ComponentType<any>> = {
   'sms-lead': SmsLeadBlock,
 };
 
-const renderBlock = (block: BlockType) => {
+const renderBlock = (block: BlockType, context?: SiteBlockContext) => {
   const Component = blockComponents[block.type];
   if (!Component) {
     return (
@@ -125,7 +129,14 @@ const renderBlock = (block: BlockType) => {
       </div>
     );
   }
-  return <Component {...block.data} />;
+  const leadProps = LEAD_CAPTURE_BLOCKS.has(block.type)
+    ? {
+        tenantId: context?.tenantId,
+        projectName: context?.projectName,
+        siteId: context?.siteId,
+      }
+    : {};
+  return <Component {...block.data} {...leadProps} />;
 };
 
 const AddBlockPopover = ({ onSelectBlock, currentBlocks, variant = 'default' }: { onSelectBlock: (blockType: string, data?: any) => void, currentBlocks: string[], variant?: 'default' | 'mini' }) => {
@@ -264,6 +275,11 @@ interface PageBuilderProps {
 export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock }: PageBuilderProps) {
   const [blocks, setBlocks] = useState<BlockType[]>(page.blocks);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const siteContext = useMemo<SiteBlockContext>(() => ({
+    tenantId: page.tenantId || 'public',
+    projectName: page.title,
+    siteId: page.id,
+  }), [page.id, page.tenantId, page.title]);
 
   useEffect(() => {
     setBlocks(page.blocks);
@@ -447,7 +463,7 @@ export function PageBuilder({ page, onPageUpdate, selectedBlockId, onSelectBlock
                         onDelete={() => deleteBlock(block.blockId)}
                         onDuplicate={() => duplicateBlock(block.blockId)}
                       >
-                        {renderBlock(block)}
+                        {renderBlock(block, siteContext)}
                       </BlockCard>
                   </div>
                 </SortableItem>

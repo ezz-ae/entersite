@@ -1,6 +1,5 @@
 
-import type { SitePage, Block, ProjectData } from './types';
-import { allProjects } from './projects';
+import type { SitePage, Block } from './types';
 
 export interface SiteTemplate {
   id: string;
@@ -10,23 +9,6 @@ export interface SiteTemplate {
   thumbnail?: string;
   description?: string;
 }
-
-// Helper to find a specific project by ID
-const findProject = (projectId: string): ProjectData | undefined => {
-    return allProjects.find(p => p.id === projectId);
-};
-
-// Helper to filter projects by criteria
-const filterProjects = (criteria: { city?: string, developer?: string, limit?: number }): ProjectData[] => {
-    let filtered = allProjects;
-    if (criteria.city) {
-        filtered = filtered.filter(p => p.location.city.toLowerCase() === criteria.city!.toLowerCase());
-    }
-    if (criteria.developer) {
-        filtered = filtered.filter(p => p.developer.toLowerCase().includes(criteria.developer!.toLowerCase()));
-    }
-    return filtered.slice(0, criteria.limit || 3);
-};
 
 const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   hero: {
@@ -276,22 +258,11 @@ const defaultBlocks: Record<string, Omit<Block, 'blockId' | 'order'>> = {
   }
 };
 
-const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: { city?: string, overrides?: any, projectId?: string, projectFilter?: {city?: string, developer?: string, limit?: number} }): Block => {
+const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: { overrides?: any, initialFilter?: Record<string, any> }): Block => {
     const blockData = JSON.parse(JSON.stringify(defaultBlocks[type]));
 
-    // Handle specific project data for listing blocks
-    if (type === 'listing-grid' || type === 'listing-grid-map' || type === 'project-detail' || type === 'featured-listing') {
-        if (context?.projectId) {
-            const project = findProject(context.projectId);
-            if (project) {
-                // For a single project, populate the data directly
-                blockData.data = { ...blockData.data, ...project, projects: [project], listingTitle: project.name, location: project.location.area, price: project.price.label, area: project.features.find(f=>f.includes('sq.ft')) || '' };
-            }
-        } else if (context?.projectFilter) {
-            blockData.data.projects = filterProjects(context.projectFilter);
-        } else { // Fallback to a default filter if no specific project/filter is provided
-            blockData.data.projects = filterProjects({ city: context?.city, limit: type === 'listing-grid' ? 3 : 5 });
-        }
+    if (context?.initialFilter && (type === 'listing-grid' || type === 'listing-grid-map')) {
+        blockData.data.initialFilter = context.initialFilter;
     }
 
     if (context?.overrides) {
@@ -306,16 +277,20 @@ const createBlock = (type: keyof typeof defaultBlocks, order: number, context?: 
     }
 }
 
-const createPage = (id: string, title: string, blocks: (keyof typeof defaultBlocks | { type: keyof typeof defaultBlocks, overrides?: any, projectId?: string, projectFilter?: {city?: string, developer?: string, limit?: number} })[], context?: { city?: string }): SitePage => {
+const createPage = (
+    id: string,
+    title: string,
+    blocks: (keyof typeof defaultBlocks | { type: keyof typeof defaultBlocks, overrides?: any, initialFilter?: Record<string, any> })[],
+    _context?: Record<string, any>
+  ): SitePage => {
     return {
         id: `page-${id}`,
         title: title,
         blocks: blocks.map((blockDef, index) => {
             const type = typeof blockDef === 'string' ? blockDef : blockDef.type;
             const overrides = typeof blockDef === 'string' ? {} : blockDef.overrides;
-            const projectId = typeof blockDef === 'string' ? undefined : blockDef.projectId;
-            const projectFilter = typeof blockDef === 'string' ? undefined : blockDef.projectFilter;
-            return createBlock(type, index + 1, { ...context, overrides, projectId, projectFilter });
+            const initialFilter = typeof blockDef === 'string' ? undefined : blockDef.initialFilter;
+            return createBlock(type, index + 1, { overrides, initialFilter });
         }),
         canonicalListings: [],
         brochureUrl: "",
@@ -341,7 +316,7 @@ export const roadshowTemplate: SiteTemplate = {
         'roadshow', 
         'banner-cta', 
         'split-content',
-        { type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 3 } },
+        { type: 'listing-grid', initialFilter: { city: 'Dubai' } },
         'brochure-form', 
         'cta-form', 
         'faq', 
@@ -358,8 +333,8 @@ export const developerFocusTemplate: SiteTemplate = {
       createPage('home', 'Home', [
           'hero',
           'stats',
-          { type: 'listing-grid', projectFilter: { city: 'Abu-dhabi', developer: 'Bloom Holding', limit: 3 } },
-          { type: 'project-detail', projectId: 'marbella' },
+          { type: 'listing-grid', initialFilter: { city: 'Abu Dhabi', developer: 'Bloom Holding' } },
+          { type: 'project-detail', overrides: { projectName: 'Marbella Residences', developer: 'Bloom Holding' } },
           'features', 
           'payment-plan', 
           'team', 
@@ -378,8 +353,8 @@ export const partnerLaunchTemplate: SiteTemplate = {
     pages: [
         createPage('home', 'Launch Home', [
             { type: 'launch-hero', overrides: { backgroundImage: 'https://images.unsplash.com/photo-1596178060671-7a80dc8059ea?auto=format&fit=crop&q=80&w=2000' } },
-            { type: 'featured-listing', projectId: 'rosso-bay-residences' },
-            { type: 'listing-grid', projectFilter: { city: 'Ras-al-khaimah', limit: 3 } }, 
+            { type: 'featured-listing', overrides: { headline: 'Rosso Bay Residences', listingTitle: 'Rosso Bay Residences', location: 'Ras Al Khaimah', price: 'From AED 1.9M' } },
+            { type: 'listing-grid', initialFilter: { city: 'Ras Al Khaimah' } }, 
             'offer', 'map', 'partners', 'cta-grid', 'chat-widget'
         ], { city: 'Ras-al-khaimah' }),
     ]
@@ -392,12 +367,12 @@ export const fullCompanyTemplate: SiteTemplate = {
     pages: [
         createPage('home', 'Home', [
             'hero-lead-form', 'search-filters', 'partners',
-            { type: 'listing-grid-map', projectFilter: { city: 'Dubai', limit: 5 } },
-            { type: 'featured-listing', projectId: 'skyscape-avenue' },
+            { type: 'listing-grid-map', initialFilter: { city: 'Dubai' } },
+            { type: 'featured-listing', overrides: { headline: 'SkyScape Avenue', listingTitle: 'SkyScape Avenue', location: 'Dubai', price: 'From AED 2.1M' } },
             'developers-list', 'city-guide', 'features', 'blog-grid', 'team', 'newsletter', 'chat-widget'
         ], { city: 'Dubai' }),
         createPage('about', 'About Us', ['hero', 'stats', 'team', 'contact-details']),
-        createPage('projects', 'Projects', [{ type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 9 } }, 'mortgage-calculator', 'roi-calculator']),
+        createPage('projects', 'Projects', [{ type: 'listing-grid', initialFilter: { city: 'Dubai' } }, 'mortgage-calculator', 'roi-calculator']),
         createPage('contact', 'Contact Us', ['contact-details', 'cta-form']),
     ]
 };
@@ -409,7 +384,7 @@ export const freelancerTemplate: SiteTemplate = {
     pages: [
         createPage('home', 'Home', [
             'hero', 
-            { type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 3 } },
+            { type: 'listing-grid', initialFilter: { city: 'Dubai' } },
             'blog-grid', 'team', 'testimonial', 'cta-form', 'chat-widget'
         ], { city: 'Dubai' }),
     ]
@@ -422,8 +397,8 @@ export const mapFocusedTemplate: SiteTemplate = {
     pages: [
         createPage('home', 'Map Search', [
             'search-filters',
-            { type: 'listing-grid-map', projectFilter: { city: 'Dubai', limit: 8 } },
-            { type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 6 } },
+            { type: 'listing-grid-map', initialFilter: { city: 'Dubai' } },
+            { type: 'listing-grid', initialFilter: { city: 'Dubai' } },
             'chat-widget'
         ], { city: 'Dubai' }),
     ]
@@ -436,7 +411,7 @@ export const adsQuickLaunchTemplate: SiteTemplate = {
     pages: [
         createPage('home', 'Landing Page', [
             { type: 'coming-soon-hero', overrides: { backgroundImage: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=2000' } },
-            { type: 'project-detail', projectId: 'orbis-tower-d' },
+            { type: 'project-detail', overrides: { projectName: 'Orbis Tower D', developer: 'Prestige Developments' } },
             'video', 'floor-plan', 'payment-plan', 'offer', 'brochure-form', 'chat-widget'
         ], { city: 'Dubai' }),
     ]
@@ -459,7 +434,7 @@ export const luxuryAgentTemplate: SiteTemplate = {
           backgroundImage: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=2000",
         },
       },
-      { type: "listing-grid", projectFilter: { city: "Dubai", limit: 3 }, overrides: { headline: "Signature Listings" } },
+      { type: "listing-grid", initialFilter: { city: "Dubai" }, overrides: { headline: "Signature Listings" } },
       { type: "testimonial", overrides: { headline: "Client Accolades" } },
       "team",
       "cta-form"
@@ -481,7 +456,7 @@ export const offPlanSpecialistTemplate: SiteTemplate = {
           subtext: "Get priority allocation and developer offers before the public.",
         },
       },
-      { type: "listing-grid", projectFilter: { city: "Dubai", developer: "Emaar", limit: 3 }, overrides: { headline: "Latest Emaar Launches" } },
+      { type: "listing-grid", initialFilter: { city: "Dubai", developer: "Emaar" }, overrides: { headline: "Latest Emaar Launches" } },
       "payment-plan",
       "offer",
       "brochure-form"
@@ -531,7 +506,7 @@ export const whatsappLeadTemplate: SiteTemplate = {
           ctaText: "Chat on WhatsApp",
         }
       },
-      { type: 'featured-listing', projectId: '310-riverside-crescent' },
+      { type: 'featured-listing', overrides: { headline: '310 Riverside Crescent', listingTitle: '310 Riverside Crescent', location: 'Dubai', price: 'From AED 1.7M' } },
     ])
   ]
 };
@@ -546,7 +521,7 @@ export const offPlanBrokerageWebsite: SiteTemplate = {
         createPage('home', 'Off-Plan Deals', [
             { type: 'hero-lead-form', overrides: { headline: "Dubai's Hottest Off-Plan Investments", subtext: "Exclusive access to pre-launch and new development inventory." } },
             { type: 'developers-list', overrides: { headline: "Leading Developers" } },
-            { type: 'listing-grid', projectFilter: { city: 'Dubai', limit: 6 }, overrides: { headline: "Featured New Launches" } },
+            { type: 'listing-grid', initialFilter: { city: 'Dubai' }, overrides: { headline: "Featured New Launches" } },
             { type: 'city-guide', overrides: { city: "Dubai", headline: "Why Invest in Dubai Off-Plan?" } },
             'roi-calculator',
             'newsletter',
@@ -562,9 +537,9 @@ export const damacIslandsLeadGen: SiteTemplate = {
     description: "High-converting landing page for Damac's new island projects.",
     pages: [
         createPage('home', 'Damac Islands', [
-            { type: 'launch-hero', overrides: { headline: "Discover Damac Islands", subtext: "Your private sanctuary awaits. Launching soon.", launchDate: "Dec 2025", backgroundImage: findProject('selene-beach-residences')?.images?.[0] || defaultBlocks['launch-hero'].data.backgroundImage } },
-            { type: 'video', overrides: { headline: "The Damac Islands Experience", videoThumbnail: findProject('selene-beach-residences')?.images?.[0] || defaultBlocks.video.data.videoThumbnail } },
-            { type: 'project-detail', projectId: 'selene-beach-residences', overrides: { headline: "Azure 2 Residences" } },
+            { type: 'launch-hero', overrides: { headline: "Discover Damac Islands", subtext: "Your private sanctuary awaits. Launching soon.", launchDate: "Dec 2025" } },
+            { type: 'video', overrides: { headline: "The Damac Islands Experience" } },
+            { type: 'project-detail', overrides: { projectName: "Selene Beach Residences", developer: "Damac Properties", description: "Ultra-luxury seafront residences on Damac Islands.", headline: "Azure 2 Residences" } },
             { type: 'floor-plan', overrides: { headline: "Island Home Layouts" } },
             { type: 'payment-plan', overrides: { headline: "Exclusive Payment Offer" } },
             { type: 'brochure-form', overrides: { brochureTitle: "Damac Islands Brochure" } },
@@ -582,7 +557,7 @@ export const listingPortalMarketData: SiteTemplate = {
     pages: [
         createPage('home', 'Property Search', [
             'search-filters',
-            { type: 'listing-grid-map', projectFilter: { limit: 10 } },
+            { type: 'listing-grid-map', initialFilter: {} },
             { type: 'roi-calculator', overrides: { headline: "Estimate Your Investment Return" } },
             { type: 'blog-grid', overrides: { headline: "Market Trends & Analysis" } },
             'chat-widget'
@@ -614,8 +589,8 @@ export const dubaiPropertiesRoadshow: SiteTemplate = {
     description: 'Event registration page for international investor roadshows.',
     pages: [
         createPage('home', 'Global Investor Event', [
-            { type: 'roadshow', overrides: { eventName: "Dubai Properties Global Roadshow", city: "London", date: "Dec 1-3, 2025", venue: "The Dorchester, London", imageUrl: defaultBlocks.roadshow.data.imageUrl } },
-            { type: 'featured-listing', projectId: 'skyscape-avenue', overrides: { headline: "Exclusive Investment Opportunity" } },
+            { type: 'roadshow', overrides: { eventName: "Dubai Properties Global Roadshow", city: "London", date: "Dec 1-3, 2025", venue: "The Dorchester, London" } },
+            { type: 'featured-listing', overrides: { headline: "Exclusive Investment Opportunity", listingTitle: "SkyScape Avenue", location: "Dubai", price: "From AED 2.1M" } },
             { type: 'city-guide', overrides: { headline: "Why Invest in Dubai?", city: "Dubai" } },
             'partners',
             'cta-form',

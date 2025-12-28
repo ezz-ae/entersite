@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 import { 
   ArrowRight, 
   UploadCloud, 
@@ -15,13 +14,27 @@ import {
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import { captureLead } from '@/lib/leads';
+import { useCampaignAttribution } from '@/hooks/useCampaignAttribution';
 
 export function LandingHero() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const router = useRouter();
+  const attribution = useCampaignAttribution();
 
-  const handleSimulateUpload = () => {
+  const handleSimulateUpload = async () => {
+    try {
+      await captureLead({
+        source: 'landing-hero',
+        project: 'Brochure Upload Simulation',
+        context: { page: 'landing', buttonId: 'hero-upload', service: 'builder' },
+        attribution: attribution ?? undefined,
+        tenantId: 'public',
+      });
+    } catch (error) {
+      console.error('Failed to capture lead', error);
+    }
     setIsUploading(true);
     let progress = 0;
     const interval = setInterval(() => {
@@ -138,10 +151,10 @@ export function LandingHero() {
           <div className="mt-8 flex justify-center items-center gap-4 text-zinc-500">
             <span className="text-xs font-medium">Or start with a simple prompt</span>
             <ArrowRight className="h-3 w-3" />
-            <Link href="/builder" className="text-white font-bold text-xs hover:underline">Launch Architect</Link>
-          </div>
-        </motion.div>
-      </div>
-    </section>
+            <Link href="/start" className="text-white font-bold text-xs hover:underline">Launch Architect</Link>
+         </div>
+       </motion.div>
+     </div>
+   </section>
   );
 }

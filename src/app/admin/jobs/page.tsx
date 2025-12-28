@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
+import Link from 'next/link';
 import { subscribeToJobs, createJob, processJob, Job } from '@/lib/jobs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,21 +16,39 @@ import { cn } from '@/lib/utils';
 export default function JobsDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user] = useAuthState(getAuth());
+  const [user, authLoading] = useAuthState(getAuth());
 
   useEffect(() => {
-    const unsubscribe = subscribeToJobs((data) => {
+    if (!user) return;
+    setLoading(true);
+    const unsubscribe = subscribeToJobs(user.uid, (data) => {
         setJobs(data);
         setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const handleCreateTestJob = async () => {
     if (!user) return;
     const newJob = await createJob(user.uid, 'site_generation', { prompt: 'Luxury Villa' });
     processJob(newJob.id as string);
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-zinc-500 text-lg">Sign in to monitor AI jobs.</p>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-black text-white p-8 font-sans">
@@ -76,29 +95,45 @@ export default function JobsDashboard() {
                             <TableHead className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Status</TableHead>
                             <TableHead className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Progress</TableHead>
                             <TableHead className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest text-right px-8">Timestamp</TableHead>
+                            <TableHead className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest text-right px-8">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={5} className="h-40 text-center">
+                                <TableCell colSpan={6} className="h-40 text-center">
                                     <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
                                 </TableCell>
                             </TableRow>
                         ) : jobs.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={5} className="text-center h-40 text-zinc-500 font-light text-lg">
+                                <TableCell colSpan={6} className="text-center h-40 text-zinc-500 font-light text-lg">
                                     No active processes in pipeline.
                                 </TableCell>
                             </TableRow>
                         ) : (
                             jobs.map((job) => (
-                                <TableRow key={job.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                                <Fragment key={job.id}>
+                                <TableRow className="border-white/5 hover:bg-white/5 transition-colors">
                                     <TableCell className="font-mono text-xs text-blue-500 px-8"># {job.id.slice(0, 12)}</TableCell>
                                     <TableCell>
                                         <div className="flex flex-col">
                                             <span className="font-bold text-sm text-white capitalize">{job.type.replace('_', ' ')}</span>
                                             <span className="text-[10px] text-zinc-600 font-mono italic">{job.plan.flowId}</span>
+                                            {job.type === 'site_refiner' && (
+                                                <>
+                                                    <span className="text-[10px] text-zinc-500 mt-1">
+                                                        Site: {job.plan?.params?.siteTitle || job.plan?.params?.siteId || 'Pending save'}
+                                                    </span>
+                                                    <div className="flex flex-wrap gap-1 mt-2">
+                                                        {job.plan?.steps?.map((step) => (
+                                                            <Badge key={step} variant="secondary" className="bg-white/5 text-white text-[10px] border-white/10">
+                                                                {REFINER_STEP_COPY[step] || step}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                     </TableCell>
                                     <TableCell>
@@ -122,7 +157,20 @@ export default function JobsDashboard() {
                                     <TableCell className="text-zinc-500 text-xs text-right px-8 font-mono">
                                         {job.createdAt ? formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true }) : 'Now'}
                                     </TableCell>
+                                    <TableCell className="text-right px-8">
+                                        {job.type === 'site_refiner' && job.plan?.params?.siteId ? (
+                                            <Link href={`/builder?siteId=${job.plan.params.siteId}&variant=refined`}>
+                                                <Button size="sm" variant="outline" className="rounded-full text-xs">
+                                                    View Refined
+                                                </Button>
+                                            </Link>
+                                        ) : (
+                                            <span className="text-xs text-zinc-600">—</span>
+                                        )}
+                                    </TableCell>
                                 </TableRow>
+                                <JobStepsRow job={job} />
+                                </Fragment>
                             ))
                         )}
                     </TableBody>
@@ -133,6 +181,94 @@ export default function JobsDashboard() {
       </div>
     </main>
   );
+}
+
+const STEP_STATUS_COPY: Record<string, string> = {
+    pending: 'Queued',
+    running: 'Running',
+    done: 'Complete',
+    error: 'Error',
+};
+
+const STEP_STATUS_STYLES: Record<
+    'pending' | 'running' | 'done' | 'error',
+    { badge: string; container: string }
+> = {
+    pending: {
+        badge: 'bg-zinc-900/70 text-zinc-400 border-zinc-700',
+        container: 'border-zinc-800 bg-black/40',
+    },
+    running: {
+        badge: 'bg-blue-500/15 text-blue-200 border-blue-400/30',
+        container: 'border-blue-500/30 bg-blue-500/5',
+    },
+    done: {
+        badge: 'bg-emerald-500/15 text-emerald-100 border-emerald-400/40',
+        container: 'border-emerald-500/20 bg-emerald-500/5',
+    },
+    error: {
+        badge: 'bg-red-500/15 text-red-100 border-red-400/30',
+        container: 'border-red-500/30 bg-red-500/5',
+    },
+};
+
+function JobStepsRow({ job }: { job: Job }) {
+    const steps = job.steps || [];
+    const totalPlanned = job.plan?.steps?.length || 0;
+    const title = job.type === 'site_refiner' ? 'Refiner AI timeline' : 'Step timeline';
+
+    return (
+        <TableRow className="border-white/5 bg-black/40">
+            <TableCell colSpan={6} className="px-8 py-5">
+                <div className="flex flex-col gap-4">
+                    <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-[0.35em] text-zinc-500">
+                        <span>{title}</span>
+                        <span className="text-zinc-600 font-mono tracking-normal">
+                            ({steps.length}/{totalPlanned} recorded)
+                        </span>
+                        {job.type === 'site_refiner' && job.plan?.params?.siteTitle && (
+                            <span className="text-xs text-amber-300 font-semibold tracking-normal normal-case">
+                                {job.plan.params.siteTitle}
+                            </span>
+                        )}
+                    </div>
+                    {steps.length === 0 ? (
+                        <p className="text-sm text-zinc-500">
+                            Awaiting worker telemetry. Steps will populate as soon as the job reports progress.
+                        </p>
+                    ) : (
+                        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                            {steps.map((step, index) => {
+                                const friendlyName = REFINER_STEP_COPY[step.name] || step.name;
+                                const style = STEP_STATUS_STYLES[step.status as keyof typeof STEP_STATUS_STYLES] || STEP_STATUS_STYLES.pending;
+                                const timeAgo = step.timestamp ? formatDistanceToNow(new Date(step.timestamp), { addSuffix: true }) : 'just now';
+                                return (
+                                    <div 
+                                        key={`${job.id}-${step.name}-${index}`}
+                                        className={cn("rounded-2xl border p-4 shadow-inner", style.container)}
+                                    >
+                                        <div className="flex items-center justify-between text-[10px] uppercase tracking-widest">
+                                            <Badge className={cn("border text-[10px]", style.badge)}>
+                                                {STEP_STATUS_COPY[step.status] || step.status}
+                                            </Badge>
+                                            <span className="text-zinc-500 font-mono lowercase">{timeAgo}</span>
+                                        </div>
+                                        <p className="text-sm text-white font-semibold mt-3">{friendlyName}</p>
+                                        {step.result && (
+                                            <p className="text-xs text-zinc-400 mt-1">{step.result}</p>
+                                        )}
+                                        {step.error && (
+                                            <p className="text-xs text-red-400 mt-1">{step.error}</p>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </TableCell>
+        </TableRow>
+    );
 }
 
 function StatsCard({ label, value, icon: Icon, color }: any) {
@@ -169,3 +305,9 @@ function StatusBadge({ status }: { status: string }) {
         </span>
     )
 }
+
+const REFINER_STEP_COPY: Record<string, string> = {
+    analyzeStructure: 'Structure Scan',
+    applyRefinements: 'Polish',
+    finalReview: 'QA Review',
+};

@@ -10,19 +10,26 @@ import { Phone, Mail, Clock, Send, ArrowRight, Loader2, CheckCircle2 } from "luc
 import { motion, AnimatePresence } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "@/firebase";
+import { captureLead } from "@/lib/leads";
+import { useCampaignAttribution } from "@/hooks/useCampaignAttribution";
 
 interface CtaFormBlockProps {
   headline?: string;
   subtext?: string;
+  tenantId?: string;
+  projectName?: string;
+  siteId?: string;
 }
 
 export function CtaFormBlock({ 
     headline = "Schedule a Private Viewing", 
-    subtext = "Our experts are ready to assist you in finding your dream property." 
+  subtext = "Our experts are ready to assist you in finding your dream property.",
+  tenantId = "public",
+  projectName = "Private Viewing",
+  siteId,
 }: CtaFormBlockProps) {
   const { toast } = useToast();
+  const attribution = useCampaignAttribution();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -38,11 +45,17 @@ export function CtaFormBlock({
     setIsSubmitting(true);
     
     try {
-        await addDoc(collection(db, 'leads'), {
-            ...formData,
-            source: 'Web CTA Form',
-            createdAt: serverTimestamp(),
-            status: 'new'
+        await captureLead({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone,
+            project: projectName || 'Private Viewing',
+            source: 'cta-form-block',
+            context: { page: 'cta-form', buttonId: 'cta-form-submit', service: 'viewing' },
+            metadata: { message: formData.message, siteId },
+            attribution: attribution ?? undefined,
+            tenantId,
+            siteId,
         });
 
         setIsSubmitted(true);

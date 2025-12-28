@@ -8,13 +8,52 @@ import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Clock, MapPin, CheckCircle2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { captureLead } from '@/lib/leads';
+import { useCampaignAttribution } from '@/hooks/useCampaignAttribution';
 
 export function BookingViewingBlock({
   headline = "Schedule a Viewing",
-  subtext = "Select a date and time to visit the property with one of our area specialists."
-}: { headline?: string, subtext?: string }) {
+  subtext = "Select a date and time to visit the property with one of our area specialists.",
+  tenantId = "public",
+  projectName = "Viewing Request",
+  siteId,
+}: { headline?: string, subtext?: string, tenantId?: string, projectName?: string, siteId?: string }) {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [step, setStep] = useState(1);
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', phone: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const attribution = useCampaignAttribution();
+
+  const timeSlots = ["09:00 AM", "10:30 AM", "01:00 PM", "03:30 PM", "05:00 PM"];
+
+  const handleConfirm = async () => {
+    if (!date || !selectedSlot) return;
+    setSubmitting(true);
+    try {
+      await captureLead({
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        phone: formData.phone,
+        project: projectName,
+        source: 'booking-viewing',
+        context: { page: 'booking-viewing', buttonId: 'booking-confirm', service: 'viewing' },
+        metadata: {
+          date: date.toISOString(),
+          slot: selectedSlot,
+          siteId,
+        },
+        attribution: attribution ?? undefined,
+        tenantId,
+        siteId,
+      });
+      setStep(3);
+    } catch (error) {
+      console.error('Failed to confirm viewing', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <section className="py-24 bg-muted/10">
@@ -81,8 +120,13 @@ export function BookingViewingBlock({
                                 <div className="flex-1 space-y-3">
                                     <Label>Available Slots</Label>
                                     <div className="grid grid-cols-2 gap-2">
-                                        {["09:00 AM", "10:30 AM", "01:00 PM", "03:30 PM", "05:00 PM"].map((time) => (
-                                            <Button key={time} variant="outline" className="justify-center hover:border-primary hover:text-primary transition-colors">
+                                        {timeSlots.map((time) => (
+                                            <Button
+                                              key={time}
+                                              variant={selectedSlot === time ? 'default' : 'outline'}
+                                              className="justify-center hover:border-primary hover:text-primary transition-colors"
+                                              onClick={() => setSelectedSlot(time)}
+                                            >
                                                 {time}
                                             </Button>
                                         ))}
@@ -90,34 +134,81 @@ export function BookingViewingBlock({
                                 </div>
                             </div>
                             <div className="flex justify-end">
-                                <Button onClick={() => setStep(2)}>Next Step</Button>
+                                <Button onClick={() => setStep(2)} disabled={!date || !selectedSlot}>
+                                  Next Step
+                                </Button>
                             </div>
                         </div>
-                    ) : (
+                    ) : step === 2 ? (
                         <div className="space-y-6 animate-in slide-in-from-right duration-300">
                              <h4 className="font-semibold text-lg">Your Details</h4>
                              <div className="grid grid-cols-2 gap-4">
                                  <div className="space-y-2">
                                      <Label>First Name</Label>
-                                     <Input placeholder="John" />
+                                     <Input
+                                       placeholder="John"
+                                       value={formData.firstName}
+                                       onChange={(e) => setFormData((prev) => ({ ...prev, firstName: e.target.value }))}
+                                     />
                                  </div>
                                  <div className="space-y-2">
                                      <Label>Last Name</Label>
-                                     <Input placeholder="Doe" />
+                                     <Input
+                                       placeholder="Doe"
+                                       value={formData.lastName}
+                                       onChange={(e) => setFormData((prev) => ({ ...prev, lastName: e.target.value }))}
+                                     />
                                  </div>
                                  <div className="space-y-2 col-span-2">
                                      <Label>Email</Label>
-                                     <Input type="email" placeholder="john@example.com" />
+                                     <Input
+                                       type="email"
+                                       placeholder="john@example.com"
+                                       value={formData.email}
+                                       onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                                     />
                                  </div>
                                   <div className="space-y-2 col-span-2">
                                      <Label>Phone</Label>
-                                     <Input type="tel" placeholder="+971..." />
+                                     <Input
+                                       type="tel"
+                                       placeholder="+971..."
+                                       value={formData.phone}
+                                       onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                                     />
                                  </div>
                              </div>
                              <div className="flex justify-between pt-4">
                                 <Button variant="ghost" onClick={() => setStep(1)}>Back</Button>
-                                <Button className="bg-green-600 hover:bg-green-700">Confirm Booking</Button>
+                                <Button
+                                  className="bg-green-600 hover:bg-green-700"
+                                  disabled={submitting || !formData.email || !formData.phone}
+                                  onClick={handleConfirm}
+                                >
+                                  {submitting ? 'Confirming…' : 'Confirm Booking'}
+                                </Button>
                             </div>
+                        </div>
+                    ) : (
+                        <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
+                          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+                            <CheckCircle2 className="h-8 w-8 text-green-600" />
+                          </div>
+                          <div className="space-y-1">
+                            <h4 className="text-2xl font-semibold">Viewing Scheduled</h4>
+                            <p className="text-muted-foreground">
+                              Our concierge will confirm your visit for {selectedSlot} on {date?.toLocaleDateString()} within the next hour.
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setStep(1);
+                              setSelectedSlot(null);
+                            }}
+                          >
+                            Schedule another tour
+                          </Button>
                         </div>
                     )}
                 </div>

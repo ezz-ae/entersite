@@ -10,25 +10,67 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { 
     MessageSquare, Users, Zap, Send, Phone, Clock, FileText, 
-    CheckCircle2, AlertCircle, Sparkles
+    CheckCircle2, AlertCircle, Sparkles, Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from '@/hooks/use-toast';
+import { sendSms } from '@/lib/messaging/smsSender';
 
 export function SmsCampaignDashboard() {
     const [message, setMessage] = useState("Hi {Name}, exclusive pre-launch offer for Emaar Beachfront: Pay 10% & Move in. Reply YES for brochure.");
     const [charCount, setCharCount] = useState(message.length);
+    const [testNumber, setTestNumber] = useState('+971501234567');
+    const [isSending, setIsSending] = useState(false);
+    const { toast } = useToast();
+
+    const handleSend = async () => {
+        if (!testNumber) {
+            toast({ title: 'Add a phone number', description: 'Enter a test recipient before sending.', variant: 'destructive' });
+            return;
+        }
+        try {
+            setIsSending(true);
+            await sendSms({
+                to: testNumber,
+                message,
+            });
+            toast({ title: 'SMS sent', description: `Delivered test SMS to ${testNumber}` });
+        } catch (error: any) {
+            toast({
+                title: 'Failed to send SMS',
+                description: error?.message || 'Verify your authentication and Twilio credentials.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsSending(false);
+        }
+    };
 
     return (
         <Card className="w-full h-full bg-background border-0 shadow-none">
             <CardHeader className="px-0 pt-0">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                         <CardTitle className="text-2xl">SMS Blast Engine</CardTitle>
                         <CardDescription>Send high-converting bulk SMS campaigns with AI personalization.</CardDescription>
                     </div>
-                    <Button size="sm" className="gap-2 bg-green-600 hover:bg-green-700">
-                        <Send className="h-4 w-4" /> Send Campaign
-                    </Button>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <Input
+                            value={testNumber}
+                            onChange={(e) => setTestNumber(e.target.value)}
+                            placeholder="+9715..."
+                            className="h-9 w-full sm:w-48"
+                        />
+                        <Button
+                            size="sm"
+                            className="gap-2 bg-green-600 hover:bg-green-700"
+                            onClick={handleSend}
+                            disabled={isSending}
+                        >
+                            {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                            {isSending ? 'Sending...' : 'Send Campaign'}
+                        </Button>
+                    </div>
                 </div>
             </CardHeader>
             

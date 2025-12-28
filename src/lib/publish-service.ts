@@ -3,7 +3,7 @@ import { db } from '@/firebase';
 import type { SitePage } from '@/lib/types';
 import { nanoid } from 'nanoid';
 
-export const publishSite = async (page: SitePage, userId?: string) => {
+export const publishSite = async (page: SitePage, ownerUid?: string) => {
   const siteId = page.id || nanoid(10);
   const siteRef = doc(db, 'sites', siteId);
   
@@ -16,9 +16,10 @@ export const publishSite = async (page: SitePage, userId?: string) => {
   const siteData = {
     ...page,
     id: siteId,
-    userId: userId || 'anonymous',
+    ownerUid: ownerUid || page.ownerUid || 'anonymous',
+    tenantId: page.tenantId || 'public',
     published: true,
-    slug: slug,
+    slug,
     updatedAt: new Date().toISOString(),
   };
 

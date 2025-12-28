@@ -18,6 +18,7 @@ import {
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
+import { authorizedFetch } from '@/lib/auth-fetch';
 
 export function ImageGenTool() {
   const [prompt, setPrompt] = useState('');
@@ -27,7 +28,7 @@ export function ImageGenTool() {
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const response = await fetch('/api/ai/generate-image', {
+      const response = await authorizedFetch('/api/ai/generate-image', {
         method: 'POST',
         body: JSON.stringify({ prompt }),
         headers: { 'Content-Type': 'application/json' }

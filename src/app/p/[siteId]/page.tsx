@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 
 interface Props {
   params: { siteId: string };
+  searchParams?: { variant?: string };
 }
 
 // Revalidate every 60 seconds
@@ -27,17 +28,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function PublishedPage({ params }: Props) {
+export default async function PublishedPage({ params, searchParams }: Props) {
   const { siteId } = params;
+  const variant = searchParams?.variant;
   const page = await getPublishedSite(siteId);
 
   if (!page) {
     notFound();
   }
 
+  const shouldUseRefined = variant === 'refined';
+  const refinedSnapshot = shouldUseRefined ? page.refinerDraftSnapshot : undefined;
+  const refinedHtml = shouldUseRefined && !refinedSnapshot ? page.refinerDraftHtml : undefined;
+  const pageToRender = refinedSnapshot ? { ...refinedSnapshot, id: refinedSnapshot.id || page.id } : page;
+
   return (
-    <main>
-      <PageRenderer page={page} />
+    <main className="min-h-screen bg-background text-foreground">
+      {shouldUseRefined && (
+        <div className="bg-amber-100 text-amber-800 text-sm text-center py-3 px-4 border-b border-amber-200">
+          Viewing Refiner Draft for <span className="font-semibold">{page.title}</span>. Remove <code className="bg-white/60 px-2 py-0.5 rounded text-xs">?variant=refined</code> to see the published version.
+        </div>
+      )}
+
+      {refinedHtml ? (
+        <div className="prose prose-lg mx-auto px-4 py-10" dangerouslySetInnerHTML={{ __html: refinedHtml }} />
+      ) : (
+        <PageRenderer page={pageToRender} tenantId={pageToRender.tenantId} projectName={pageToRender.title} />
+      )}
       
       {/* "Made with EntreSite" Badge */}
       <div className="fixed bottom-4 right-4 z-50">

@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, X, Send, Bot, Zap, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { authorizedFetch } from "@/lib/auth-fetch";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatWidgetBlockProps {
   agentName?: string;
@@ -21,6 +23,8 @@ export function ChatWidgetBlock({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const { toast } = useToast();
+
   const handleSend = async () => {
       if (!input.trim() || isLoading) return;
       
@@ -30,7 +34,7 @@ export function ChatWidgetBlock({
       setIsLoading(true);
       
       try {
-          const response = await fetch('/api/bot/main/chat', {
+          const response = await authorizedFetch('/api/bot/main/chat', {
               method: 'POST',
               body: JSON.stringify({ message: userText, context: 'web_widget' }),
               headers: { 'Content-Type': 'application/json' }
@@ -42,7 +46,12 @@ export function ChatWidgetBlock({
           } else {
               throw new Error("Chat failed");
           }
-      } catch (e) {
+      } catch (e:any) {
+          toast({
+            title: 'Chat unavailable',
+            description: e?.message || "I'm currently updating my market database. Please try again in a moment.",
+            variant: 'destructive',
+          });
           setMessages(prev => [...prev, { role: 'agent', text: "I'm currently updating my market database. Please try again in a moment." }]);
       } finally {
           setIsLoading(false);

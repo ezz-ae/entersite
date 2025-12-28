@@ -8,7 +8,8 @@ import {
   orderBy, 
   serverTimestamp,
   Timestamp,
-  onSnapshot
+  onSnapshot,
+  where
 } from 'firebase/firestore';
 import { db } from '@/firebase';
 
@@ -22,8 +23,8 @@ export interface JobStep {
 
 export interface Job {
   id: string;
-  userId: string;
-  type: 'site_generation' | 'ad_campaign' | 'seo_audit';
+  ownerUid: string;
+  type: 'site_generation' | 'ad_campaign' | 'seo_audit' | 'site_refiner';
   status: 'queued' | 'running' | 'done' | 'error';
   plan: {
     flowId: string;
@@ -31,22 +32,25 @@ export interface Job {
     params: Record<string, any>;
   };
   steps: JobStep[];
+  result?: Record<string, any>;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
 
 const JOBS_COLLECTION = 'jobs';
 
-export const createJob = async (userId: string, type: Job['type'], params: any) => {
+export const createJob = async (ownerUid: string, type: Job['type'], params: any) => {
   let planSteps = ['init'];
   if (type === 'site_generation') {
     planSteps = ['renderBlocks', 'seoGenerate', 'adsGenerate', 'deploy'];
   } else if (type === 'ad_campaign') {
     planSteps = ['analyzeContent', 'generateKeywords', 'createHeadlines', 'budgetOptimization'];
+  } else if (type === 'site_refiner') {
+    planSteps = ['analyzeStructure', 'applyRefinements', 'finalReview'];
   }
 
   const jobData = {
-    userId,
+    ownerUid,
     type,
     status: 'queued',
     plan: {
@@ -63,9 +67,13 @@ export const createJob = async (userId: string, type: Job['type'], params: any) 
   return { id: docRef.id, ...jobData };
 };
 
-export const getJobs = async () => {
+export const getJobs = async (ownerUid: string) => {
   try {
-    const q = query(collection(db, JOBS_COLLECTION), orderBy('createdAt', 'desc'));
+    const q = query(
+      collection(db, JOBS_COLLECTION),
+      where('ownerUid', '==', ownerUid),
+      orderBy('createdAt', 'desc')
+    );
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
@@ -77,8 +85,12 @@ export const getJobs = async () => {
   }
 };
 
-export const subscribeToJobs = (callback: (jobs: Job[]) => void) => {
-  const q = query(collection(db, JOBS_COLLECTION), orderBy('createdAt', 'desc'));
+export const subscribeToJobs = (ownerUid: string, callback: (jobs: Job[]) => void) => {
+  const q = query(
+    collection(db, JOBS_COLLECTION),
+    where('ownerUid', '==', ownerUid),
+    orderBy('createdAt', 'desc')
+  );
   return onSnapshot(q, (snapshot) => {
     const jobs = snapshot.docs.map(doc => ({
       id: doc.id,

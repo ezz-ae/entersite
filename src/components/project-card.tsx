@@ -37,6 +37,7 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
   const router = useRouter();
+  const statusLabel = project.availability ?? project.status ?? 'Active';
 
   const handleCreateLandingPage = () => {
     router.push(`/builder?prompt=Luxury landing page for ${project.name} by ${project.developer} in ${project.location.area}`);
@@ -61,7 +62,7 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
             
             <div className="absolute top-6 left-6 flex gap-2">
                 <Badge className="bg-white/10 backdrop-blur-xl border-white/10 text-white text-[9px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">
-                    {project.status}
+                    {statusLabel}
                 </Badge>
                 {project.performance.marketTrend === 'up' && (
                     <Badge className="bg-green-500/20 backdrop-blur-xl border-green-500/20 text-green-500 text-[9px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full gap-1.5">
@@ -215,7 +216,7 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                                     <DnaTag label="Developer" value={project.developer} />
                                     <DnaTag label="Handover" value={project.handover ? `Q${project.handover.quarter} ${project.handover.year}` : 'Ready'} />
                                     <DnaTag label="Price Range" value={project.price.label} />
-                                    <DnaTag label="Status" value={project.status || 'Active'} />
+                                    <DnaTag label="Status" value={statusLabel} />
                                 </div>
                             </div>
                         </div>

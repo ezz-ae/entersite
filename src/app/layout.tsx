@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from '@/components/theme-provider';
 import { LayoutWrapper } from '@/components/layout-wrapper';
 import Script from 'next/script';
+import localFont from 'next/font/local';
 
 export const metadata: Metadata = {
   title: 'Entrestate OS | Real Estate Intelligence',
@@ -16,19 +17,27 @@ export const metadata: Metadata = {
   }
 };
 
+// Vendored Inter font so builds don't rely on Google Fonts during compile time.
+const inter = localFont({
+  src: [
+    {
+      path: '../../public/fonts/inter/inter-latin-wght-normal.woff2',
+      weight: '300 700',
+      style: 'normal',
+    },
+  ],
+  display: 'swap',
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const facebookAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
   return (
     <html lang="en" suppressHydrationWarning className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-sans antialiased bg-black text-white selection:bg-white/20">
+      <body className={`${inter.className} antialiased bg-black text-white selection:bg-white/20`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <FirebaseClientProvider>
             <LayoutWrapper>
@@ -37,11 +46,12 @@ export default function RootLayout({
           </FirebaseClientProvider>
           <Toaster />
         </ThemeProvider>
-        <Script id="fb-sdk" strategy="afterInteractive">
+        {facebookAppId && (
+          <Script id="fb-sdk" strategy="afterInteractive">
           {`
             window.fbAsyncInit = function() {
               FB.init({
-                appId      : '1117024043144362',
+                appId      : '${facebookAppId}',
                 cookie     : true,
                 xfbml      : true,
                 version    : 'v19.0'
@@ -59,7 +69,8 @@ export default function RootLayout({
                fjs.parentNode.insertBefore(js, fjs);
              }(document, 'script', 'facebook-jssdk'));
           `}
-        </Script>
+          </Script>
+        )}
       </body>
     </html>
   );

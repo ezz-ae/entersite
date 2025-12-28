@@ -20,19 +20,51 @@ import { generateAdsFromPageContent, GenerateAdsOutput } from "@/ai/flows/genera
 // import { createJob } from "@/lib/jobs"; // If used later
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { authorizedFetch } from "@/lib/auth-fetch";
+
+interface PrefillPlan {
+  id?: string;
+  summary?: string;
+  prompt?: string;
+  locationCity?: string;
+  projectName?: string;
+  audience?: string | null;
+  createdAt?: string;
+  adCampaignConfig?: {
+    budget?: number;
+    keywords?: string[];
+  };
+}
+
+type AdsTab = 'setup' | 'creative' | 'keywords';
 
 interface GoogleAdsManagerProps {
   pageTitle: string;
   pageDescription: string;
   userEmail?: string; 
+  prefillPlan?: PrefillPlan;
+  prefillResetKey?: number;
+  onPrefillReset?: () => void;
+  initialTab?: AdsTab;
 }
 
 type CampaignStatus = 'draft' | 'generating' | 'active' | 'completed';
 
-export function GoogleAdsManager({ pageTitle, pageDescription, userEmail }: GoogleAdsManagerProps) {
+export function GoogleAdsManager({
+  pageTitle,
+  pageDescription,
+  userEmail,
+  prefillPlan,
+  prefillResetKey = 0,
+  onPrefillReset,
+  initialTab = 'setup',
+}: GoogleAdsManagerProps) {
   const { toast } = useToast();
   const [status, setStatus] = useState<CampaignStatus>('draft');
-  const [activeTab, setActiveTab] = useState("setup");
+  const [activeTab, setActiveTab] = useState<AdsTab>(initialTab);
+  const [isLaunching, setIsLaunching] = useState(false);
+  const [prefillApplied, setPrefillApplied] = useState(false);
+  const [appliedPlanId, setAppliedPlanId] = useState<string | null>(null);
   
   // Campaign Settings
   const [budget, setBudget] = useState([50]); // Daily
@@ -75,15 +107,105 @@ export function GoogleAdsManager({ pageTitle, pageDescription, userEmail }: Goog
   };
 
   const handleLaunch = async () => {
-      setStatus('active');
-      toast({
-          title: "Campaign Launched!",
-          description: "Your ads are now being reviewed by Google. Dashboard will update shortly.",
-      });
+      try {
+          setIsLaunching(true);
+          const payload = {
+              name: `${pageTitle} Launch`,
+              budget: budget[0],
+              duration: duration[0],
+              location,
+              variation: adData?.variations?.[selectedVariation],
+          };
+          const response = await authorizedFetch('/api/ads/google/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+          });
+          const data = await response.json();
+          if (!response.ok) {
+              throw new Error(data?.error || 'Sync failed');
+          }
+          setStatus('active');
+          toast({
+              title: "Campaign Launched!",
+              description: `Google Ads sync queued (ID: ${data.campaignId || 'pending'})`,
+          });
+      } catch (error: any) {
+          console.error('Failed to sync Google Ads', error);
+          toast({
+              title: 'Failed to launch',
+              description: error?.message || 'Check your authentication or Google Ads credentials.',
+              variant: 'destructive',
+          });
+      } finally {
+          setIsLaunching(false);
+      }
   };
 
   const estimatedReach = Math.floor(budget[0] * 1200); 
   const estimatedClicks = Math.floor(estimatedReach * 0.035);
+
+  useEffect(() => {
+      setActiveTab(initialTab ?? 'setup');
+  }, [initialTab]);
+
+  useEffect(() => {
+      if (!prefillPlan) {
+          setPrefillApplied(false);
+          setAppliedPlanId(null);
+          return;
+      }
+      const planId = prefillPlan.id ?? null;
+      if (planId && planId === appliedPlanId) {
+          return;
+      }
+      if (!planId && prefillApplied) {
+          return;
+      }
+      if (prefillPlan.adCampaignConfig?.budget) {
+          setBudget([prefillPlan.adCampaignConfig.budget]);
+      }
+      if (prefillPlan.locationCity) {
+          setLocation(prefillPlan.locationCity);
+      }
+      const keywords = prefillPlan.adCampaignConfig?.keywords || [];
+      if (keywords.length || prefillPlan.summary) {
+          setAdData({
+              variations: [
+                  {
+                      id: planId || 'prefill',
+                      headlines: keywords.slice(0, 2).length ? keywords.slice(0, 2) : ['AI Generated Campaign'],
+                      descriptions: [
+                          prefillPlan.summary || pageDescription,
+                      ],
+                  },
+              ],
+              keywordGroups: keywords.length
+                ? [
+                    {
+                        category: 'AI Plan',
+                        keywords,
+                    },
+                  ]
+                : [],
+              estimatedCpc: 1.25,
+          });
+      }
+      setPrefillApplied(true);
+      setAppliedPlanId(planId);
+  }, [prefillPlan, prefillApplied, appliedPlanId, pageDescription]);
+
+  useEffect(() => {
+      if (!prefillResetKey) return;
+      setAdData(null);
+      setStatus('draft');
+      setPrefillApplied(false);
+      setAppliedPlanId(null);
+      setBudget([50]);
+      setDuration([30]);
+      setLocation("Dubai, UAE");
+      setActiveTab(initialTab ?? 'setup');
+  }, [prefillResetKey, initialTab]);
 
   if (status === 'active') {
       return (
@@ -187,6 +309,42 @@ export function GoogleAdsManager({ pageTitle, pageDescription, userEmail }: Goog
         </CardHeader>
         
         <CardContent className="px-0">
+            {prefillPlan && (
+                <div className="mb-6 rounded-xl border border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/5 p-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                            Plan applied: {prefillPlan.projectName || 'AI Campaign Brief'}
+                        </p>
+                        <p className="text-xs text-blue-800 dark:text-blue-200 mt-1">
+                            {prefillPlan.summary
+                              ? prefillPlan.summary
+                              : 'Keywords and budgets from your AI marketing plan have been loaded. Adjust before launching.'}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            {prefillPlan.locationCity && (
+                                <Badge variant="secondary" className="bg-white/80 text-blue-700 dark:bg-black/40 dark:text-blue-100">
+                                    {prefillPlan.locationCity}
+                                </Badge>
+                            )}
+                            {typeof prefillPlan.adCampaignConfig?.budget === 'number' && (
+                                <Badge variant="secondary" className="bg-white/80 text-blue-700 dark:bg-black/40 dark:text-blue-100">
+                                    Budget • ${prefillPlan.adCampaignConfig.budget}/day
+                                </Badge>
+                            )}
+                            {prefillPlan.adCampaignConfig?.keywords?.length ? (
+                                <Badge variant="secondary" className="bg-white/80 text-blue-700 dark:bg-black/40 dark:text-blue-100">
+                                    {prefillPlan.adCampaignConfig.keywords.length} keywords
+                                </Badge>
+                            ) : null}
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => onPrefillReset?.()}>
+                            Reset plan
+                        </Button>
+                    </div>
+                </div>
+            )}
             {status === 'generating' ? (
                 <div className="h-64 flex flex-col items-center justify-center space-y-4">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -224,7 +382,7 @@ export function GoogleAdsManager({ pageTitle, pageDescription, userEmail }: Goog
                      </div>
                  </div>
             ) : (
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <Tabs value={activeTab} onValueChange={(tab) => setActiveTab(tab as AdsTab)} className="w-full">
                     <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/50 p-1">
                         <TabsTrigger value="setup">1. Budget & Target</TabsTrigger>
                         <TabsTrigger value="creative">2. Ad Creative</TabsTrigger>
@@ -351,8 +509,20 @@ export function GoogleAdsManager({ pageTitle, pageDescription, userEmail }: Goog
                                         <p className="text-2xl font-bold text-green-600">~{(estimatedClicks * 0.05 * 30).toFixed(0)}</p>
                                     </div>
                                 </div>
-                                <Button size="lg" className="w-full h-14 text-lg font-bold shadow-xl bg-green-600 hover:bg-green-700 text-white" onClick={handleLaunch}>
-                                    Launch Campaign Now
+                                <Button
+                                    size="lg"
+                                    className="w-full h-14 text-lg font-bold shadow-xl bg-green-600 hover:bg-green-700 text-white disabled:opacity-70"
+                                    onClick={handleLaunch}
+                                    disabled={isLaunching}
+                                >
+                                    {isLaunching ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                            Syncing with Google Ads...
+                                        </>
+                                    ) : (
+                                        'Launch Campaign Now'
+                                    )}
                                 </Button>
                                 <p className="text-[10px] text-center text-muted-foreground mt-3">
                                     By launching, you agree to the ad spend terms. Billing is processed securely via Stripe.
