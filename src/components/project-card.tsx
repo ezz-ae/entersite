@@ -68,7 +68,7 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                 <Badge className="bg-white/10 backdrop-blur-xl border-white/10 text-white text-[9px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">
                     {statusLabel}
                 </Badge>
-                {project.performance.marketTrend === 'up' && (
+                {project.performance?.marketTrend === 'up' && (
                     <Badge className="bg-green-500/20 backdrop-blur-xl border-green-500/20 text-green-500 text-[9px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full gap-1.5">
                         <TrendingUp className="h-3 w-3" /> Trending
                     </Badge>
@@ -94,13 +94,13 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
             <div className="grid grid-cols-3 gap-6">
                 <DataMetric 
                     label="Expected ROI" 
-                    value={`${project.performance.roi}%`} 
+                    value={`${project.performance?.roi ?? 0}%`} 
                     icon={BarChart3} 
                     color="blue"
                 />
                 <DataMetric 
                     label="Capital Gain" 
-                    value={`+${project.performance.capitalAppreciation}%`} 
+                    value={`+${project.performance?.capitalAppreciation ?? 0}%`} 
                     icon={ArrowUpRight} 
                     color="green"
                 />
@@ -174,11 +174,11 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                                     <div className="grid grid-cols-2 gap-8">
                                         <div className="p-8 rounded-[2rem] bg-zinc-900 border border-white/5">
                                             <p className="text-[10px] font-bold text-zinc-600 uppercase mb-2 tracking-widest">Expected Yield</p>
-                                            <p className="text-4xl font-black text-green-500">{project.performance.roi}% <span className="text-xs font-medium opacity-50 ml-1">PA</span></p>
+                                            <p className="text-4xl font-black text-green-500">{project.performance?.roi ?? 0}% <span className="text-xs font-medium opacity-50 ml-1">PA</span></p>
                                         </div>
                                         <div className="p-8 rounded-[2rem] bg-zinc-900 border border-white/5">
                                             <p className="text-[10px] font-bold text-zinc-600 uppercase mb-2 tracking-widest">Growth Potential</p>
-                                            <p className="text-4xl font-black text-blue-500">+{project.performance.capitalAppreciation}%</p>
+                                            <p className="text-4xl font-black text-blue-500">+{project.performance?.capitalAppreciation ?? 0}%</p>
                                         </div>
                                     </div>
                                 </div>
@@ -186,19 +186,23 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                                 <div className="space-y-10">
                                     <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">Market Performance</h4>
                                     <div className="h-64 flex items-end gap-3 px-4 bg-black/40 rounded-[2.5rem] border border-white/5 pt-12 pb-6">
-                                        {project.performance.priceHistory.map((h, i) => (
+                                        {project.performance?.priceHistory?.map((h, i) => (
                                             <div key={i} className="flex-1 flex flex-col items-center gap-4 h-full justify-end group">
                                                 <div className="relative w-full">
                                                     <motion.div 
                                                         initial={{ height: 0 }}
-                                                        whileInView={{ height: `${(h.avgPrice / Math.max(...project.performance.priceHistory.map(ph => ph.avgPrice))) * 100}%` }}
+                                                        whileInView={{ height: `${(h.avgPrice / Math.max(...project.performance!.priceHistory.map(ph => ph.avgPrice))) * 100}%` }}
                                                         transition={{ duration: 1, delay: i * 0.1 }}
                                                         className="bg-blue-600/40 w-full rounded-t-xl group-hover:bg-blue-500 transition-all border-t border-blue-400" 
                                                     />
                                                 </div>
                                                 <p className="text-[10px] font-mono text-zinc-600 group-hover:text-white transition-colors">{h.year}</p>
                                             </div>
-                                        ))}
+                                        )) ?? (
+                                          <div className="w-full h-full flex items-center justify-center text-zinc-500 italic text-sm">
+                                            No price history available
+                                          </div>
+                                        )}
                                     </div>
                                     <div className="p-8 rounded-[2.5rem] bg-blue-600/5 border border-blue-500/20 relative overflow-hidden">
                                         <div className="absolute top-0 right-0 p-4 opacity-10">
@@ -206,9 +210,9 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                                         </div>
                                         <div className="flex items-center gap-3 mb-3 relative z-10">
                                             <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                                            <p className="font-black uppercase tracking-widest text-xs text-white">Sentiment: {project.performance.marketTrend === 'up' ? 'Aggressive' : 'Stable'}</p>
+                                            <p className="font-black uppercase tracking-widest text-xs text-white">Sentiment: {project.performance?.marketTrend === 'up' ? 'Aggressive' : 'Stable'}</p>
                                         </div>
-                                        <p className="text-sm text-zinc-400 leading-relaxed font-light relative z-10">This project is {project.performance.marketTrend === 'up' ? 'outperforming' : 'aligning with'} the {project.location.city} luxury index by {project.performance.capitalAppreciation / 5}% this quarter.</p>
+                                        <p className="text-sm text-zinc-400 leading-relaxed font-light relative z-10">This project is {project.performance?.marketTrend === 'up' ? 'outperforming' : 'aligning with'} the {project.location.city} luxury index by {(project.performance?.capitalAppreciation ?? 0) / 5}% this quarter.</p>
                                     </div>
                                 </div>
                             </div>

@@ -3,10 +3,11 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, CheckCircle, Globe, Megaphone, Bot, Mail, Search, User, Briefcase, Facebook, Zap, Activity, Target } from 'lucide-react';
+import { ArrowRight, CheckCircle, Globe, Bot, Search, Facebook, Activity, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 // --- Content Configuration ---
 const SERVICE_DATA = {
@@ -77,11 +78,12 @@ const SERVICE_DATA = {
 };
 
 interface PageProps {
-  params: { service: string };
+  params: Promise<{ service: string }>;
 }
 
 export default function ServicePage({ params }: PageProps) {
-  const serviceKey = params.service as keyof typeof SERVICE_DATA;
+  const resolvedParams = React.use(params);
+  const serviceKey = resolvedParams.service as keyof typeof SERVICE_DATA;
   const service = SERVICE_DATA[serviceKey];
 
   if (!service) {
@@ -109,7 +111,7 @@ export default function ServicePage({ params }: PageProps) {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-6"
               >
-                  <div className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-[0.3em] mx-auto", `text-\${service.color}-500`)}>
+                  <div className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-[0.3em] mx-auto", `text-${service.color}-500`)}>
                     <Activity className="h-3.5 w-3.5" />
                     Service Infrastructure
                   </div>
@@ -151,7 +153,7 @@ export default function ServicePage({ params }: PageProps) {
                   <Card className="bg-zinc-900/50 border-white/5 backdrop-blur-3xl rounded-[3rem] overflow-hidden p-12">
                       <div className="space-y-8">
                           <div className="flex items-center gap-4 border-b border-white/5 pb-8">
-                              <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center border", `bg-\${service.color}-600/10 border-\${service.color}-500/20 text-\${service.color}-500`)}>
+                              <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center border", `bg-${service.color}-600/10 border-${service.color}-500/20 text-${service.color}-500`)}>
                                   <Icon className="h-8 w-8" />
                               </div>
                               <div>
@@ -203,5 +205,3 @@ export default function ServicePage({ params }: PageProps) {
     </main>
   );
 }
-
-import { cn } from '@/lib/utils';
