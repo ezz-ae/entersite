@@ -38,6 +38,10 @@ interface ProjectCardProps {
 export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
   const router = useRouter();
   const statusLabel = project.availability ?? project.status ?? 'Active';
+  const firstImage =
+  Array.isArray(project.images) && project.images.length > 0
+    ? project.images[0]
+    : "/images/placeholder-project.jpg";
 
   const handleCreateLandingPage = () => {
     router.push(`/builder?prompt=Luxury landing page for ${project.name} by ${project.developer} in ${project.location.area}`);
@@ -53,8 +57,8 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
         {/* Visual Top */}
         <div className="relative aspect-[16/10] overflow-hidden">
             <ResponsiveImage 
-                src={project.images[0]} 
-                alt={project.name}
+                src={firstImage} 
+                alt={project.name ?? "Project"}
                 fill
                 className="group-hover:scale-105 transition-transform duration-1000"
             />
@@ -127,7 +131,7 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-4xl bg-zinc-950 border-white/10 text-white rounded-[2.5rem] overflow-hidden p-0 max-h-[90vh] overflow-y-auto custom-scrollbar border-none shadow-2xl">
                         <div className="relative aspect-video w-full">
-                            <ResponsiveImage src={project.images[0]} alt={project.name} fill className="object-cover" />
+                            <ResponsiveImage src={firstImage} alt={project.name ?? "Project"} fill className="object-cover" />
                             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
                             <div className="absolute top-6 right-6 z-50">
                                 <DialogClose className="h-10 w-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black transition-all">
