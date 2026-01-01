@@ -55,7 +55,7 @@ const requestSchema = z.object({
 export async function POST(req: NextRequest) {
     try {
         const user = await requireAuth(req);
-        const ip = req.headers.get('x-forwarded-for') || req.ip || 'anonymous';
+        const ip = req.headers.get('x-forwarded-for') || 'anonymous';
         if (!consumeRateLimit(ip)) {
             return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
         }

@@ -34,10 +34,11 @@ function consumeRateLimit(key: string) {
   return true;
 }
 
-export async function POST(req: NextRequest, { params }: { params: { botId: string } }) {
+export async function POST(req: NextRequest, { params: paramsPromise }: { params: Promise<{ botId: string }> }) {
   try {
+    const params = await paramsPromise;
     const user = await requireAuth(req);
-    const ip = req.headers.get('x-forwarded-for') || req.ip || 'anon';
+    const ip = req.headers.get('x-forwarded-for') || 'anon';
     if (!consumeRateLimit(`${params.botId}:${ip}`)) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }

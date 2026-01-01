@@ -223,7 +223,7 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     <DnaTag label="Developer" value={project.developer} />
                                     <DnaTag label="Handover" value={project.handover ? `Q${project.handover.quarter} ${project.handover.year}` : 'Ready'} />
-                                    <DnaTag label="Price Range" value={project.price?.label} />
+                                    <DnaTag label="Price Range" value={project.price?.label ?? 'N/A'} />
                                     <DnaTag label="Status" value={statusLabel} />
                                 </div>
                             </div>
