@@ -44,7 +44,7 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
     : "/images/placeholder-project.jpg";
 
   const handleCreateLandingPage = () => {
-    router.push(`/builder?prompt=Luxury landing page for ${project.name} by ${project.developer} in ${project.location.area}`);
+    router.push(`/builder?prompt=Luxury landing page for ${project.name} by ${project.developer} in ${project.location?.area}`);
   };
 
   return (
@@ -78,13 +78,13 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
             <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
                 <div className="space-y-1.5">
                     <div className="flex items-center gap-1.5 text-white/60 text-xs font-medium">
-                        <MapPin className="h-3.5 w-3.5" /> {project.location.area}, {project.location.city}
+                        <MapPin className="h-3.5 w-3.5" /> {project.location?.area}, {project.location?.city}
                     </div>
                     <h3 className="text-3xl font-bold text-white tracking-tighter">{project.name}</h3>
                 </div>
                 <div className="text-right">
                     <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Starting</p>
-                    <p className="text-2xl font-black text-white">{project.price.label}</p>
+                    <p className="text-2xl font-black text-white">{project.price?.label}</p>
                 </div>
             </div>
         </div>
@@ -139,10 +139,10 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                                 </DialogClose>
                             </div>
                             <div className="absolute bottom-10 left-10 right-10">
-                                <h2 className="text-6xl font-black tracking-tighter text-white leading-none uppercase italic">{project.name}</h2>
-                                <p className="text-xl text-zinc-400 font-light mt-4 flex items-center gap-2">
-                                    <MapPin className="h-5 w-5 text-blue-500" /> {project.location.area}, {project.location.city}
-                                </p>
+                                <DialogTitle className="text-6xl font-black tracking-tighter text-white leading-none uppercase italic">{project.name}</DialogTitle>
+                                <DialogDescription className="text-xl text-zinc-400 font-light mt-4 flex items-center gap-2">
+                                    <MapPin className="h-5 w-5 text-blue-500" /> {project.location?.area}, {project.location?.city}
+                                </DialogDescription>
                             </div>
                         </div>
 
@@ -212,7 +212,7 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                                             <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
                                             <p className="font-black uppercase tracking-widest text-xs text-white">Sentiment: {project.performance?.marketTrend === 'up' ? 'Aggressive' : 'Stable'}</p>
                                         </div>
-                                        <p className="text-sm text-zinc-400 leading-relaxed font-light relative z-10">This project is {project.performance?.marketTrend === 'up' ? 'outperforming' : 'aligning with'} the {project.location.city} luxury index by {(project.performance?.capitalAppreciation ?? 0) / 5}% this quarter.</p>
+                                        <p className="text-sm text-zinc-400 leading-relaxed font-light relative z-10">This project is {project.performance?.marketTrend === 'up' ? 'outperforming' : 'aligning with'} the {project.location?.city} luxury index by {(project.performance?.capitalAppreciation ?? 0) / 5}% this quarter.</p>
                                     </div>
                                 </div>
                             </div>
@@ -223,7 +223,7 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     <DnaTag label="Developer" value={project.developer} />
                                     <DnaTag label="Handover" value={project.handover ? `Q${project.handover.quarter} ${project.handover.year}` : 'Ready'} />
-                                    <DnaTag label="Price Range" value={project.price.label} />
+                                    <DnaTag label="Price Range" value={project.price?.label} />
                                     <DnaTag label="Status" value={statusLabel} />
                                 </div>
                             </div>
