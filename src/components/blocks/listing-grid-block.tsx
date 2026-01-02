@@ -51,11 +51,12 @@ export function ListingGridBlock({
       }
   }, [initialFilter]);
 
+  // Only run on initial mount if no projects are provided
   useEffect(() => {
       if (initialProjects.length === 0) {
-          loadProjects(searchQuery);
+          loadProjects();
       }
-  }, [initialProjects.length, loadProjects, searchQuery]);
+  }, [initialProjects.length, loadProjects]);
 
   const handleSearch = (e: React.FormEvent) => {
       e.preventDefault();

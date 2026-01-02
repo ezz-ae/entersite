@@ -1,23 +1,22 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Bot, 
   Smartphone, 
-  Globe, 
-  List, 
   Layout, 
-  Image as ImageIcon, 
+  ImageIcon, 
   Phone, 
   BarChart, 
   Sparkles,
   Search,
-  Users,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { suggestNextBlocksAction } from '@/app/actions/ai';
 import type { SitePage, Block } from '@/lib/types';
+import type { SuggestNextBlocksOutput } from '@/types/block-suggestions'; // Updated import path
 
 interface AddBlockPanelProps {
     page: SitePage;
@@ -37,7 +36,6 @@ const BLOCK_LIBRARY = [
         blocks: [
             { type: 'sms-lead', name: 'SMS VIP Broadcast', icon: Smartphone, badge: 'High Conversion', desc: 'Capture numbers for SMS/WhatsApp.' },
             { type: 'cta-form', name: 'Smart Lead Form', icon: Phone, desc: 'Optimized for mobile leads.' },
-            { type: 'newsletter', name: 'Newsletter', icon: List, desc: 'Keep investors updated.' },
         ]
     },
     {
@@ -51,15 +49,34 @@ const BLOCK_LIBRARY = [
 ];
 
 export function AddBlockPanel({ page, onPageUpdate }: AddBlockPanelProps) {
-  
-  const addBlock = (blockType: string) => {
+  const [suggestions, setSuggestions] = useState<SuggestNextBlocksOutput>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSuggestions() {
+      try {
+        const result = await suggestNextBlocksAction({
+          currentBlocks: page.blocks.map(b => b.type),
+          siteType: 'real estate property launch',
+          brand: page.title || 'Luxury Homes',
+          primaryColor: '#002F4B'
+        });
+        setSuggestions(result);
+      } catch (error) {
+        console.error("Failed to get block suggestions:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchSuggestions();
+  }, [page.blocks, page.title]);
+
+  const addBlock = (blockType: string, defaultContent?: any) => {
     const newBlock: Block = {
-        blockId: `\${blockType}-\${Date.now()}`,
+        blockId: `${blockType}-${Date.now()}`,
         type: blockType,
         order: page.blocks.length,
-        data: {
-            headline: `New \${blockType} Section`,
-        }
+        data: defaultContent || { headline: `New ${blockType} Section` }
     };
     
     onPageUpdate({
@@ -82,15 +99,29 @@ export function AddBlockPanel({ page, onPageUpdate }: AddBlockPanelProps) {
           <div className="bg-gradient-to-br from-blue-600/10 to-indigo-600/10 rounded-2xl p-4 border border-blue-500/20">
              <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="h-3 w-3 text-blue-400" />
-                <span className="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Architect Suggestion</span>
+                <span className="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Architect Suggestions</span>
              </div>
-             <p className="text-xs text-zinc-400 mb-3">Add the <strong>SMS VIP</strong> block to increase lead volume by ~30% for this project type.</p>
-             <button 
-                onClick={() => addBlock('sms-lead')}
-                className="text-[10px] font-bold text-white bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
-             >
-                Apply Suggestion
-             </button>
+             {isLoading ? (
+                <div className="flex items-center justify-center p-4">
+                  <Loader2 className="h-5 w-5 text-blue-400 animate-spin" />
+                </div>
+             ) : suggestions.length > 0 ? (
+              <div className="space-y-2">
+                {suggestions.slice(0, 2).map((sugg) => (
+                  <div key={sugg.blockId}>
+                     <p className="text-xs text-zinc-400 mb-2">Add the <strong>{sugg.blockId}</strong> block to improve conversions.</p>
+                     <button 
+                        onClick={() => addBlock(sugg.blockId, sugg.defaultContent)}
+                        className="text-[10px] font-bold text-white bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
+                     >
+                        Apply Suggestion
+                     </button>
+                  </div>
+                ))}
+              </div>
+             ) : (
+              <p className="text-xs text-zinc-500">No suggestions available at this time.</p>
+             )}
           </div>
 
           {BLOCK_LIBRARY.map((group) => (
