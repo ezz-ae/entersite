@@ -1,0 +1,20 @@
+{
+  "node": {
+    "40ff9dd4dded0320db5906f7333d50ba6f632956dd": {
+      "workers": {
+        "app/builder/page": {
+          "moduleId": 76039,
+          "async": false,
+          "exportedName": "suggestNextBlocks",
+          "filename": "src/ai/flows/suggest-next-blocks.ts"
+        }
+      },
+      "layer": {
+        "app/builder/page": "action-browser"
+      },
+      "exportedName": "suggestNextBlocks",
+      "filename": "src/ai/flows/suggest-next-blocks.ts"
+    }
+  },
+  "edge": {}
+}

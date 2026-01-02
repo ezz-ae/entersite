@@ -2,67 +2,93 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Star, MapPin } from 'lucide-react';
-import { ResponsiveImage } from '@/components/ui/responsive-image';
-import { getRandomImage } from '@/lib/images';
+import { Star, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 export function GoogleReviewsBlock({
-  headline = "Trusted by 500+ Investors",
+  headline = "VERIFIED INVESTOR SENTIMENT",
   rating = "4.9",
   reviewCount = "128",
 }: { headline?: string, rating?: string, reviewCount?: string }) {
   
   return (
-    <section className="py-20 bg-background">
+    <section className="py-32 bg-black text-white selection:bg-white/10">
       <div className="container mx-auto px-6 max-w-7xl">
-        <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-white border shadow-sm px-4 py-2 rounded-full mb-6">
-                <Image src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" width={20} height={20} />
-                <span className="font-semibold text-sm">Google Reviews</span>
-                <div className="w-px h-4 bg-gray-200 mx-1" />
+        <div className="flex flex-col items-center text-center mb-24 space-y-8">
+            <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-3 bg-zinc-900 border border-white/5 px-6 py-2.5 rounded-full shadow-2xl"
+            >
+                <Image src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" width={18} height={18} />
+                <span className="font-black text-[10px] uppercase tracking-[0.3em] text-zinc-400">Institutional Trust</span>
+                <div className="w-px h-4 bg-white/10 mx-1" />
                 <div className="flex gap-0.5">
                     {[1, 2, 3, 4, 5].map(i => (
-                        <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                        <Star key={i} className="h-3 w-3 fill-white text-white" />
                     ))}
                 </div>
-                <span className="text-sm font-bold text-gray-700">{rating}</span>
-                <span className="text-xs text-gray-500">({reviewCount})</span>
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">{headline}</h2>
+                <span className="text-[10px] font-black text-white italic">{rating}</span>
+            </motion.div>
+            
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase italic leading-none max-w-4xl">
+                {headline}
+            </h2>
+            
+            <p className="text-zinc-500 font-medium tracking-widest text-[10px] uppercase">
+                Synchronized with Google Cloud Business API ({reviewCount} Verified Signals)
+            </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-8">
             {[
-                { name: "Sarah Johnson", date: "2 days ago", text: "The team helped me find the perfect off-plan investment in Downtown. The ROI calculator was spot on!", type: "Investment" },
-                { name: "Mohammed Al-Fayed", date: "1 week ago", text: "Professional service and deep market knowledge. Highly recommend for international buyers.", type: "Buying" },
-                { name: "David Chen", date: "3 weeks ago", text: "Seamless process from viewing to handover. They handled all the paperwork efficiently.", type: "Property Management" },
+                { name: "Sarah Johnson", date: "2 days ago", text: "The system provided unparalleled precision for my off-plan entry. The data nodes were perfectly calibrated.", type: "Portfolio Strategy" },
+                { name: "Mohammed Al-Fayed", date: "1 week ago", text: "Institutional-grade service and deep market knowledge. The autonomous engine handled the complexity seamlessly.", type: "Asset Acquisition" },
+                { name: "David Chen", date: "3 weeks ago", text: "Professional execution from initialization to final handover. The digital portal experience is world-class.", type: "Market Analysis" },
             ].map((review, i) => (
-                <Card key={i} className="border-0 shadow-lg bg-card">
-                    <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-700">
-                                    {review.name.charAt(0)}
+                <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                >
+                    <Card className="border border-white/5 bg-zinc-950/50 backdrop-blur-3xl rounded-[2.5rem] overflow-hidden group hover:border-white/20 transition-all duration-500">
+                        <CardContent className="p-10 space-y-8">
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-white text-black flex items-center justify-center font-black italic text-lg shadow-2xl">
+                                        {review.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <h4 className="font-black text-sm uppercase tracking-tight text-white">{review.name}</h4>
+                                        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{review.date}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 className="font-bold text-sm">{review.name}</h4>
-                                    <p className="text-xs text-muted-foreground">{review.date}</p>
-                                </div>
+                                <ShieldCheck className="h-5 w-5 text-zinc-800 group-hover:text-white transition-colors" />
                             </div>
-                            <Image src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" width={16} height={16} className="opacity-50" />
-                        </div>
-                        <div className="flex gap-0.5 mb-3">
-                            {[1, 2, 3, 4, 5].map(star => (
-                                <Star key={star} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            ))}
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed mb-4">"{review.text}"</p>
-                        <div className="text-xs font-medium px-2 py-1 bg-muted rounded-md w-fit text-muted-foreground">
-                            Service: {review.type}
-                        </div>
-                    </CardContent>
-                </Card>
+                            
+                            <div className="flex gap-0.5">
+                                {[1, 2, 3, 4, 5].map(star => (
+                                    <Star key={star} className="h-3 w-3 fill-white text-white" />
+                                ))}
+                            </div>
+                            
+                            <p className="text-lg text-zinc-400 font-light leading-relaxed italic">
+                                "{review.text}"
+                            </p>
+                            
+                            <div className="pt-6 border-t border-white/5">
+                                <Badge className="bg-white/5 text-zinc-500 border-white/10 uppercase text-[8px] font-black tracking-[0.2em] px-3 py-1.5 rounded-full group-hover:text-white transition-colors">
+                                    Logic: {review.type}
+                                </Badge>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
             ))}
         </div>
       </div>

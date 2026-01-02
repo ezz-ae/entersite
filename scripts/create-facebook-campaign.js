@@ -1,50 +1,46 @@
 
 'use strict';
+require('dotenv').config();
 const bizSdk = require('facebook-nodejs-business-sdk');
 const AdAccount = bizSdk.AdAccount;
-const Campaign = bizSdk.Campaign;
 
-let access_token = 'EAAP37W1MFKoBQdHbOQS3th2IjLP4PNw7i6gOFwi9jNPevxqP4YNphzUJxiWAlGIq647ObkFD6AIGoKfMi4J7eGvcDDl8vzMKaXoNa9kohM4hBMuzEQkJWXDYitsdwYMZCpaC2SzMMpsag0tjtJjLGkYOb5h8jKITno9XFcnl8ptPx9dZCeDgXN9Ph6oi7DjrSr4IXbS0pqOnkORFho';
-let app_id = '1117024043144362';
-let ad_account_id = 'act_1986804738524873';
-let campaign_name = 'Real Estate Lead Generation';
+// Moving credentials to environment variables for security
+const access_token = process.env.FB_ACCESS_TOKEN;
+const app_id = process.env.FB_APP_ID;
+const ad_account_id = process.env.FB_AD_ACCOUNT_ID;
+const campaign_name = process.env.FB_CAMPAIGN_NAME || 'Real Estate Lead Generation';
+
+if (!access_token || !ad_account_id) {
+  console.error('❌ Error: FB_ACCESS_TOKEN and FB_AD_ACCOUNT_ID must be set in .env');
+  process.exit(1);
+}
 
 const api = bizSdk.FacebookAdsApi.init(access_token);
-const showDebugingInfo = true; // Setting this to true shows more debugging info.
+const showDebugingInfo = true; 
 if (showDebugingInfo) {
   api.setDebug(true);
 }
 
-const logApiCallResult = (apiCallName, data) => {
-  console.log(apiCallName);
-  if (showDebugingInfo) {
-    console.log('Data:' + JSON.stringify(data));
-  }
-};
-
-let fields, params;
-
 void async function() {
   try {
-    // Create an ad campaign with objective OUTCOME_TRAFFIC
-    fields = [
-    ];
-    params = {
+    console.log(`🚀 Initializing Meta Campaign: ${campaign_name}`);
+    
+    const params = {
       'name': campaign_name,
       'objective': 'OUTCOME_TRAFFIC',
       'status': 'PAUSED',
-      'special_ad_categories': ['HOUSING'],
+      'special_ad_categories': ['HOUSING'], // Required for Real Estate
     };
-    let campaign = await (new AdAccount(ad_account_id)).createCampaign(
-      fields,
+
+    const campaign = await (new AdAccount(ad_account_id)).createCampaign(
+      [],
       params
     );
-    let campaign_id = campaign.id;
 
-    console.log('Your created campaign is with campaign_id:' + campaign_id);
+    console.log('✅ Success! Meta Campaign ID:' + campaign.id);
 
   } catch(error) {
-    console.log(error);
+    console.error('❌ Meta API Error:', error.response?.error || error);
     process.exit(1);
   }
 }();

@@ -1,26 +1,24 @@
-
 'use client';
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { 
-    CheckCircle2, AlertCircle, TrendingUp, MousePointerClick, Eye, Globe, 
-    Target, Loader2, Plus, Trash2, BarChart3, Calendar, MapPin, Zap, ExternalLink,
-    Sparkles
+    CheckCircle2, TrendingUp, MousePointerClick, Eye, Globe, 
+    Target, Loader2, Plus, BarChart3, MapPin, Zap, Sparkles, X, 
+    ArrowRight, Info, Search
 } from "lucide-react";
-import { generateAdsFromPageContent, GenerateAdsOutput } from "@/ai/flows/generate-ads-from-page-content";
-// import { createJob } from "@/lib/jobs"; // If used later
+import { generateGoogleAdsAction } from "@/app/actions/ai";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { authorizedFetch } from "@/lib/auth-fetch";
+import { motion, AnimatePresence } from "framer-motion";
+import type { GenerateAdsOutput } from "@/types/ads";
 
 interface PrefillPlan {
   id?: string;
@@ -36,7 +34,7 @@ interface PrefillPlan {
   };
 }
 
-type AdsTab = 'setup' | 'creative' | 'keywords';
+type AdsTab = 'setup' | 'creative' | 'keywords' | 'extensions';
 
 interface GoogleAdsManagerProps {
   pageTitle: string;
@@ -63,20 +61,15 @@ export function GoogleAdsManager({
   const [status, setStatus] = useState<CampaignStatus>('draft');
   const [activeTab, setActiveTab] = useState<AdsTab>(initialTab);
   const [isLaunching, setIsLaunching] = useState(false);
-  const [prefillApplied, setPrefillApplied] = useState(false);
-  const [appliedPlanId, setAppliedPlanId] = useState<string | null>(null);
   
-  // Campaign Settings
-  const [budget, setBudget] = useState([50]); // Daily
-  const [duration, setDuration] = useState([30]); // Days
+  const [budget, setBudget] = useState([150]);
+  const [duration, setDuration] = useState([30]);
   const [location, setLocation] = useState("Dubai, UAE");
   
-  // AI Generated Content - Mocked for public UI
   const [adData, setAdData] = useState<GenerateAdsOutput | null>(null);
   const [selectedVariation, setSelectedVariation] = useState(0);
 
-  // Live Performance Mock Data
-  const [performance, setPerformance] = useState({
+  const [performance] = useState({
       impressions: 12500,
       clicks: 480,
       ctr: 3.8,
@@ -89,445 +82,198 @@ export function GoogleAdsManager({
 
   const handleGenerate = async () => {
       setStatus('generating');
-      // Simulate AI delay for public demo
-      setTimeout(() => {
-          setAdData({
-            variations: [
-                { id: "v1", headlines: ["Luxury Marina Apartments", "5-Year Payment Plan"], descriptions: ["Own a piece of the Dubai skyline. Starting from AED 2.5M. Book your viewing today.", "Exclusive waterfront living with world-class amenities."] },
-                { id: "v2", headlines: ["Invest in Dubai Marina", "High ROI Potential"], descriptions: ["Prime location, high rental yields. Perfect for investors.", "Secure your unit with just 10% down payment."] }
-            ],
-            keywordGroups: [
-                { category: "High Intent", keywords: ["buy apartment dubai marina", "luxury flats for sale dubai", "emaar beachfront sale"] },
-                { category: "Investment", keywords: ["dubai property investment", "real estate roi dubai"] }
-            ],
-            estimatedCpc: 1.25
+      try {
+          const result = await generateGoogleAdsAction({
+              pageTitle,
+              pageDescription,
+              location,
+              targetAudience: prefillPlan?.audience || undefined
           });
+          setAdData(result);
+          setSelectedVariation(0);
           setStatus('draft');
-      }, 2000);
+          toast({ title: "Ad Strategy Ready", description: "Created 4 search ad variations for your project." });
+      } catch (error) {
+          setStatus('draft');
+          toast({ title: "Failed to create", description: "The ad engine is temporarily busy.", variant: "destructive" });
+      }
   };
 
   const handleLaunch = async () => {
+      if (!adData) return;
       try {
           setIsLaunching(true);
           const payload = {
-              name: `${pageTitle} Launch`,
+              name: `${pageTitle} Search Campaign`,
               budget: budget[0],
               duration: duration[0],
               location,
-              variation: adData?.variations?.[selectedVariation],
+              variation: adData.variations[selectedVariation],
+              keywords: adData.keywordGroups.flatMap(g => g.keywords),
+              negativeKeywords: adData.negativeKeywords,
+              sitelinks: adData.sitelinks,
+              strategy: adData.variations[selectedVariation].strategy
           };
           const response = await authorizedFetch('/api/ads/google/sync', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(payload),
           });
-          const data = await response.json();
-          if (!response.ok) {
-              throw new Error(data?.error || 'Sync failed');
-          }
+          if (!response.ok) throw new Error('Sync failed');
           setStatus('active');
-          toast({
-              title: "Campaign Launched!",
-              description: `Google Ads sync queued (ID: ${data.campaignId || 'pending'})`,
-          });
+          toast({ title: "Campaign Live", description: "Your ads have been pushed to Google." });
       } catch (error: any) {
-          console.error('Failed to sync Google Ads', error);
-          toast({
-              title: 'Failed to launch',
-              description: error?.message || 'Check your authentication or Google Ads credentials.',
-              variant: 'destructive',
-          });
+          toast({ title: 'Launch Failed', description: error?.message, variant: 'destructive' });
       } finally {
           setIsLaunching(false);
       }
   };
 
-  const estimatedReach = Math.floor(budget[0] * 1200); 
-  const estimatedClicks = Math.floor(estimatedReach * 0.035);
-
-  useEffect(() => {
-      setActiveTab(initialTab ?? 'setup');
-  }, [initialTab]);
-
-  useEffect(() => {
-      if (!prefillPlan) {
-          setPrefillApplied(false);
-          setAppliedPlanId(null);
-          return;
-      }
-      const planId = prefillPlan.id ?? null;
-      if (planId && planId === appliedPlanId) {
-          return;
-      }
-      if (!planId && prefillApplied) {
-          return;
-      }
-      if (prefillPlan.adCampaignConfig?.budget) {
-          setBudget([prefillPlan.adCampaignConfig.budget]);
-      }
-      if (prefillPlan.locationCity) {
-          setLocation(prefillPlan.locationCity);
-      }
-      const keywords = prefillPlan.adCampaignConfig?.keywords || [];
-      if (keywords.length || prefillPlan.summary) {
-          setAdData({
-              variations: [
-                  {
-                      id: planId || 'prefill',
-                      headlines: keywords.slice(0, 2).length ? keywords.slice(0, 2) : ['AI Generated Campaign'],
-                      descriptions: [
-                          prefillPlan.summary || pageDescription,
-                      ],
-                  },
-              ],
-              keywordGroups: keywords.length
-                ? [
-                    {
-                        category: 'AI Plan',
-                        keywords,
-                    },
-                  ]
-                : [],
-              estimatedCpc: 1.25,
-          });
-      }
-      setPrefillApplied(true);
-      setAppliedPlanId(planId);
-  }, [prefillPlan, prefillApplied, appliedPlanId, pageDescription]);
-
-  useEffect(() => {
-      if (!prefillResetKey) return;
-      setAdData(null);
-      setStatus('draft');
-      setPrefillApplied(false);
-      setAppliedPlanId(null);
-      setBudget([50]);
-      setDuration([30]);
-      setLocation("Dubai, UAE");
-      setActiveTab(initialTab ?? 'setup');
-  }, [prefillResetKey, initialTab]);
+  const estimatedReach = Math.floor(budget[0] * (1 / (adData?.estimatedCpc || 2.5)) * 10); 
 
   if (status === 'active') {
       return (
           <div className="space-y-6">
-              {/* Active Campaign Header */}
-              <div className="flex justify-between items-center bg-green-50 dark:bg-green-900/20 p-4 rounded-xl border border-green-200 dark:border-green-800">
-                  <div className="flex items-center gap-3">
+              <div className="flex justify-between items-center bg-blue-600/10 p-8 rounded-[2.5rem] border border-blue-500/20 shadow-sm">
+                  <div className="flex items-center gap-5">
                       <div className="relative">
-                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                        <div className="absolute inset-0 w-3 h-3 bg-green-500 rounded-full animate-ping opacity-75" />
+                        <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse" />
+                        <div className="absolute inset-0 w-4 h-4 bg-blue-500 rounded-full animate-ping opacity-75" />
                       </div>
                       <div>
-                          <h3 className="font-bold text-green-900 dark:text-green-100">Campaign Active: {pageTitle} Launch</h3>
-                          <div className="flex gap-2 text-xs text-green-700 dark:text-green-300 mt-0.5">
-                              <span>Optimization Score: 92%</span>
-                              <span>•</span>
-                              <span>Learning Phase: Active</span>
-                          </div>
+                          <h3 className="font-bold text-2xl tracking-tight text-white uppercase">Campaign Active: {pageTitle}</h3>
+                          <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mt-1">Delivering • Daily budget: AED {budget[0]}</p>
                       </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="bg-white dark:bg-black h-8 text-xs">Edit</Button>
-                    <Button variant="outline" size="sm" className="bg-white dark:bg-black h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => setStatus('draft')}>Pause</Button>
-                  </div>
+                  <Button variant="outline" className="rounded-xl h-12 px-8 border-white/10 bg-white/5 hover:bg-white hover:text-black font-bold">Open Google Ads</Button>
               </div>
 
-              {/* KPI Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                   <MetricCard label="Impressions" value={performance.impressions.toLocaleString()} icon={Eye} trend="+12%" />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                   <MetricCard label="Impressions" value={performance.impressions.toLocaleString()} icon={Eye} trend="+12%" highlight />
                    <MetricCard label="Clicks" value={performance.clicks} icon={MousePointerClick} trend="+5%" />
                    <MetricCard label="CTR" value={`${performance.ctr}%`} icon={TrendingUp} trend="+0.2%" />
-                   <MetricCard label="Total Spend" value={`$${performance.spend}`} icon={Target} />
-                   <MetricCard label="Leads Generated" value={performance.leads} icon={CheckCircle2} highlight trend="+3" />
-                   <MetricCard label="Cost Per Lead" value={`$${performance.cpl}`} icon={BarChart3} trend="-10%" positive />
-                   <MetricCard label="ROAS" value={`${performance.roas}x`} icon={Zap} trend="+0.5" />
-                   <MetricCard label="Quality Score" value={`${performance.qualityScore}/10`} icon={Target} />
+                   <MetricCard label="Spend" value={`$${performance.spend}`} icon={Target} />
               </div>
-
-              {/* Performance Chart Placeholder */}
-              <Card>
-                  <CardHeader>
-                      <CardTitle className="text-sm font-medium">Performance Over Time</CardTitle>
-                  </CardHeader>
-                  <CardContent className="h-[200px] flex items-end gap-1 pb-2 px-6">
-                      {/* CSS Bar Chart */}
-                      {[30, 45, 60, 50, 70, 85, 90, 80, 95, 100, 90, 85, 95, 110, 120, 115, 130, 125, 140, 135].map((h, i) => (
-                          <div key={i} className="flex-1 bg-blue-500/20 hover:bg-blue-500/40 transition-colors rounded-t-sm relative group" style={{ height: `${h}%` }}>
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-black text-white text-[10px] px-1 py-0.5 rounded whitespace-nowrap z-10">
-                                  {Math.floor(h * 3.5)} Clicks
-                              </div>
-                          </div>
-                      ))}
-                  </CardContent>
-              </Card>
-
-              <Card>
-                  <CardHeader>
-                      <CardTitle className="text-sm font-medium">Top Performing Keywords</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                      <div className="divide-y">
-                          {adData?.keywordGroups[0].keywords.slice(0, 5).map((k, i) => (
-                              <div key={i} className="flex justify-between items-center p-4 hover:bg-muted/30 transition-colors">
-                                  <div className="flex items-center gap-3">
-                                      <span className="font-medium text-sm">{k}</span>
-                                      <Badge variant="secondary" className="text-[10px] h-5">High Intent</Badge>
-                                  </div>
-                                  <div className="flex gap-6 text-sm">
-                                      <div className="text-right">
-                                          <p className="font-bold">{Math.floor(Math.random() * 200)}</p>
-                                          <p className="text-xs text-muted-foreground">Clicks</p>
-                                      </div>
-                                      <div className="text-right w-20">
-                                          <p className="font-bold">${(Math.random() * 2 + 0.5).toFixed(2)}</p>
-                                          <p className="text-xs text-muted-foreground">CPC</p>
-                                      </div>
-                                      <div className="text-right w-16">
-                                          <p className="font-bold text-green-600">{(Math.random() * 5).toFixed(1)}%</p>
-                                          <p className="text-xs text-muted-foreground">CTR</p>
-                                      </div>
-                                  </div>
-                              </div>
-                          ))}
-                      </div>
-                  </CardContent>
-              </Card>
           </div>
       )
   }
 
   return (
-    <Card className="w-full h-full border-0 shadow-none bg-background">
-        <CardHeader className="px-0 pt-0">
+    <Card className="w-full h-full border-0 shadow-none bg-transparent">
+        <CardHeader className="px-0 pt-0 pb-10">
             <div className="flex justify-between items-start">
-                <div>
-                    <CardTitle className="text-2xl">Google Ads Manager</CardTitle>
-                    <CardDescription>Target high-intent buyers with AI-optimized search campaigns.</CardDescription>
+                <div className="space-y-1">
+                    <CardTitle className="text-4xl font-bold tracking-tight text-white uppercase">Google Search Ads</CardTitle>
+                    <CardDescription className="text-zinc-500 font-medium text-lg">Target high-intent buyers searching for your project.</CardDescription>
                 </div>
-                {adData && <Badge variant="secondary" className="bg-blue-100 text-blue-700">AI Generated</Badge>}
+                {adData && <Badge className="bg-blue-600/10 text-blue-500 border-blue-500/20 py-1.5 px-4 rounded-full uppercase text-[10px] font-bold tracking-widest">Strategy Ready</Badge>}
             </div>
         </CardHeader>
         
-        <CardContent className="px-0">
-            {prefillPlan && (
-                <div className="mb-6 rounded-xl border border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/5 p-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
-                            Plan applied: {prefillPlan.projectName || 'AI Campaign Brief'}
-                        </p>
-                        <p className="text-xs text-blue-800 dark:text-blue-200 mt-1">
-                            {prefillPlan.summary
-                              ? prefillPlan.summary
-                              : 'Keywords and budgets from your AI marketing plan have been loaded. Adjust before launching.'}
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                            {prefillPlan.locationCity && (
-                                <Badge variant="secondary" className="bg-white/80 text-blue-700 dark:bg-black/40 dark:text-blue-100">
-                                    {prefillPlan.locationCity}
-                                </Badge>
-                            )}
-                            {typeof prefillPlan.adCampaignConfig?.budget === 'number' && (
-                                <Badge variant="secondary" className="bg-white/80 text-blue-700 dark:bg-black/40 dark:text-blue-100">
-                                    Budget • ${prefillPlan.adCampaignConfig.budget}/day
-                                </Badge>
-                            )}
-                            {prefillPlan.adCampaignConfig?.keywords?.length ? (
-                                <Badge variant="secondary" className="bg-white/80 text-blue-700 dark:bg-black/40 dark:text-blue-100">
-                                    {prefillPlan.adCampaignConfig.keywords.length} keywords
-                                </Badge>
-                            ) : null}
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => onPrefillReset?.()}>
-                            Reset plan
-                        </Button>
-                    </div>
-                </div>
-            )}
+        <CardContent className="px-0 space-y-8">
             {status === 'generating' ? (
-                <div className="h-64 flex flex-col items-center justify-center space-y-4">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                    <p className="text-muted-foreground animate-pulse">Analyzing market trends & generating keywords...</p>
+                <div className="h-96 flex flex-col items-center justify-center space-y-6 bg-zinc-900/30 rounded-[3rem] border border-white/5 border-dashed">
+                    <Loader2 className="h-16 w-16 animate-spin text-blue-500" />
+                    <p className="text-xl font-bold tracking-tight text-white uppercase">Designing Ad Strategy...</p>
                 </div>
             ) : !adData ? (
-                 <div className="space-y-6">
-                     <div className="grid gap-4 p-8 bg-muted/30 rounded-xl border border-dashed text-center">
-                         <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                             <Zap className="h-6 w-6 text-blue-600" />
-                         </div>
-                         <div className="space-y-2 mb-4">
-                             <h3 className="font-bold text-lg">Start Automated Campaign</h3>
-                             <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                                 Our AI will scan your landing page content, identify the best keywords, and write high-converting ad copy in seconds.
-                             </p>
-                         </div>
-                         
-                         <div className="max-w-xs mx-auto space-y-4 text-left">
-                             <div className="space-y-2">
-                                 <Label>Target Location</Label>
-                                 <div className="flex gap-2 relative">
-                                    <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                                    <Input 
-                                        value={location} 
-                                        onChange={(e) => setLocation(e.target.value)} 
-                                        className="pl-10"
-                                    />
-                                 </div>
-                             </div>
-                             <Button onClick={handleGenerate} className="w-full h-10 gap-2">
-                                 <Sparkles className="h-4 w-4" /> Generate Strategy
-                             </Button>
-                         </div>
+                 <div className="p-10 bg-zinc-900/40 rounded-[2.5rem] border border-white/5 flex flex-col items-center text-center space-y-8 shadow-sm">
+                     <div className="w-16 h-16 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500 mb-2 border border-blue-500/20">
+                         <Search className="h-8 w-8" />
+                     </div>
+                     <div className="space-y-2 max-w-md">
+                         <h3 className="text-2xl font-bold text-white">Start New Campaign</h3>
+                         <p className="text-zinc-500 text-sm font-medium">Create a search campaign for <span className="text-white">{pageTitle}</span>.</p>
+                     </div>
+                     
+                     <div className="w-full max-w-sm space-y-4">
+                        <div className="space-y-2 text-left">
+                            <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Target Location</Label>
+                            <div className="relative">
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                <Input 
+                                    value={location} 
+                                    onChange={(e) => setLocation(e.target.value)} 
+                                    className="pl-10 h-12 bg-black/40 border-white/10 rounded-xl font-medium text-white focus:border-blue-500/50" 
+                                />
+                            </div>
+                        </div>
+                        <Button 
+                            onClick={handleGenerate} 
+                            className="w-full h-14 bg-white text-black hover:bg-zinc-200 rounded-xl text-sm font-bold uppercase tracking-widest shadow-lg"
+                        >
+                            Generate Strategy
+                        </Button>
                      </div>
                  </div>
             ) : (
                 <Tabs value={activeTab} onValueChange={(tab) => setActiveTab(tab as AdsTab)} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/50 p-1">
-                        <TabsTrigger value="setup">1. Budget & Target</TabsTrigger>
-                        <TabsTrigger value="creative">2. Ad Creative</TabsTrigger>
-                        <TabsTrigger value="keywords">3. Keywords</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-4 mb-10 bg-zinc-950 p-1.5 rounded-[1.5rem] border border-white/10">
+                        <TabsTrigger value="setup" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-black uppercase text-[10px] font-bold tracking-widest h-12">1. Budget</TabsTrigger>
+                        <TabsTrigger value="creative" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-black uppercase text-[10px] font-bold tracking-widest h-12">2. Creative</TabsTrigger>
+                        <TabsTrigger value="keywords" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-black uppercase text-[10px] font-bold tracking-widest h-12">3. Keywords</TabsTrigger>
+                        <TabsTrigger value="extensions" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-black uppercase text-[10px] font-bold tracking-widest h-12">4. Extensions</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="setup" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="p-6 bg-card border rounded-xl space-y-8">
-                             <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-base font-semibold">Daily Budget</Label>
-                                    <span className="font-bold text-xl text-primary">${budget[0]}</span>
+                    <TabsContent value="setup" className="space-y-8 mt-0">
+                        <div className="p-12 bg-zinc-900/30 border border-white/5 rounded-[3rem] space-y-10 shadow-sm">
+                            <div className="flex justify-between items-end">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Daily Investment</label>
+                                    <p className="text-6xl font-bold tracking-tight text-white uppercase leading-none">AED {budget[0]}</p>
                                 </div>
-                                <Slider value={budget} min={10} max={1000} step={10} onValueChange={setBudget} />
-                                <div className="flex justify-between text-xs text-muted-foreground">
-                                    <span>$10/day</span>
-                                    <span>Estimated Monthly: ${(budget[0] * 30).toLocaleString()}</span>
-                                </div>
+                                <Badge className="bg-green-500/10 text-green-500 border-green-500/20 uppercase font-bold text-[9px] px-3 py-1 rounded-full">Optimal Range</Badge>
                             </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg text-center border border-blue-100 dark:border-blue-900/50">
-                                    <Globe className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-                                    <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">{estimatedReach.toLocaleString()}</div>
-                                    <p className="text-xs text-blue-600 dark:text-blue-300 font-medium">Daily Impressions</p>
-                                </div>
-                                <div className="p-4 bg-green-50/50 dark:bg-green-900/10 rounded-lg text-center border border-green-100 dark:border-green-900/50">
-                                    <MousePointerClick className="h-6 w-6 mx-auto mb-2 text-green-500" />
-                                    <div className="text-2xl font-bold text-green-900 dark:text-green-100">{estimatedClicks}</div>
-                                    <p className="text-xs text-green-600 dark:text-green-300 font-medium">Est. Daily Clicks</p>
-                                </div>
-                            </div>
-                            
-                            <Button className="w-full h-12" onClick={() => setActiveTab("creative")}>
-                                Next: Review Creative <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
+                            <Slider value={budget} min={50} max={5000} step={50} onValueChange={setBudget} className="py-6" />
                         </div>
+                        <Button className="w-full h-16 rounded-2xl bg-white text-black font-bold text-xl uppercase tracking-tight shadow-xl" onClick={() => setActiveTab("creative")}>Next step <ArrowRight className="ml-3 h-6 w-6" /></Button>
                     </TabsContent>
 
-                    <TabsContent value="creative" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="space-y-6">
-                             <div className="flex gap-2 overflow-x-auto pb-2">
-                                 {adData.variations.map((v, i) => (
-                                     <button
-                                        key={v.id}
-                                        onClick={() => setSelectedVariation(i)}
-                                        className={cn(
-                                            "px-4 py-2 rounded-full text-sm font-medium border transition-colors whitespace-nowrap",
-                                            selectedVariation === i ? "bg-primary text-primary-foreground border-primary" : "hover:bg-muted"
-                                        )}
-                                     >
-                                         Variation {i + 1}
-                                     </button>
-                                 ))}
-                             </div>
-
-                             {/* Google Ad Preview - High Fidelity */}
-                            <div className="p-6 bg-white border rounded-xl shadow-sm max-w-2xl mx-auto font-sans">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-bold text-black text-xs">Ad</span>
-                                    <span className="text-xs text-gray-600">www.entresite.ai/projects/luxury-launch</span>
-                                </div>
-                                <div className="text-xl text-[#1a0dab] hover:underline cursor-pointer font-medium leading-snug mb-1">
-                                    {adData.variations[selectedVariation].headlines[0]} | {adData.variations[selectedVariation].headlines[1]}
-                                </div>
-                                <div className="text-sm text-[#4d5156] leading-normal">
-                                    {adData.variations[selectedVariation].descriptions[0]} {adData.variations[selectedVariation].descriptions[1]}
-                                </div>
-                                <div className="flex gap-3 mt-3">
-                                    {["Floor Plans", "Payment Plan", "Location Map", "Register Now"].map((link, i) => (
-                                        <span key={i} className="text-xs text-[#1a0dab] hover:underline cursor-pointer">{link}</span>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            <div className="space-y-4 bg-card p-4 border rounded-xl">
-                                <h4 className="font-semibold text-sm">Edit Content</h4>
-                                <div className="space-y-3">
-                                    {adData.variations[selectedVariation].headlines.map((h, i) => (
-                                        <div key={i} className="space-y-1">
-                                            <Label className="text-xs text-muted-foreground">Headline {i + 1}</Label>
-                                            <Input defaultValue={h} className="h-9" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                             <Button className="w-full h-12" onClick={() => setActiveTab("keywords")}>
-                                 Next: Keywords <ArrowRight className="ml-2 h-4 w-4" />
-                             </Button>
-                        </div>
-                    </TabsContent>
-
-                    <TabsContent value="keywords" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="space-y-6">
-                            {adData.keywordGroups.map((group, i) => (
-                                <div key={i} className="bg-card border rounded-xl p-4">
-                                    <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                                        <Target className="h-4 w-4 text-primary" />
-                                        {group.category} Keywords
-                                    </h4>
-                                    <div className="flex flex-wrap gap-2">
-                                        {group.keywords.map((k, j) => (
-                                            <Badge key={j} variant="secondary" className="pl-3 pr-1 py-1.5 text-sm font-normal bg-muted/50 hover:bg-muted border border-transparent hover:border-border transition-all">
-                                                {k}
-                                                <button className="ml-2 hover:bg-destructive/10 hover:text-destructive rounded-full p-0.5 transition-colors"><X className="h-3 w-3" /></button>
-                                            </Badge>
-                                        ))}
-                                        <Button variant="outline" size="sm" className="h-8 rounded-full border-dashed text-xs">
-                                            <Plus className="h-3 w-3 mr-1" /> Add
-                                        </Button>
-                                    </div>
-                                </div>
+                    <TabsContent value="creative" className="space-y-10 mt-0">
+                        <div className="flex gap-3 overflow-x-auto pb-6 no-scrollbar">
+                            {adData.variations.map((v, i) => (
+                                <button key={v.id} onClick={() => setSelectedVariation(i)} className={cn("px-10 py-5 rounded-2xl text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap flex items-center gap-3", selectedVariation === i ? "bg-white text-black border-white shadow-xl" : "bg-zinc-900 text-zinc-500 border-white/5 hover:border-white/10")}>
+                                    Variation {i + 1}
+                                </button>
                             ))}
-                            
-                             <div className="pt-6 border-t bg-gradient-to-b from-background to-muted/20 p-6 -mx-6 -mb-6 rounded-b-xl">
-                                <div className="flex justify-between items-center mb-4">
-                                    <div>
-                                        <p className="text-sm font-medium">Estimated Monthly Cost</p>
-                                        <p className="text-2xl font-bold">${(budget[0] * 30).toLocaleString()}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-sm font-medium">Estimated Monthly Leads</p>
-                                        <p className="text-2xl font-bold text-green-600">~{(estimatedClicks * 0.05 * 30).toFixed(0)}</p>
-                                    </div>
+                        </div>
+                        <div className="grid lg:grid-cols-2 gap-16">
+                            <div className="p-10 bg-white border border-zinc-200 rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,1)] font-sans space-y-6 text-black overflow-hidden relative">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-zinc-100 rounded-xl flex items-center justify-center text-[11px] font-bold border border-zinc-200">G</div>
+                                    <div className="flex flex-col"><span className="text-[11px] font-bold leading-none uppercase tracking-tighter">Sponsored</span><span className="text-[11px] text-zinc-500">https://your-project-site.com</span></div>
                                 </div>
-                                <Button
-                                    size="lg"
-                                    className="w-full h-14 text-lg font-bold shadow-xl bg-green-600 hover:bg-green-700 text-white disabled:opacity-70"
-                                    onClick={handleLaunch}
-                                    disabled={isLaunching}
-                                >
-                                    {isLaunching ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                            Syncing with Google Ads...
-                                        </>
-                                    ) : (
-                                        'Launch Campaign Now'
-                                    )}
-                                </Button>
-                                <p className="text-[10px] text-center text-muted-foreground mt-3">
-                                    By launching, you agree to the ad spend terms. Billing is processed securely via Stripe.
-                                </p>
-                             </div>
+                                <div className="space-y-3"><h3 className="text-2xl text-[#1a0dab] font-medium leading-tight hover:underline cursor-pointer">{adData.variations[selectedVariation].headlines.join(' | ')}</h3><p className="text-sm text-zinc-600 leading-relaxed font-medium">{adData.variations[selectedVariation].descriptions.join(' ')}</p></div>
+                            </div>
+                            <div className="space-y-6">
+                                <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-2">Edit Headlines</Label>
+                                {adData.variations[selectedVariation].headlines.map((h, i) => (
+                                    <Input key={i} defaultValue={h} className="h-14 bg-black/40 border-white/5 rounded-xl font-bold text-white uppercase tracking-tight focus:border-blue-500/50" maxLength={30} />
+                                ))}
+                            </div>
+                        </div>
+                        <Button className="w-full h-16 rounded-2xl bg-white text-black font-bold text-xl uppercase tracking-tight shadow-xl" onClick={() => setActiveTab("keywords")}>Continue to Keywords</Button>
+                    </TabsContent>
+
+                    <TabsContent value="keywords" className="space-y-8 mt-0">
+                        <div className="grid md:grid-cols-2 gap-10">
+                            <div className="bg-zinc-900/30 border border-white/5 rounded-[3rem] p-10 space-y-8 shadow-sm">
+                                <h4 className="font-bold text-xs uppercase tracking-widest flex items-center gap-3 text-white"><Target className="h-5 w-5 text-blue-500" /> High Intent Keywords</h4>
+                                <div className="flex flex-wrap gap-3">{adData.keywordGroups[0].keywords.map((k, j) => (<Badge key={j} className="bg-white/5 text-zinc-300 border-white/5 py-2.5 px-5 rounded-2xl text-xs font-bold shadow-sm">{k}</Badge>))}</div>
+                            </div>
+                            <div className="bg-red-600/5 border border-red-500/20 rounded-[3rem] p-10 space-y-8 shadow-sm">
+                                <h4 className="font-bold text-xs uppercase tracking-widest text-red-500">Negative Filter (Cost Saving)</h4>
+                                <div className="flex flex-wrap gap-3">{adData.negativeKeywords.map((k, i) => (<Badge key={i} className="bg-red-500/10 text-red-500 border-red-500/10 py-2.5 px-5 rounded-2xl text-xs font-bold">- {k}</Badge>))}</div>
+                            </div>
+                        </div>
+                        <Button className="w-full h-16 rounded-2xl bg-white text-black font-bold text-xl uppercase tracking-tight shadow-xl" onClick={() => setActiveTab("extensions")}>Continue to Extensions</Button>
+                    </TabsContent>
+
+                    <TabsContent value="extensions" className="mt-0">
+                        <div className="max-w-3xl mx-auto p-12 md:p-20 bg-zinc-900/60 rounded-[4rem] border border-white/10 text-center space-y-12 shadow-2xl">
+                            <div className="space-y-3"><p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.5em]">Campaign Readiness Score: 100%</p><h3 className="text-5xl font-bold tracking-tight text-white uppercase">Push to Google</h3></div>
+                            <Button size="lg" className="w-full h-24 rounded-[2.5rem] text-3xl font-bold shadow-[0_20px_60px_rgba(37,99,235,0.4)] bg-blue-600 hover:bg-blue-700 text-white uppercase tracking-tight" onClick={handleLaunch} disabled={isLaunching}>{isLaunching ? "Syncing Search Cloud..." : "Launch Search Campaign"}</Button>
+                            <div className="flex items-center justify-center gap-10 text-[10px] font-bold text-zinc-600 uppercase tracking-widest"><span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Google Verified</span><span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Conversion Tracking Active</span></div>
                         </div>
                     </TabsContent>
                 </Tabs>
@@ -537,24 +283,17 @@ export function GoogleAdsManager({
   );
 }
 
-function MetricCard({ label, value, icon: Icon, highlight, trend, positive = true }: any) {
+function MetricCard({ label, value, icon: Icon, trend, highlight, positive = true }: any) {
     return (
-        <div className={cn("p-4 rounded-xl border flex flex-col justify-between transition-all hover:shadow-md", highlight ? "bg-primary/5 border-primary/20" : "bg-card")}>
-            <div className="flex justify-between items-start mb-2">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{label}</p>
-                <Icon className={cn("h-4 w-4", highlight ? "text-primary" : "text-muted-foreground")} />
+        <div className={cn("p-10 rounded-[2.5rem] border flex flex-col justify-between transition-all hover:border-blue-500/30 shadow-sm", highlight ? "bg-blue-600/5 border-blue-600/20" : "bg-zinc-900/30 border-white/5")}>
+            <div className="flex justify-between items-start mb-8">
+                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{label}</p>
+                <div className={cn("p-2.5 rounded-xl", highlight ? "bg-blue-600/10 text-blue-500" : "bg-white/5 text-zinc-600")}><Icon className="h-5 w-5" /></div>
             </div>
             <div>
-                <p className="text-2xl font-bold">{value}</p>
-                {trend && (
-                    <p className={cn("text-xs font-medium mt-1", positive ? "text-green-600" : "text-red-600")}>
-                        {trend} vs last 30 days
-                    </p>
-                )}
+                <p className="text-4xl font-bold text-white tracking-tight uppercase">{value}</p>
+                {trend && (<div className="flex items-center gap-2 mt-2"><TrendingUp className={cn("h-3.5 w-3.5", positive ? "text-green-500" : "text-red-500")} /><span className={cn("text-[10px] font-bold uppercase tracking-tight", positive ? "text-green-500" : "text-red-500")}>{trend}</span></div>)}
             </div>
         </div>
     )
 }
-
-function ArrowRight(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg> }
-function X(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> }

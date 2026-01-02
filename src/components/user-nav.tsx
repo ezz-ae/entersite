@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { CreditCard, LogOut, PlusCircle, Settings, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -20,6 +21,11 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 
 export function UserNav() {
   const [user] = useAuthState(auth);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleLogout = () => {
     signOut(auth);
@@ -27,6 +33,17 @@ export function UserNav() {
 
   const displayName = user?.displayName || user?.email?.split('@')[0] || "User";
   const initials = displayName.substring(0, 2).toUpperCase();
+
+  // Prevent hydration mismatch by ensuring content matches server-side (where user is initially null)
+  if (!isMounted) {
+      return (
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-white/10">
+          <Avatar className="h-full w-full">
+            <AvatarFallback className="bg-zinc-800 text-zinc-500"></AvatarFallback>
+          </Avatar>
+        </Button>
+      )
+  }
 
   return (
     <DropdownMenu>

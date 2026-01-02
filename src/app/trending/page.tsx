@@ -27,7 +27,7 @@ import {
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import Link from 'next/link';
+import Link from 'next/navigation';
 
 export default function TrendingPage() {
   const [step, setStep] = useState(1);
@@ -53,7 +53,7 @@ export default function TrendingPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white font-sans selection:bg-pink-500/30 overflow-x-hidden">
+    <main className="min-h-screen bg-black text-white selection:bg-pink-500/30 overflow-x-hidden">
       
       {/* 1. HIGH CONVERSION HERO */}
       <section className="relative pt-40 pb-20 overflow-hidden">
@@ -68,28 +68,28 @@ export default function TrendingPage() {
               >
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pink-600/10 border border-pink-500/20 text-pink-500 text-[10px] font-bold uppercase tracking-[0.3em] mx-auto">
                     <Zap className="h-3.5 w-3.5" />
-                    Trending Technology
+                    Automated Sales
                   </div>
                   
-                  <h1 className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.9] text-white">
+                  <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tight leading-[1] text-white">
                       Automate your <br/>
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-orange-500 italic">Instagram Sales.</span>
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-orange-500">Instagram Leads.</span>
                   </h1>
                   
-                  <p className="text-zinc-500 text-2xl md:text-3xl max-w-3xl mx-auto font-light leading-relaxed">
-                      Deploy a 24/7 AI Real Estate Expert to your Instagram DMs. Convert followers into leads while you sleep.
+                  <p className="text-zinc-500 text-xl md:text-2xl max-w-3xl mx-auto font-medium leading-relaxed">
+                      Deploy a 24/7 AI Sales Assistant to your Instagram DMs. Qualify investors and capture leads while you sleep.
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
                       <Button 
                         onClick={() => document.getElementById('activation-flow')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="h-20 px-12 rounded-full bg-white text-black font-black text-xl hover:scale-105 transition-all shadow-[0_0_50px_-10px_rgba(255,255,255,0.5)]"
+                        className="h-20 px-12 rounded-full bg-white text-black font-bold text-xl hover:scale-105 transition-all shadow-[0_0_50px_-10px_rgba(255,255,255,0.5)]"
                       >
                           Deploy Expert Agent <ArrowRight className="ml-2 h-6 w-6" />
                       </Button>
                       <button 
                         onClick={() => document.getElementById('capabilities')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="h-20 px-12 rounded-full border border-white/5 bg-white/5 text-white font-bold text-xl hover:bg-white/10 transition-all"
+                        className="h-20 px-12 rounded-full border border-white/10 bg-white/5 text-white font-semibold text-xl hover:bg-white/10 transition-all"
                       >
                           View Capabilities
                       </button>
@@ -97,19 +97,19 @@ export default function TrendingPage() {
 
                   <div className="pt-20 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-40">
                       <div className="flex flex-col items-center gap-2">
-                          <p className="text-4xl font-black text-white">2s</p>
+                          <p className="text-4xl font-bold text-white tracking-tight">2s</p>
                           <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Response Time</p>
                       </div>
                       <div className="flex flex-col items-center gap-2">
-                          <p className="text-4xl font-black text-white">3.5x</p>
+                          <p className="text-4xl font-bold text-white tracking-tight">3.5x</p>
                           <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Lead Volume</p>
                       </div>
                       <div className="flex flex-col items-center gap-2">
-                          <p className="text-4xl font-black text-white">100%</p>
+                          <p className="text-4xl font-bold text-white tracking-tight">100%</p>
                           <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">DM Coverage</p>
                       </div>
                       <div className="flex flex-col items-center gap-2">
-                          <p className="text-4xl font-black text-white">0</p>
+                          <p className="text-4xl font-bold text-white tracking-tight">0</p>
                           <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Missed Inquiries</p>
                       </div>
                   </div>
@@ -123,9 +123,9 @@ export default function TrendingPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                   <div className="space-y-12">
                       <div className="space-y-6">
-                          <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-none text-white">Not just a chatbot. <br/><span className="text-zinc-600">A Sales Professional.</span></h2>
-                          <p className="text-zinc-500 text-xl font-light leading-relaxed">
-                              Our AI agents are trained on the latest market data and your specific project inventory. They don't just "chat"—they qualify and convert.
+                          <h2 className="text-5xl md:text-7xl font-bold tracking-tight leading-none text-white">More than a chatbot. <br/><span className="text-zinc-600 font-semibold">A Sales Expert.</span></h2>
+                          <p className="text-zinc-500 text-xl font-medium leading-relaxed">
+                              Our AI agents are trained on market data and your specific project inventory. They don't just "chat"—they qualify and convert.
                           </p>
                       </div>
 
@@ -158,11 +158,11 @@ export default function TrendingPage() {
                       <Card className="relative bg-zinc-900 border-white/10 rounded-[3rem] overflow-hidden p-8 shadow-2xl">
                           <div className="space-y-6">
                               <div className="flex items-center gap-4 border-b border-white/5 pb-6">
-                                  <div className="w-12 h-12 rounded-full bg-pink-600/20 flex items-center justify-center">
+                                  <div className="w-12 h-12 rounded-full bg-pink-600/20 flex items-center justify-center border border-pink-500/20">
                                       <Instagram className="h-6 w-6 text-pink-500" />
                                   </div>
                                   <div>
-                                      <p className="text-xs font-black uppercase tracking-widest text-zinc-500">Live Interaction Simulation</p>
+                                      <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">Interaction Simulation</p>
                                       <h4 className="text-lg font-bold text-white">Prospective Investor DM</h4>
                                   </div>
                               </div>
@@ -175,7 +175,7 @@ export default function TrendingPage() {
                                   </div>
                                   <div className="flex justify-end">
                                       <div className="bg-pink-600 p-4 rounded-2xl rounded-tr-none max-w-[80%] text-sm text-white shadow-lg">
-                                          "Hello! That's Emaar's latest launch. Prices start from AED 1.8M with a 2027 handover. We have some exclusive corner units available. Would you like me to send the full payment plan to your WhatsApp?"
+                                          "Hello! Prices start from AED 1.8M with a 2027 handover. We have exclusive units available. Should I send the payment plan to your WhatsApp?"
                                       </div>
                                   </div>
                                   <div className="flex justify-start">
@@ -200,8 +200,8 @@ export default function TrendingPage() {
       <section id="activation-flow" className="py-40 bg-black relative">
           <div className="container mx-auto px-6 max-w-4xl">
               <div className="text-center mb-20 space-y-4">
-                  <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white">Instant <span className="italic text-zinc-600">Activation.</span></h2>
-                  <p className="text-zinc-500 text-xl">Deploy your expert in under 5 minutes. No coding required.</p>
+                  <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-white uppercase">Instant Activation.</h2>
+                  <p className="text-zinc-500 text-xl font-medium">Deploy your expert in under 5 minutes. No coding required.</p>
               </div>
 
               <Card className="bg-zinc-900/50 border-white/5 backdrop-blur-3xl rounded-[3rem] overflow-hidden shadow-2xl relative">
@@ -228,12 +228,12 @@ export default function TrendingPage() {
                                   </div>
                                   <div className="space-y-4">
                                       <h2 className="text-4xl font-bold text-white">1. Connect Instagram</h2>
-                                      <p className="text-zinc-500 text-lg">Grant Entrestate permission to automate your sales conversations via official Meta API.</p>
+                                      <p className="text-zinc-500 text-lg font-medium">Grant permission to automate your conversations via the official Meta API.</p>
                                   </div>
                                   <Button 
                                       onClick={handleConnect}
                                       disabled={isConnecting}
-                                      className="h-16 px-12 rounded-2xl bg-white text-black font-black text-xl hover:bg-zinc-200 transition-all w-full md:w-auto"
+                                      className="h-16 px-12 rounded-2xl bg-white text-black font-bold text-xl hover:bg-zinc-200 transition-all w-full md:w-auto"
                                   >
                                       {isConnecting ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : "Authorize Meta Agent"}
                                   </Button>
@@ -249,12 +249,12 @@ export default function TrendingPage() {
                                   className="space-y-10"
                               >
                                   <div className="flex items-center gap-4 border-b border-white/5 pb-8">
-                                      <div className="w-16 h-16 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500">
+                                      <div className="w-16 h-16 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
                                           <Bot className="h-8 w-8" />
                                       </div>
                                       <div>
-                                          <h2 className="text-3xl font-bold text-white leading-none mb-2">2. Your Branded Agent</h2>
-                                          <p className="text-zinc-500 font-medium">Define your agent's name and company focus.</p>
+                                          <h2 className="text-3xl font-bold text-white leading-none mb-2">2. Your Expert Profile</h2>
+                                          <p className="text-zinc-500 font-semibold uppercase tracking-widest text-[10px]">Define your agent's focus.</p>
                                       </div>
                                   </div>
 
@@ -263,21 +263,21 @@ export default function TrendingPage() {
                                           <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Expert Name</label>
                                           <Input 
                                               placeholder="e.g. David from Downtown Realty" 
-                                              className="h-14 bg-black/40 border-white/10 rounded-xl text-white"
+                                              className="h-14 bg-black/40 border-white/10 rounded-xl text-white font-medium"
                                               value={agentName}
                                               onChange={(e) => setAgentName(e.target.value)}
                                           />
                                       </div>
                                       <div className="space-y-2">
-                                          <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Company Mission</label>
+                                          <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Company Focus</label>
                                           <Textarea 
-                                              placeholder="We specialize in off-plan villas in Dubai South. Focus on Palm Jumeirah luxury rentals." 
-                                              className="min-h-[120px] bg-black/40 border-white/10 rounded-xl resize-none text-white"
+                                              placeholder="We specialize in off-plan villas in Dubai South. Focus on luxury rentals." 
+                                              className="min-h-[120px] bg-black/40 border-white/10 rounded-xl resize-none text-white font-medium"
                                           />
                                       </div>
                                       <Button 
                                           onClick={nextStep}
-                                          className="h-16 px-12 rounded-2xl bg-white text-black font-black text-xl w-full shadow-lg"
+                                          className="h-16 px-12 rounded-2xl bg-white text-black font-bold text-xl w-full shadow-lg"
                                       >
                                           Review & Activate <ArrowRight className="ml-2 h-6 w-6" />
                                       </Button>
@@ -298,9 +298,9 @@ export default function TrendingPage() {
                                   </div>
                                   <div className="space-y-4">
                                       <h2 className="text-4xl font-bold text-white">3. Final Activation</h2>
-                                      <p className="text-zinc-500 text-lg">One-time setup fee for your 24/7 Expert Agent.</p>
+                                      <p className="text-zinc-500 text-lg font-medium">One-time setup fee for your 24/7 Sales Expert.</p>
                                       <div className="pt-6">
-                                          <span className="text-7xl font-black text-white">$20</span>
+                                          <span className="text-7xl font-bold text-white tracking-tighter">$20</span>
                                           <span className="text-zinc-500 font-bold uppercase tracking-widest ml-2">USD</span>
                                       </div>
                                   </div>
@@ -333,11 +333,11 @@ export default function TrendingPage() {
                                   <div className="w-24 h-24 rounded-full bg-green-500 flex items-center justify-center mx-auto shadow-[0_0_50px_rgba(34,197,94,0.4)]">
                                       <Check className="h-12 w-12 text-white stroke-[4px]" />
                                   </div>
-                                  <h2 className="text-5xl font-black tracking-tighter text-white">Your Agent is Live!</h2>
-                                  <p className="text-zinc-500 text-xl font-light">
+                                  <h2 className="text-5xl font-bold tracking-tight text-white uppercase">Your Agent is Live!</h2>
+                                  <p className="text-zinc-500 text-xl font-medium">
                                       Instagram DMs for your account are now being handled by <strong>{agentName || 'your expert'}</strong>.
                                   </p>
-                                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                  <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
                                       <Link href="/dashboard">
                                           <Button className="h-14 px-10 rounded-2xl bg-white text-black font-bold text-lg w-full sm:w-auto">
                                               Go to Dashboard
@@ -367,12 +367,12 @@ export default function TrendingPage() {
                   <TrustItem 
                     icon={Clock}
                     title="24/7 Availability"
-                    desc="Investors from different time zones get instant answers while you rest. Never miss a midnight lead again."
+                    desc="Investors from different time zones get instant answers while you rest. Never miss a lead again."
                   />
                   <TrustItem 
                     icon={Cpu}
                     title="Continuous Learning"
-                    desc="The agent gets smarter with every interaction, learning from your specific sales style and updated project data."
+                    desc="The agent gets smarter with every interaction, learning from your sales style and project data."
                   />
               </div>
           </div>
@@ -381,15 +381,15 @@ export default function TrendingPage() {
       {/* 5. FOOTER CTA */}
       <section className="py-40 border-t border-white/5">
           <div className="container mx-auto px-6 text-center space-y-12">
-              <h2 className="text-6xl font-black tracking-tighter text-white uppercase italic">Stop Missing <br/><span className="text-zinc-600">Sales.</span></h2>
-              <p className="text-zinc-500 text-2xl font-light max-w-2xl mx-auto">
-                  Every second your Instagram DM goes unanswered, an investor moves to the next agent. Start your automation today.
+              <h2 className="text-6xl md:text-8xl font-bold tracking-tight text-white uppercase">Start Automating.</h2>
+              <p className="text-zinc-500 text-2xl font-medium max-w-2xl mx-auto">
+                  Every second your Instagram DM goes unanswered, an investor moves to the next agent. Scale your sales today.
               </p>
               <Button 
                 onClick={() => document.getElementById('activation-flow')?.scrollIntoView({ behavior: 'smooth' })}
-                className="h-24 px-20 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-black text-3xl shadow-2xl shadow-pink-900/40 transition-all hover:scale-105"
+                className="h-24 px-20 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-bold text-3xl shadow-2xl shadow-pink-900/40 transition-all hover:scale-105 uppercase"
               >
-                  Start Automation Now
+                  Deploy AI Now
               </Button>
           </div>
       </section>
@@ -401,21 +401,21 @@ export default function TrendingPage() {
 function FeatureItem({ icon: Icon, title, desc }: any) {
     return (
         <div className="space-y-4 group">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5 group-hover:border-pink-500/30 transition-all">
+            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5 group-hover:border-pink-500/30 transition-all shadow-sm">
                 <Icon className="h-6 w-6 text-zinc-400 group-hover:text-pink-500 transition-colors" />
             </div>
             <h4 className="text-xl font-bold text-white">{title}</h4>
-            <p className="text-sm text-zinc-500 leading-relaxed font-light">{desc}</p>
+            <p className="text-sm text-zinc-500 leading-relaxed font-medium">{desc}</p>
         </div>
     )
 }
 
 function TrustItem({ icon: Icon, title, desc }: any) {
     return (
-        <div className="p-8 rounded-[2.5rem] bg-zinc-900/30 border border-white/5 space-y-4">
+        <div className="p-8 rounded-[2.5rem] bg-zinc-900/40 border border-white/5 space-y-4 shadow-sm">
             <Icon className="h-8 w-8 text-blue-500" />
             <h4 className="text-lg font-bold text-white">{title}</h4>
-            <p className="text-sm text-zinc-500 font-light leading-relaxed">{desc}</p>
+            <p className="text-sm text-zinc-500 font-medium leading-relaxed">{desc}</p>
         </div>
     )
 }

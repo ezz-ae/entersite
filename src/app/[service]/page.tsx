@@ -3,7 +3,7 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, CheckCircle, Globe, Bot, Search, Facebook, Activity, Target } from 'lucide-react';
+import { ArrowRight, CheckCircle, Globe, Bot, Search, Facebook, Activity, Target, Zap, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { motion } from 'framer-motion';
@@ -13,16 +13,16 @@ import { cn } from '@/lib/utils';
 const SERVICE_DATA = {
   website: {
     title: "Site Architect",
-    tagline: "Brochure to Web in 30 Seconds",
+    tagline: "High-Performance Property Sites",
     description: "Deploy high-converting project landing pages by simply uploading a brochure. Our AI extracts project data, generates SEO-optimized copy, and builds a professional layout instantly.",
     icon: Globe,
     color: "blue",
     features: [
       "Auto-extraction of project details & specs",
-      "Vertex AI generated sales copy",
+      "AI-generated high-conversion sales copy",
       "Mobile-first responsive architecture",
-      "Direct integration with market data nodes",
-      "sitename.site.entrestate.com subdomain"
+      "Direct integration with market data",
+      "Custom branded project domains"
     ],
     cta: "Launch Architect",
     href: "/builder"
@@ -30,7 +30,7 @@ const SERVICE_DATA = {
   'ai-market-expert': {
     title: "Market Intelligence",
     tagline: "Real-time UAE Project Data",
-    description: "Access our centralized intelligence node with 3,750+ verified UAE projects. Get live ROI data, capital appreciation trends, and inventory updates.",
+    description: "Access our centralized intelligence database with 3,750+ verified UAE projects. Get live ROI data, capital appreciation trends, and inventory updates.",
     icon: Bot,
     color: "orange",
     features: [
@@ -44,8 +44,8 @@ const SERVICE_DATA = {
     href: "/discover"
   },
   'google-ads': {
-    title: "Ads Synchronization",
-    tagline: "High-ROI Search Campaigns",
+    title: "Search Ads Sync",
+    tagline: "Target High-Intent Buyers",
     description: "Launch targeted Google Search campaigns directly from your project data. Our AI handles keyword bidding, ad copy, and budget optimization for maximum leads.",
     icon: Search,
     color: "green",
@@ -57,7 +57,7 @@ const SERVICE_DATA = {
         "Automatic tracking pixel setup"
     ],
     cta: "Sync Google Ads",
-    href: "/dashboard/google-ads"
+    href: "/dashboard/marketing"
   },
   'instagram-bot': {
     title: "Social Automation",
@@ -72,8 +72,8 @@ const SERVICE_DATA = {
         "Lead qualification & CRM sync",
         "Zero missed inquiries policy"
     ],
-    cta: "Deploy Insta-Bot",
-    href: "/trending"
+    cta: "Deploy Instagram Bot",
+    href: "/dashboard/chat-agent"
   }
 };
 
@@ -99,7 +99,7 @@ export default function ServicePage({ params }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white selection:bg-white/20">
+    <main className="min-h-screen bg-black text-white selection:bg-white/10">
       
       {/* Header Section */}
       <section className="relative pt-40 pb-20 overflow-hidden">
@@ -111,12 +111,12 @@ export default function ServicePage({ params }: PageProps) {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-6"
               >
-                  <div className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-[0.3em] mx-auto", `text-${service.color}-500`)}>
-                    <Activity className="h-3.5 w-3.5" />
-                    Service Infrastructure
+                  <div className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest mx-auto")}>
+                    <Activity className="h-3.5 w-3.5 text-blue-500" />
+                    System Infrastructure
                   </div>
-                  <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9]">{service.title}<br/><span className="text-zinc-600 italic uppercase">{service.tagline}</span></h1>
-                  <p className="text-zinc-500 text-2xl max-w-3xl mx-auto font-light leading-relaxed">
+                  <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-none uppercase">{service.title}<br/><span className="text-zinc-600">{service.tagline}</span></h1>
+                  <p className="text-zinc-500 text-xl md:text-2xl max-w-3xl mx-auto font-medium leading-relaxed">
                       {service.description}
                   </p>
               </motion.div>
@@ -130,59 +130,63 @@ export default function ServicePage({ params }: PageProps) {
                   
                   <div className="space-y-12">
                       <div>
-                          <h2 className="text-4xl font-bold mb-8">Enterprise Capabilities</h2>
+                          <h2 className="text-4xl font-bold mb-8 uppercase tracking-tight">Capabilities</h2>
                           <div className="space-y-6">
                               {service.features.map((feature, i) => (
                                   <div key={i} className="flex items-start gap-4">
                                       <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10">
                                           <CheckCircle className="h-4 w-4 text-green-500" />
                                       </div>
-                                      <p className="text-lg text-zinc-300 font-light">{feature}</p>
+                                      <p className="text-lg text-zinc-300 font-medium">{feature}</p>
                                   </div>
                               ))}
                           </div>
                       </div>
 
                       <Link href={service.href}>
-                        <Button className="h-16 px-12 rounded-full bg-white text-black font-black text-xl hover:scale-105 transition-all shadow-2xl">
+                        <Button className="h-16 px-12 rounded-full bg-white text-black font-bold text-xl hover:scale-105 transition-all shadow-2xl uppercase tracking-tight">
                             {service.cta} <ArrowRight className="ml-2 h-5 w-5" />
                         </Button>
                       </Link>
                   </div>
 
-                  <Card className="bg-zinc-900/50 border-white/5 backdrop-blur-3xl rounded-[3rem] overflow-hidden p-12">
+                  <Card className="bg-zinc-900/40 border-white/5 backdrop-blur-3xl rounded-[3rem] overflow-hidden p-12 shadow-sm">
                       <div className="space-y-8">
                           <div className="flex items-center gap-4 border-b border-white/5 pb-8">
-                              <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center border", `bg-${service.color}-600/10 border-${service.color}-500/20 text-${service.color}-500`)}>
+                              <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center border", `bg-white/5 border-white/10 text-white`)}>
                                   <Icon className="h-8 w-8" />
                               </div>
                               <div>
-                                  <p className="text-xs font-black text-zinc-500 uppercase tracking-widest">Active Module</p>
-                                  <h4 className="text-xl font-bold text-white">{service.title} v2.0</h4>
+                                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Active Module</p>
+                                  <h4 className="text-xl font-bold text-white uppercase tracking-tight">{service.title}</h4>
                               </div>
                           </div>
                           
                           <div className="space-y-6">
                               <div className="p-6 rounded-2xl bg-black/40 border border-white/5">
-                                  <p className="text-[10px] font-bold text-zinc-600 uppercase mb-2">Sync Status</p>
+                                  <p className="text-[10px] font-bold text-zinc-600 uppercase mb-2 tracking-widest">Sync Status</p>
                                   <div className="flex items-center gap-3">
-                                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                      <p className="text-sm font-bold text-white">Connected to UAE Data Nodes</p>
+                                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.6)]" />
+                                      <p className="text-sm font-bold text-white uppercase tracking-tight">Connected to Market Data</p>
                                   </div>
                               </div>
                               <div className="p-6 rounded-2xl bg-black/40 border border-white/5">
-                                  <p className="text-[10px] font-bold text-zinc-600 uppercase mb-2">AI Optimization</p>
-                                  <p className="text-lg font-black text-white">Vertex Pro Active</p>
+                                  <p className="text-[10px] font-bold text-zinc-600 uppercase mb-2 tracking-widest">AI Performance</p>
+                                  <p className="text-lg font-bold text-white uppercase tracking-tight">Optimization Active</p>
                               </div>
                           </div>
 
                           <div className="pt-4">
-                              <div className="flex justify-between text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-3">
+                              <div className="flex justify-between text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3">
                                   <span>Efficiency Rating</span>
                                   <span className="text-blue-500">98.4%</span>
                               </div>
                               <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                  <div className="h-full w-[98%] bg-blue-600" />
+                                  <motion.div 
+                                    initial={{ width: 0 }}
+                                    whileInView={{ width: '98%' }}
+                                    className="h-full bg-blue-600" 
+                                  />
                               </div>
                           </div>
                       </div>
@@ -191,14 +195,20 @@ export default function ServicePage({ params }: PageProps) {
           </div>
       </section>
 
-      {/* System Note */}
-      <section className="py-40 bg-zinc-950 border-y border-white/5 text-center">
-          <div className="container mx-auto px-6 max-w-4xl space-y-6">
-              <Target className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-              <h3 className="text-4xl font-bold">Part of the Growth Infrastructure.</h3>
-              <p className="text-zinc-500 text-xl font-light leading-relaxed">
-                  All Entrestate services are interconnected. Data from the <span className="text-white font-medium">Architect</span> flows directly into your <span className="text-white font-medium">Ads Manager</span> and <span className="text-white font-medium">Chat Experts</span>, creating a seamless high-conversion loop.
+      {/* Interconnectivity Section */}
+      <section className="py-40 bg-zinc-950 border-y border-white/5 text-center relative overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
+          <div className="container mx-auto px-6 max-w-4xl space-y-8 relative z-10">
+              <Zap className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+              <h3 className="text-4xl font-bold uppercase tracking-tight text-white">Full Stack Growth.</h3>
+              <p className="text-zinc-500 text-xl font-medium leading-relaxed max-w-3xl mx-auto">
+                  Every Entrestate service is interconnected. Data from the <span className="text-white">Architect</span> flows directly into your <span className="text-white">Ads Manager</span> and <span className="text-white">Chat Experts</span>, creating a high-conversion sales loop.
               </p>
+              <div className="pt-8 flex flex-wrap justify-center gap-8">
+                  <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /><span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Verified Assets</span></div>
+                  <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /><span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Secure Cloud</span></div>
+                  <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /><span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Live ROI Sync</span></div>
+              </div>
           </div>
       </section>
 

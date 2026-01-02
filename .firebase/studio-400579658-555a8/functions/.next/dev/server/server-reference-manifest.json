@@ -1,0 +1,21 @@
+{
+  "node": {
+    "404299809d1a730a80b97a843a966aafd5efcd4ca6": {
+      "workers": {
+        "app/builder/page": {
+          "moduleId": "[project]/.next-internal/server/app/builder/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/suggest-next-blocks.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "suggestNextBlocks",
+          "filename": "src/ai/flows/suggest-next-blocks.ts"
+        }
+      },
+      "layer": {
+        "app/builder/page": "action-browser"
+      },
+      "filename": "src/ai/flows/suggest-next-blocks.ts",
+      "exportedName": "suggestNextBlocks"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "QFDPENB4uXZE2NQwx8om7Py0RxYpSqXpcJVAwmq+ntA="
+}
