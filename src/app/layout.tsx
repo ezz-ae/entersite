@@ -1,37 +1,43 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-<<<<<<< HEAD
 import { FirebaseClientProvider } from '@/firebase/client-provider'; // Corrected import path
-=======
-import { FirebaseClientProvider } from '@/firebase';
->>>>>>> parent of a4cc956 (all)
 import { ThemeProvider } from '@/components/theme-provider';
 import { LayoutWrapper } from '@/components/layout-wrapper';
 import Script from 'next/script';
 import localFont from 'next/font/local';
 
-export const metadata: Metadata = {
-  title: 'Entrestate OS | Real Estate Intelligence',
-  description: 'The first AI Operating System for Real Estate. Build landing pages from brochures, automate Instagram DMs, and launch high-ROI Google Ads.',
-  metadataBase: new URL('https://entrestate.com'),
-  icons: {
-    icon: 'https://firebasestorage.googleapis.com/v0/b/studio-7730943652-a28e0.firebasestorage.app/o/logo_white.png?alt=media&token=c606a461-1e96-4115-8930-b530053982e0',
-    apple: 'https://firebasestorage.googleapis.com/v0/b/studio-7730943652-a28e0.firebasestorage.app/o/logo_white.png?alt=media&token=c606a461-1e96-4115-8930-b530053982e0',
-  }
-};
-
-// Vendored Inter font so builds don't rely on Google Fonts during compile time.
 const inter = localFont({
   src: [
     {
       path: '../../public/fonts/inter/inter-latin-wght-normal.woff2',
-      weight: '300 700',
       style: 'normal',
     },
   ],
   display: 'swap',
+  variable: '--font-inter',
 });
+
+export const metadata: Metadata = {
+  title: 'Entrestate OS',
+  description:
+    'The operating system for real estate developers and marketers. Launch a full-featured website, generate leads, and manage your sales pipeline, all in one place.',
+  metadataBase: new URL('https://entrestate.com'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://entrestate.com',
+    siteName: 'Entrestate OS',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Entrestate OS',
+      },
+    ],
+  },
+};
 
 export default function RootLayout({
   children,
@@ -60,11 +66,8 @@ export default function RootLayout({
                 xfbml      : true,
                 version    : 'v19.0'
               });
-              
-              FB.AppEvents.logPageView();   
-                
+              FB.AppEvents.logPageView();
             };
-
             (function(d, s, id){
                var js, fjs = d.getElementsByTagName(s)[0];
                if (d.getElementById(id)) {return;}
@@ -73,7 +76,7 @@ export default function RootLayout({
                fjs.parentNode.insertBefore(js, fjs);
              }(document, 'script', 'facebook-jssdk'));
           `}
-          </Script>
+        </Script>
         )}
       </body>
     </html>
