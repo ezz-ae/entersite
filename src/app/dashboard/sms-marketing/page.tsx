@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Smartphone, Send, Users, MessageCircle, Zap, Clock, ArrowRight, CheckCircle2, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export default function SmsMarketingPage() {
   return (
@@ -17,9 +18,11 @@ export default function SmsMarketingPage() {
           <p className="text-md md:text-lg text-zinc-500 font-light mt-1">Launch targeted SMS/WhatsApp blasts to your investor lists.</p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
-          <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-full px-6 h-11 font-bold gap-2 text-xs uppercase tracking-wider">
-             <Upload className="h-4 w-4" /> Import Contacts
-          </Button>
+          <Link href="/dashboard/sms-marketing/import">
+            <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-full px-6 h-11 font-bold gap-2 text-xs uppercase tracking-wider">
+               <Upload className="h-4 w-4" /> Import Contacts
+            </Button>
+          </Link>
           <Button className="bg-green-600 hover:bg-green-700 rounded-full px-6 h-11 font-bold gap-2 text-xs uppercase tracking-wider">
              <Send className="h-4 w-4" /> Create Broadcast
           </Button>
