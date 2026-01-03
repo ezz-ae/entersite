@@ -1,48 +1,27 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
+  ArrowRight, 
   UploadCloud, 
-  Loader2,
-  ShieldCheck,
-  ChevronRight,
-  ArrowRight,
+  FileText, 
+  Zap, 
+  CheckCircle2, 
   Sparkles,
-  Zap,
-  Globe,
-  Cpu,
-  Target,
-  ArrowRightCircle
+  Loader2
 } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { captureLead } from '@/lib/leads';
 import { useCampaignAttribution } from '@/hooks/useCampaignAttribution';
-import { Button } from '@/components/ui/button';
-
-const SITE_TYPES = [
-    "Landing Pages",
-    "Listing Sites",
-    "Broker Portals",
-    "Single Units",
-    "Sales Events"
-];
 
 export function LandingHero() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [typeIndex, setTypeIndex] = useState(0);
   const router = useRouter();
   const attribution = useCampaignAttribution();
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTypeIndex((prev) => (prev + 1) % SITE_TYPES.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleSimulateUpload = async () => {
     try {
@@ -59,178 +38,123 @@ export function LandingHero() {
     setIsUploading(true);
     let progress = 0;
     const interval = setInterval(() => {
-      progress += 5;
+      progress += 10;
       setUploadProgress(progress);
       if (progress >= 100) {
         clearInterval(interval);
         setTimeout(() => {
-          router.push('/builder?method=upload');
+          router.push('/builder?mode=brochure-demo');
         }, 500);
       }
-    }, 100);
+    }, 200);
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center bg-black text-white selection:bg-blue-500 selection:text-white py-12 md:py-20 overflow-hidden">
+    <section className="relative min-h-screen flex flex-col items-center justify-center bg-black text-white overflow-hidden px-4 py-20">
       
-      {/* Cinematic Background */}
-      <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] opacity-[0.05]" />
-          <div className="absolute top-0 left-1/4 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-blue-600/10 blur-[100px] md:blur-[150px] rounded-full animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-indigo-600/10 blur-[100px] md:blur-[150px] rounded-full animate-pulse" />
+      {/* Background Intelligence */}
+      <div className="absolute inset-0 z-0">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,_rgba(37,99,235,0.1),transparent_50%)] animate-pulse" />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
       </div>
 
-      <div className="container relative z-10 max-w-7xl mx-auto px-4 md:px-6 flex flex-col items-center">
+      <div className="relative z-10 container mx-auto max-w-5xl text-center space-y-12">
         
-        <div className="w-full flex flex-col items-center space-y-8 md:space-y-16">
-            
-            {/* Status Badge */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="hidden sm:inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-400 backdrop-blur-sm shadow-[0_0_20px_rgba(37,99,235,0.1)]"
-            >
-                <Sparkles className="h-3.5 w-3.5" /> Site Architect v2.0 Live
-            </motion.div>
-
-            {/* Main Headline */}
-            <div className="space-y-4 md:space-y-8 text-center max-w-5xl">
-                <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-bold tracking-tight leading-[1] text-white uppercase">
-                   PDF TO <br/>
-                   <div className="min-h-[1.1em] relative flex items-center justify-center mt-2 md:mt-4">
-                        <AnimatePresence mode="wait">
-                            <motion.span
-                                key={SITE_TYPES[typeIndex]}
-                                initial={{ y: 20, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                exit={{ y: -20, opacity: 0 }}
-                                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                                className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-blue-600 drop-shadow-[0_0_30px_rgba(37,99,235,0.3)] block w-full px-4"
-                            >
-                                {SITE_TYPES[typeIndex]}
-                            </motion.span>
-                        </AnimatePresence>
-                   </div>
-                </h1>
-                <p className="text-zinc-500 text-base md:text-xl lg:text-2xl max-w-2xl mx-auto font-medium leading-relaxed px-4">
-                    Convert brochures into <span className="text-white">sales engines</span> in seconds. Automated structure and AI copy instantly.
-                </p>
-            </div>
-
-            {/* The Dropzone / Action Area */}
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.8 }}
-                className="w-full max-w-2xl flex flex-col items-center px-4"
-            >
-                <div 
-                    onClick={handleSimulateUpload}
-                    className={cn(
-                        "relative group w-full p-8 md:p-16 border border-white/10 rounded-[2.5rem] md:rounded-[4rem] flex flex-col items-center justify-center transition-all duration-700 cursor-pointer overflow-hidden",
-                        isUploading 
-                            ? "bg-zinc-900 border-blue-500/50" 
-                            : "bg-zinc-950/50 hover:bg-zinc-900/40 hover:border-white/20 shadow-[0_20px_60px_-20px_rgba(0,0,0,1)]"
-                    )}
-                >
-                    {/* Hover Glow */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    
-                    <AnimatePresence mode="wait">
-                        {!isUploading ? (
-                            <motion.div 
-                                key="idle"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.05 }}
-                                className="flex flex-col items-center gap-6 md:gap-10 text-center relative z-10"
-                            >
-                                <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-[2rem] bg-white text-black flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.2)] transition-all duration-700 group-hover:scale-110 group-hover:rotate-3">
-                                    <UploadCloud className="h-8 w-8 md:h-10 md:w-10" />
-                                </div>
-                                <div className="space-y-2 md:space-y-4">
-                                    <p className="text-2xl md:text-4xl font-bold tracking-tight text-white uppercase">Select Project PDF</p>
-                                    <p className="hidden sm:block text-xs md:text-sm font-bold text-zinc-500 uppercase tracking-widest">Deploy Automated Sales Hub</p>
-                                </div>
-                                <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6">
-                                    <BadgeItem label="AI Content" />
-                                    <BadgeItem label="Leads" />
-                                    <BadgeItem label="Instant" />
-                                </div>
-                            </motion.div>
-                        ) : (
-                            <motion.div 
-                                key="uploading"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="w-full max-w-sm flex flex-col items-center gap-8 md:gap-12 relative z-10"
-                            >
-                                <div className="space-y-4 md:space-y-6 w-full text-center">
-                                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-2">
-                                        <span className="animate-pulse">Building Assets</span>
-                                        <span className="font-mono">{uploadProgress}%</span>
-                                    </div>
-                                    <div className="h-1.5 md:h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-                                        <motion.div 
-                                            className="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${uploadProgress}%` }}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex flex-col items-center gap-3">
-                                    <Loader2 className="h-6 w-6 text-blue-500 animate-spin" />
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 animate-pulse">Designing Hub</p>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-
-                {/* Bottom Navigation */}
-                <div className="mt-8 md:mt-16">
-                    <Link href="/builder">
-                        <button className="group flex items-center gap-3 text-zinc-600 hover:text-white transition-all font-bold uppercase text-[10px] tracking-widest">
-                            Skip to Templates
-                            <ArrowRightCircle className="h-4 w-4 text-zinc-800 group-hover:text-blue-500 transition-colors" />
-                        </button>
-                    </Link>
-                </div>
-            </motion.div>
-        </div>
-      </div>
-
-    </section>
-  );
-}
-
-function BadgeItem({ label }: { label: string }) {
-    return (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
-            <CheckCircle2 className="h-3 w-3 text-blue-500" />
-            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{label}</span>
-        </div>
-    )
-}
-
-function CheckCircle2(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="space-y-6"
         >
-            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-            <path d="m9 12 2 2 4-4" />
-        </svg>
-    )
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-4">
+                <Sparkles className="h-3 w-3" /> Industry First: Brochure-to-Web AI
+            </div>
+            
+            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.9]">
+                PDF to <br />
+                <span className="text-blue-600">Empire.</span>
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-zinc-400 max-w-2xl mx-auto font-light leading-relaxed">
+                Drop your project brochure. Our AI extracts the data and builds a high-converting landing page in seconds.
+            </p>
+        </motion.div>
+
+        {/* The "One Big Action" - Upload Simulation */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.8 }}
+          className="w-full max-w-2xl mx-auto"
+        >
+          <div 
+            onClick={handleSimulateUpload}
+            className={cn(
+                "relative group border-2 border-dashed rounded-[3rem] p-12 transition-all duration-500 cursor-pointer overflow-hidden",
+                isUploading 
+                  ? "border-blue-500 bg-blue-500/5" 
+                  : "border-white/10 bg-white/5 hover:border-blue-500/50 hover:bg-white/10"
+            )}
+          >
+            <AnimatePresence mode="wait">
+              {!isUploading ? (
+                <motion.div 
+                  key="idle"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col items-center gap-6"
+                >
+                  <div className="w-20 h-20 rounded-3xl bg-blue-600 flex items-center justify-center shadow-2xl shadow-blue-600/40 group-hover:scale-110 transition-transform">
+                    <UploadCloud className="h-10 w-10 text-white" />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-2xl font-bold">Drop your Brochure (PDF)</p>
+                    <p className="text-zinc-500 font-medium">Any project, any developer. Instant results.</p>
+                  </div>
+                  <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest text-zinc-600">
+                    <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-500" /> Extracts ROI</span>
+                    <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-500" /> Floor Plans</span>
+                    <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-500" /> Lead Sync</span>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div 
+                  key="uploading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col items-center gap-8 py-4"
+                >
+                  <div className="relative">
+                    <Loader2 className="h-16 w-16 text-blue-500 animate-spin" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <FileText className="h-6 w-6 text-blue-400" />
+                    </div>
+                  </div>
+                  <div className="space-y-4 w-full max-w-xs">
+                    <p className="text-xl font-bold text-white">Analyzing Architectural Data...</p>
+                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-blue-600"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-xs font-mono text-zinc-500 uppercase tracking-widest">{uploadProgress}% Complete</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          
+          <div className="mt-8 flex justify-center items-center gap-4 text-zinc-500">
+            <span className="text-xs font-medium">Or start with a simple prompt</span>
+            <ArrowRight className="h-3 w-3" />
+            <Link href="/start" className="text-white font-bold text-xs hover:underline">Launch Architect</Link>
+         </div>
+       </motion.div>
+     </div>
+   </section>
+  );
 }

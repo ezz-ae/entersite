@@ -1,47 +1,75 @@
+export interface GenerateAdsInput {
+  pageTitle: string;
+  pageDescription: string;
+  targetAudience?: string;
+  location?: string;
+}
 
-import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { GenerateAdsInputSchema, GenerateAdsOutputSchema } from '@/types/ads';
+export interface AdVariation {
+  id: string;
+  headlines: string[];
+  descriptions: string[];
+}
 
-export type { GenerateAdsInput, GenerateAdsOutput } from '@/types/ads';
+export interface KeywordGroup {
+  category: string;
+  keywords: string[];
+}
 
-const generateAdsPrompt = ai.definePrompt({
-  name: 'generateAdsPrompt',
-  input: { schema: GenerateAdsInputSchema },
-  output: { schema: GenerateAdsOutputSchema },
-  prompt: `
-    You are an expert Google Ads Strategist for the Dubai Real Estate market.
-    Analyze this project:
-    Title: {{pageTitle}}
-    Description: {{pageDescription}}
-    Target Audience: {{targetAudience}}
-    Location: {{location}}
-    USPs: {{usp}}
+export interface GenerateAdsOutput {
+  variations: AdVariation[];
+  keywordGroups: KeywordGroup[];
+  estimatedCpc: number;
+}
 
-    Generate a high-performing Google Search Campaign structure.
-    Include 4 distinct variations based on different psychological triggers:
-    1. ROI_FOCUSED (Yields, Appreciation, Tax-free)
-    2. LIFESTYLE_FOCUSED (Amenities, Views, Neighborhood)
-    3. URGENCY_FOCUSED (Launch price, Limited units, "Register Now")
-    4. LUXURY_FOCUSED (Exclusivity, Design, Branded residences)
+export const generateAdsFromPageContent = async (input: GenerateAdsInput): Promise<GenerateAdsOutput> => {
+  // Simulate AI latency
+  await new Promise(resolve => setTimeout(resolve, 2000));
 
-    Ensure all headlines are < 30 chars and descriptions < 90 chars.
-    Provide negative keywords to avoid low-intent traffic (e.g., "cheap", "jobs", "rent").
-    Suggest 4 sitelink extensions.
-    Estimate a realistic CPC for Dubai real estate in 2024/2025.
-    Output strictly as JSON.
-  `,
-});
-
-export const generateAdsFromPageContent = ai.defineFlow(
-  {
-    name: 'generateAdsFromPageContent',
-    inputSchema: GenerateAdsInputSchema,
-    outputSchema: GenerateAdsOutputSchema,
-  },
-  async (input) => {
-    const { output } = await generateAdsPrompt(input);
-    if (!output) throw new Error('Failed to generate ads from AI');
-    return output;
-  }
-);
+  const baseKeywords = ["real estate", "property for sale", "investment"];
+  if (input.location) baseKeywords.push(`property in ${input.location}`, `${input.location} real estate`);
+  
+  return {
+    variations: [
+      {
+        id: "v1",
+        headlines: [
+          `New Launch in ${input.location || "Dubai"}`,
+          "Luxury Waterfront Living",
+          "High ROI Investment"
+        ],
+        descriptions: [
+          `Own a premium apartment with stunning views. 5-year payment plan available.`,
+          `Exclusive pre-launch offers ending soon. Register your interest today.`
+        ]
+      },
+      {
+        id: "v2",
+        headlines: [
+          "Invest with 10% Down",
+          `${input.pageTitle || "Premium Property"}`,
+          "Golden Visa Eligible"
+        ],
+        descriptions: [
+          `Secure your future with tax-free real estate income. Prices starting from AED 1.5M.`,
+          `Award-winning developer. Prime location. High rental yields guaranteed.`
+        ]
+      }
+    ],
+    keywordGroups: [
+      {
+        category: "High Intent",
+        keywords: [`buy apartment in ${input.location || "dubai"}`, "luxury villas for sale", "off plan projects"]
+      },
+      {
+        category: "Competitor",
+        keywords: ["emaar properties", "damac hills", "sobha hartland prices"]
+      },
+      {
+        category: "Broad Match",
+        keywords: ["real estate investment", "dubai property market", "best places to invest"]
+      }
+    ],
+    estimatedCpc: 2.50 // AED/USD
+  };
+};

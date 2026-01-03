@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, LayoutGrid, List as ListIcon, Loader2, Activity } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, MapPin, Filter, LayoutGrid, List as ListIcon, TrendingUp, BarChart3, Building2, SlidersHorizontal, X, ArrowRight, Zap, Globe, Activity, Loader2 } from "lucide-react";
 import type { ProjectData } from '@/lib/types';
 import {
     Select,
@@ -12,6 +14,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ProjectCard } from '@/components/project-card';
 
@@ -38,6 +42,9 @@ export default function DiscoverPage() {
   const [selectedCity, setSelectedCity] = useState("Dubai");
   const [selectedStatus, setSelectedStatus] = useState("all");
   
+  // Statistics
+  const [stats, setStats] = useState({ total: 0, avgPrice: 0, avgRoi: 0 });
+
   const fetchProjects = useCallback(async (pageParam: number, append: boolean) => {
     setLoading(true);
     try {
@@ -48,12 +55,16 @@ export default function DiscoverPage() {
         page: pageParam,
         limit: PROJECTS_PER_PAGE,
       });
-      const res = await fetch(`/api/projects/search?\${queryString}`);
+      const res = await fetch(`/api/projects/search?${queryString}`);
       if (!res.ok) throw new Error('Failed to fetch projects');
       const json = await res.json();
       setTotalProjects(json.pagination.total || 0);
       setProjects((prev) => {
-        return append ? [...prev, ...json.data] : json.data;
+        const nextProjects = append ? [...prev, ...json.data] : json.data;
+        const total = nextProjects.length;
+        const avgPrice = total > 0 ? nextProjects.reduce((acc: number, curr: any) => acc + (curr.price?.from || 0), 0) / total : 0;
+        setStats({ total, avgPrice, avgRoi: 8.4 });
+        return nextProjects;
       });
       setPage(pageParam);
     } catch (error) {
@@ -80,35 +91,35 @@ export default function DiscoverPage() {
           <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/5 blur-[150px] rounded-full pointer-events-none" />
           
           <div className="container mx-auto px-6 max-w-[1800px] relative z-10">
-              <div className="flex flex-col items-center gap-8 mb-16 text-center">
-                  <div className="max-w-4xl space-y-6">
-                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600/10 text-blue-500 text-[10px] font-bold uppercase tracking-widest border border-blue-500/20 mx-auto">
+              <div className="flex flex-col items-center gap-12 mb-16 text-center">
+                  <div className="max-w-4xl space-y-8">
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50/10 text-blue-500 text-[10px] font-bold uppercase tracking-[0.3em] border border-blue-500/20 mx-auto">
                         <Activity className="h-3.5 w-3.5" />
-                        Market Database
+                        Enterprise Data Cluster
                       </div>
-                      <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white leading-tight uppercase">Market Intelligence</h1>
-                      <p className="text-zinc-500 text-xl md:text-2xl max-w-2xl mx-auto font-medium leading-relaxed">
-                          Access verified data on <span className="text-white">3,750+ projects</span>. Live inventory, ROI insights, and developer analytics.
+                      <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none text-white">Market <br/><span className="text-zinc-600 italic uppercase">Intelligence.</span></h1>
+                      <p className="text-zinc-500 text-2xl max-w-2xl mx-auto font-light leading-relaxed">
+                          Access verified data on <span className="text-white font-medium">3,750+ global projects</span>. Live inventory, real-time ROI, and developer analytics.
                       </p>
                   </div>
               </div>
 
               {/* Search Control */}
               <div className="max-w-5xl mx-auto">
-                  <div className="bg-zinc-900 border border-white/10 rounded-[2.5rem] p-2 flex flex-col md:flex-row gap-2 shadow-2xl backdrop-blur-3xl focus-within:border-blue-500/30 transition-all">
+                  <div className="bg-zinc-900 border border-white/10 rounded-[2.5rem] p-2 flex flex-col md:flex-row gap-2 shadow-2xl backdrop-blur-3xl">
                       <div className="flex-1 flex items-center px-6 gap-4 py-4 md:py-0 border-b md:border-b-0 md:border-r border-white/5">
                           <Search className="h-6 w-6 text-zinc-600" />
                           <input 
                             type="text" 
-                            placeholder="Search project, area, or developer..."
-                            className="flex-1 bg-transparent border-none text-white placeholder:text-zinc-700 focus:outline-none h-12 text-lg font-medium"
+                            placeholder="Project, Area, Developer or Global City..."
+                            className="flex-1 bg-transparent border-none text-white placeholder:text-zinc-700 focus:outline-none h-12 text-xl"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                           />
                       </div>
                       <div className="p-2 flex gap-2">
                            <Select value={selectedCity} onValueChange={setSelectedCity}>
-                                <SelectTrigger className="h-14 bg-white/5 border-white/5 rounded-2xl w-48 font-bold uppercase tracking-widest text-[10px] text-zinc-400 hover:bg-white/10 transition-all">
+                                <SelectTrigger className="h-14 bg-white/5 border-white/5 rounded-2xl w-48 font-bold uppercase tracking-widest text-[10px] text-zinc-400">
                                     <SelectValue placeholder="Location" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-zinc-900 border-white/10 text-white">
@@ -117,10 +128,15 @@ export default function DiscoverPage() {
                                     <SelectItem value="Abu Dhabi">Abu Dhabi</SelectItem>
                                     <SelectItem value="Ras Al Khaimah">Ras Al Khaimah</SelectItem>
                                     <SelectItem value="Sharjah">Sharjah</SelectItem>
+                                    <SelectItem value="Miami">Miami</SelectItem>
+                                    <SelectItem value="New York">New York</SelectItem>
+                                    <SelectItem value="London">London</SelectItem>
+                                    <SelectItem value="Singapore">Singapore</SelectItem>
+                                    <SelectItem value="Bali">Bali</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <Button onClick={() => fetchProjects(1, false)} className="h-14 px-10 rounded-2xl bg-blue-600 hover:bg-blue-700 font-bold shadow-lg shadow-blue-900/40 uppercase tracking-tight">
-                                Search Data
+                            <Button className="h-14 px-10 rounded-2xl bg-blue-600 hover:bg-blue-700 font-bold shadow-lg shadow-blue-900/40">
+                                Query Nodes
                             </Button>
                       </div>
                   </div>
@@ -132,9 +148,9 @@ export default function DiscoverPage() {
             {/* Grid Header */}
             <div className="flex justify-between items-center mb-12 border-b border-white/5 pb-8">
                 <div className="flex items-center gap-4">
-                    <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Available Clusters</p>
-                    <Badge variant="outline" className="bg-green-500/5 text-green-500 border-green-500/20 font-bold px-3 py-1 rounded-full">
-                        {totalProjects} Results
+                    <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Cluster Activity</p>
+                    <Badge variant="outline" className="bg-green-500/5 text-green-500 border-green-500/20 font-mono">
+                        {totalProjects} Ready
                     </Badge>
                 </div>
                 <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/5">
@@ -146,7 +162,7 @@ export default function DiscoverPage() {
             {loading && projects.length === 0 ? (
                 <div className="h-96 flex flex-col items-center justify-center gap-6">
                     <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
-                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Searching Market...</p>
+                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.4em]">Synchronizing Cluster...</p>
                 </div>
             ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -158,7 +174,7 @@ export default function DiscoverPage() {
 
             {!loading && projects.length < totalProjects && (
                 <div className="mt-20 text-center">
-                    <Button onClick={loadMore} className="h-16 px-12 rounded-full border border-white/10 bg-white/5 text-white font-bold hover:bg-white/10 transition-all text-lg uppercase tracking-tight">
+                    <Button onClick={loadMore} className="h-16 px-12 rounded-full border border-white/10 bg-white/5 text-white font-bold hover:bg-white/10 transition-all text-lg">
                         Load More Projects
                     </Button>
                 </div>

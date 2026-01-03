@@ -26,14 +26,8 @@ export function ProjectDiscoveryClient({ initialProjects }: Props) {
   const [city, setCity] = useState('Dubai');
   const [status, setStatus] = useState('all');
   const [loading, setLoading] = useState(false);
-  const [projects, setProjects] = useState<ProjectData[]>([]);
+  const [projects, setProjects] = useState<ProjectData[]>(initialProjects.slice(0, 6));
   const [totalResults, setTotalResults] = useState(initialProjects.length);
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-      setHasMounted(true);
-      setProjects(initialProjects.slice(0, 6));
-  }, [initialProjects]);
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -50,26 +44,20 @@ export function ProjectDiscoveryClient({ initialProjects }: Props) {
       setProjects(json.data || []);
       setTotalResults(json.pagination?.total || 0);
     } catch (error) {
-      console.error('Failed to fetch projects', error);
+      console.error('Failed to fetch discovery projects', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (hasMounted) {
-        fetchProjects();
-    }
+    fetchProjects();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [city, status, hasMounted]);
+  }, [city, status]);
 
   const handleSearch = () => {
     fetchProjects();
   };
-
-  if (!hasMounted) {
-      return <div className="min-h-[600px] bg-black" />;
-  }
 
   return (
     <section className="bg-black text-white py-40 border-y border-white/5 relative overflow-hidden">
@@ -80,14 +68,14 @@ export function ProjectDiscoveryClient({ initialProjects }: Props) {
         <div className="flex flex-col lg:flex-row justify-between items-end mb-24 gap-12 border-b border-white/5 pb-16">
             <div className="max-w-4xl space-y-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[10px] font-bold uppercase tracking-widest">
-                    <Activity className="h-3 w-3" /> Live Database
+                    <Activity className="h-3 w-3" /> Live Inventory
                 </div>
-                <h2 className="text-6xl md:text-8xl font-black tracking-tighter leading-none uppercase italic">
-                    Market <br/>
-                    <span className="text-zinc-600">Intelligence.</span>
+                <h2 className="text-6xl md:text-8xl font-bold tracking-tighter leading-none">
+                    Verified <br/>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">Market Intelligence.</span>
                 </h2>
                 <p className="text-2xl text-zinc-400 max-w-2xl font-light">
-                    Direct access to the EntreSite database of {totalResults.toLocaleString()}+ verified projects. Live prices and rental yields.
+                    Direct access to the Entrestate database of {totalResults.toLocaleString()}+ projects. Verified prices, real-time ROI, and developer inventory.
                 </p>
             </div>
             <div className="flex gap-4">
@@ -96,8 +84,8 @@ export function ProjectDiscoveryClient({ initialProjects }: Props) {
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase">System Status</p>
-                        <p className="text-xs font-mono text-green-500">Connected</p>
+                        <p className="text-[10px] font-bold text-zinc-500 uppercase">Data Sync</p>
+                        <p className="text-xs font-mono text-green-500">Live</p>
                     </div>
                 </div>
             </div>
@@ -140,8 +128,8 @@ export function ProjectDiscoveryClient({ initialProjects }: Props) {
                         </SelectContent>
                     </Select>
 
-                    <Button onClick={handleSearch} className="h-14 px-10 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg shadow-blue-900/40 uppercase italic tracking-tighter">
-                        Search Library
+                    <Button onClick={handleSearch} className="h-14 px-10 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg shadow-blue-900/40">
+                        Query Data
                     </Button>
                 </div>
             </div>
@@ -153,7 +141,7 @@ export function ProjectDiscoveryClient({ initialProjects }: Props) {
                     <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
                     <div className="absolute inset-0 bg-blue-500 blur-2xl opacity-20 animate-pulse" />
                 </div>
-                <p className="text-zinc-500 font-mono text-[10px] font-black uppercase tracking-[0.4em]">Searching Database...</p>
+                <p className="text-zinc-500 font-mono text-xs uppercase tracking-[0.3em]">Querying Data Nodes...</p>
             </div>
         ) : projects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -164,7 +152,7 @@ export function ProjectDiscoveryClient({ initialProjects }: Props) {
         ) : (
             <div className="h-60 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[3rem] bg-white/5">
                 <MapPin className="h-10 w-10 text-zinc-800 mb-4" />
-                <p className="text-zinc-500 font-medium text-lg">No matches found in the library.</p>
+                <p className="text-zinc-500 font-medium text-lg">No matches found in current data cluster.</p>
                 <button onClick={() => { setQuery(''); setCity('Dubai'); setStatus('all'); fetchProjects(); }} className="mt-4 text-blue-500 font-bold uppercase tracking-widest text-[10px] hover:underline">Reset Filters</button>
             </div>
         )}

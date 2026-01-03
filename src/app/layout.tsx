@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+<<<<<<< HEAD
 import { FirebaseClientProvider } from '@/firebase/client-provider'; // Corrected import path
+=======
+import { FirebaseClientProvider } from '@/firebase';
+>>>>>>> parent of a4cc956 (all)
 import { ThemeProvider } from '@/components/theme-provider';
 import { LayoutWrapper } from '@/components/layout-wrapper';
 import Script from 'next/script';

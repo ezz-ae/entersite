@@ -5,14 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BarChart, PieChart, DollarSign, Plus, Loader2, TrendingUp, Megaphone, Globe, Smartphone, Mail, Instagram, Target, Search, Activity } from 'lucide-react';
+import { BarChart, PieChart, DollarSign, Plus, Loader2, TrendingUp } from 'lucide-react';
 import { getAuth } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useToast } from '@/hooks/use-toast';
 
 // Enhanced Components
 import { GoogleAdsManager } from '@/components/ads/google-ads-manager';
-import { MetaAdsManager } from '@/components/ads/meta-ads-manager';
 import { SeoManager } from '@/components/seo/seo-manager';
 import { MetricCard } from '@/components/dashboard/metric-card';
 import { EmailCampaignDashboard } from '@/components/messaging/email-dashboard';
@@ -52,6 +51,11 @@ export default function MarketingDashboardPage() {
     };
     load().catch((error) => {
       console.error(error);
+      toast({
+        title: 'Failed to load marketing data',
+        description: 'Showing cached defaults for now.',
+        variant: 'destructive',
+      });
       if (isMounted) {
         setLoading(false);
       }
@@ -59,7 +63,7 @@ export default function MarketingDashboardPage() {
     return () => {
       isMounted = false;
     };
-  }, [user]);
+  }, [user, toast]);
 
   useEffect(() => {
     let isMounted = true;
@@ -145,28 +149,26 @@ export default function MarketingDashboardPage() {
   }, [metrics]);
 
   const campaignList = campaigns ?? [];
+  const recommendation = metrics.recommendations?.[0];
 
   return (
-      <div className="space-y-8 animate-in fade-in duration-700 pb-24">
+      <div className="space-y-8">
         
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-8">
-            <div className="space-y-1">
-                <div className="flex items-center gap-2 mb-1">
-                    <Badge className="bg-blue-600/10 text-blue-500 border-blue-500/20 px-2 py-0 h-5 text-[9px] font-bold uppercase tracking-widest">Active Hub</Badge>
-                </div>
-                <h1 className="text-4xl font-bold tracking-tight text-white">Marketing Hub</h1>
-                <p className="text-zinc-500 font-medium">Coordinate global project launches and lead generation channels.</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">Marketing Center</h1>
+                <p className="text-muted-foreground">Manage your paid campaigns, SEO, and lead generation channels.</p>
             </div>
-            <div className="flex gap-3">
-                <Button variant="outline" className="rounded-xl border-white/10 bg-white/5 font-bold h-12 px-6">Export Report</Button>
-                <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 font-bold h-12 px-6"><Plus className="h-4 w-4 mr-2" />Create Launch</Button>
+            <div className="flex gap-2">
+                <Button variant="outline">Export Report</Button>
+                <Button><Plus className="h-4 w-4 mr-2" />Create Campaign</Button>
             </div>
         </div>
 
         {loading && (
-          <div className="flex items-center gap-2 text-sm text-zinc-500 font-medium bg-zinc-900/50 p-4 rounded-2xl border border-white/5">
-            <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-            Synchronizing live marketing performance...
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Syncing live marketing performance...
           </div>
         )}
 
@@ -184,90 +186,107 @@ export default function MarketingDashboardPage() {
             ))}
         </div>
 
-        <Tabs defaultValue="google" className="w-full">
-           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 mb-8 bg-zinc-950 p-1.5 rounded-[1.5rem] border border-white/10">
-               <TabsTrigger value="google" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">Google Ads</TabsTrigger>
-               <TabsTrigger value="meta" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">Meta Ads</TabsTrigger>
-               <TabsTrigger value="seo" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">SEO Engine</TabsTrigger>
-               <TabsTrigger value="email" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">Email</TabsTrigger>
-               <TabsTrigger value="sms" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">SMS</TabsTrigger>
-               <TabsTrigger value="plans" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">AI Plans</TabsTrigger>
+        <Tabs defaultValue="campaigns" className="w-full">
+           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
+               <TabsTrigger value="campaigns">Google Ads</TabsTrigger>
+               <TabsTrigger value="seo">SEO & Keywords</TabsTrigger>
+               <TabsTrigger value="meta">Meta Ads</TabsTrigger>
+               <TabsTrigger value="social">Social Media</TabsTrigger>
+               <TabsTrigger value="email">Email</TabsTrigger>
+               <TabsTrigger value="sms">SMS</TabsTrigger>
+                <TabsTrigger value="plans">AI Plans</TabsTrigger>
            </TabsList>
             
-            <TabsContent value="google" className="mt-0 space-y-6">
-                <div className="grid lg:grid-cols-3 gap-6">
-                     <Card className="lg:col-span-2 bg-zinc-900/30 border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm">
-                        <CardContent className="p-8">
+            <TabsContent value="campaigns" className="mt-6 space-y-6">
+                <div className="grid lg:grid-cols-3 gap-6 h-[800px]">
+                     <Card className="lg:col-span-2 h-full overflow-hidden">
+                        <CardContent className="p-6 h-full">
+                            {/* We pass dummy data since this is a dashboard view */}
                             <GoogleAdsManager pageTitle="New Campaign" pageDescription="Describe your offer to generate ads..." />
                         </CardContent>
                     </Card>
                     
                     <div className="space-y-6">
-                         <Card className="bg-zinc-900/30 border-white/5 rounded-[2.5rem] shadow-sm">
-                            <CardHeader className="p-8 pb-4">
-                                <CardTitle className="text-xl font-bold">Active Campaigns</CardTitle>
+                         <Card className="h-1/2">
+                            <CardHeader>
+                                <CardTitle>Active Campaigns</CardTitle>
                             </CardHeader>
-                            <CardContent className="p-8 pt-0">
-                                <div className="space-y-5">
+                            <CardContent>
+                                <div className="space-y-4">
                                     {campaignList.map((c: any, i: number) => (
-                                        <div key={i} className="flex justify-between items-center text-sm border-b border-white/5 pb-4 last:border-0 last:pb-0">
-                                            <div className="space-y-1">
-                                                <p className="font-bold text-white uppercase tracking-tight">{c.name}</p>
-                                                <p className="text-xs text-zinc-500 font-medium">
-                                                  {metrics.currencySymbol}{c.dailyBudget}/day
+                                        <div key={i} className="flex justify-between items-center text-sm border-b last:border-0 pb-3 last:pb-0">
+                                            <div>
+                                                <p className="font-medium">{c.name}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                  {metrics.currencySymbol}
+                                                  {c.dailyBudget}/day
                                                 </p>
+                                                {(c.conversions || c.roas) && (
+                                                  <p className="text-[11px] text-muted-foreground mt-1">
+                                                    {(c.conversions || 0).toLocaleString()} conversions
+                                                    {typeof c.roas === 'number' ? ` • ${c.roas.toFixed(2)}x ROAS` : ''}
+                                                  </p>
+                                                )}
                                             </div>
-                                            <Badge variant={c.status === 'Active' ? 'default' : 'secondary'} className="rounded-lg h-6 px-3 text-[9px] font-bold uppercase tracking-widest">{c.status}</Badge>
+                                            <Badge variant={c.status === 'Active' ? 'default' : 'secondary'} className="text-[10px]">{c.status}</Badge>
                                         </div>
                                     ))}
-                                    {campaignList.length === 0 && (
-                                      <div className="py-8 text-center space-y-3">
-                                          <Activity className="h-8 w-8 text-zinc-800 mx-auto" />
-                                          <p className="text-xs text-zinc-600 font-medium uppercase tracking-widest">No Active Campaigns</p>
-                                      </div>
+                                    {campaignsLoading && (
+                                      <p className="text-xs text-muted-foreground">Syncing recent launches…</p>
+                                    )}
+                                    {!campaignsLoading && campaignList.length === 0 && (
+                                      <p className="text-xs text-muted-foreground">No campaigns synced yet.</p>
                                     )}
                                 </div>
+                            </CardContent>
+                        </Card>
+                         <Card className="h-[calc(50%-1.5rem)]">
+                            <CardHeader>
+                                <CardTitle>Recommendations</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {recommendation ? (
+                                  <div className="p-3 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/50 rounded-lg text-sm">
+                                      <p className="font-medium text-yellow-800 dark:text-yellow-200">{recommendation.title}</p>
+                                      <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">{recommendation.description}</p>
+                                      {recommendation.actionLabel && (
+                                        <Button size="sm" variant="outline" className="mt-2 h-7 text-xs bg-white dark:bg-black">
+                                          {recommendation.actionLabel}
+                                        </Button>
+                                      )}
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-muted-foreground">No active recommendations.</p>
+                                )}
                             </CardContent>
                         </Card>
                     </div>
                 </div>
             </TabsContent>
 
-            <TabsContent value="meta" className="mt-0">
-                 <Card className="bg-zinc-900/30 border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm">
-                    <CardContent className="p-8">
-                        <MetaAdsManager pageTitle="Meta Launch" pageDescription="Instagram and Facebook social leads." />
-                    </CardContent>
-                </Card>
-            </TabsContent>
-
-            <TabsContent value="seo" className="mt-0">
-                 <div className="grid lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2">
-                        <Card className="bg-zinc-900/30 border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm">
-                            <CardContent className="p-8">
-                                <SeoManager />
-                            </CardContent>
-                        </Card>
+            <TabsContent value="seo" className="mt-6">
+                 <div className="grid lg:grid-cols-3 gap-6 h-[800px]">
+                    <div className="lg:col-span-2 h-full">
+                        <SeoManager />
                     </div>
                     <div>
-                         <Card className="bg-zinc-900/30 border-white/5 rounded-[2.5rem] shadow-sm h-full">
-                            <CardHeader className="p-8 pb-4">
-                                <CardTitle className="text-xl font-bold">Opportunities</CardTitle>
+                         <Card className="h-full">
+                            <CardHeader>
+                                <CardTitle>Keyword Opportunities</CardTitle>
                             </CardHeader>
-                            <CardContent className="p-8 pt-0">
+                            <CardContent>
                                  <div className="space-y-4">
                                      {[
-                                         { kw: "waterfront villas dubai", vol: "High", comp: "Med" },
-                                         { kw: "palm jebel ali prices", vol: "Extreme", comp: "Low" },
-                                         { kw: "luxury off-plan 2025", vol: "High", comp: "High" },
+                                         { kw: "waterfront apartments dubai", vol: "High", comp: "Med" },
+                                         { kw: "buy villa with crypto", vol: "Med", comp: "Low" },
+                                         { kw: "golden visa property", vol: "High", comp: "High" },
                                      ].map((k, i) => (
-                                         <div key={i} className="flex justify-between items-center p-5 border border-white/5 rounded-2xl bg-black/20 hover:bg-black/40 transition-colors">
-                                             <div className="space-y-1">
-                                                 <p className="font-bold text-sm text-white uppercase tracking-tight">{k.kw}</p>
-                                                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{k.vol} Vol • {k.comp} Comp</p>
+                                         <div key={i} className="flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                                             <div>
+                                                 <p className="font-medium text-sm">{k.kw}</p>
+                                                 <p className="text-xs text-muted-foreground">{k.vol} Vol • {k.comp} Comp</p>
                                              </div>
-                                             <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-600 hover:text-blue-500 hover:bg-blue-500/10"><Plus className="h-4 w-4" /></Button>
+                                             <Button size="icon" variant="ghost" className="h-8 w-8"><Plus className="h-4 w-4" /></Button>
                                          </div>
                                      ))}
                                  </div>
@@ -277,63 +296,79 @@ export default function MarketingDashboardPage() {
                  </div>
             </TabsContent>
 
-            <TabsContent value="email" className="mt-0">
-                <Card className="bg-zinc-900/30 border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm">
-                    <CardContent className="p-8">
-                        <EmailCampaignDashboard />
+            <TabsContent value="meta">
+                <Card>
+                    <CardContent className="py-20 text-center">
+                        <p className="text-muted-foreground">Meta Ads Manager Coming Soon...</p>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+            
+            <TabsContent value="social">
+                <Card>
+                    <CardContent className="py-20 text-center">
+                        <p className="text-muted-foreground">Social Media Manager Coming Soon...</p>
                     </CardContent>
                 </Card>
             </TabsContent>
 
-            <TabsContent value="sms" className="mt-0">
-                <Card className="bg-zinc-900/30 border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm">
-                    <CardContent className="p-8">
-                        <SmsCampaignDashboard />
-                    </CardContent>
-                </Card>
+            <TabsContent value="email" className="mt-6">
+                <EmailCampaignDashboard />
             </TabsContent>
 
-            <TabsContent value="plans" className="mt-0">
-                <Card className="bg-zinc-900/30 border-white/5 rounded-[2.5rem] shadow-sm">
-                    <CardHeader className="p-8 pb-4">
-                        <CardTitle className="text-2xl font-bold">AI Marketing Briefs</CardTitle>
-                        <CardDescription className="text-zinc-500 font-medium">Recent autonomous strategies generated by the system.</CardDescription>
+            <TabsContent value="sms" className="mt-6">
+                <SmsCampaignDashboard />
+            </TabsContent>
+
+            <TabsContent value="plans" className="mt-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>AI Marketing Plans</CardTitle>
+                        <CardDescription>Recent briefs generated by the Entrestate Marketing Architect.</CardDescription>
                     </CardHeader>
-                    <CardContent className="p-8 pt-0 space-y-6">
-                        {plans.length === 0 && (
-                            <div className="py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl">
-                                <Activity className="h-12 w-12 text-zinc-800 mx-auto" />
-                                <p className="text-zinc-500 font-medium">No plans generated yet.</p>
+                    <CardContent className="space-y-4">
+                        {plansLoading && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Loading marketing plans…
                             </div>
                         )}
-                        {plans.map((plan) => (
-                            <div key={plan.id} className="border border-white/5 rounded-[2rem] p-8 space-y-5 bg-black/20 hover:border-blue-500/20 transition-all group">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-blue-600/10 flex items-center justify-center text-blue-500">
-                                            <Zap className="h-4 w-4" />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{plan.audience || 'Custom Segment'}</span>
-                                    </div>
-                                    <span className="text-[10px] font-mono text-zinc-600">{new Date(plan.createdAt).toLocaleDateString()}</span>
+                        {!plansLoading && plans.length === 0 && (
+                            <p className="text-sm text-muted-foreground">
+                                No plans generated yet. Use the AI Marketing Architect to create your first brief.
+                            </p>
+                        )}
+                        {!plansLoading && plans.map((plan) => (
+                            <div key={plan.id} className="border rounded-xl p-4 space-y-3 bg-muted/20">
+                                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                    <span>{plan.audience || 'General Audience'}</span>
+                                    <span>{new Date(plan.createdAt).toLocaleString()}</span>
                                 </div>
-                                <p className="text-lg font-bold text-white tracking-tight leading-relaxed">{plan.response?.text || 'Strategic Campaign Overview'}</p>
-                                <div className="flex flex-col gap-3 sm:flex-row pt-2">
+                                <p className="text-sm font-semibold">{plan.response?.text || 'Campaign Summary'}</p>
+                                <div className="text-xs text-muted-foreground">
+                                    Prompt: <span className="text-foreground">{plan.prompt}</span>
+                                </div>
+                                <div className="flex flex-col gap-2 sm:flex-row">
                                     <Button
                                         variant="outline"
-                                        className="h-11 rounded-xl border-white/10 bg-white/5 font-bold text-xs uppercase tracking-widest px-6"
+                                        className="h-9 text-xs"
                                         onClick={() => {
                                             navigator.clipboard.writeText(plan.prompt || '');
-                                            toast({ title: 'Brief Copied' });
+                                            toast({ title: 'Prompt copied', description: 'Use this brief in the AI designer or Google Ads manager.' });
                                         }}
                                     >
-                                        Copy Specs
+                                        Copy Prompt
                                     </Button>
                                     <Button
-                                        className="h-11 rounded-xl bg-blue-600 hover:bg-blue-700 font-bold text-xs uppercase tracking-widest px-6"
-                                        onClick={() => router.push('/dashboard/google-ads?source=plan')}
+                                        className="h-9 text-xs bg-green-600 hover:bg-green-700"
+                                        onClick={() => {
+                                            if (typeof window !== 'undefined') {
+                                                sessionStorage.setItem(GOOGLE_ADS_DRAFT_KEY, JSON.stringify(plan));
+                                            }
+                                            router.push('/dashboard/google-ads?source=plan');
+                                        }}
                                     >
-                                        Execute Flow
+                                        Launch Flow
                                     </Button>
                                 </div>
                             </div>

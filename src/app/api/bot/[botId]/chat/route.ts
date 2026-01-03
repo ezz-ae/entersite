@@ -16,30 +16,8 @@ const requestSchema = z.object({
   context: z.string().optional(),
 });
 
-// Simple RAG: Fetch relevant projects from Firestore based on message keywords
-async function fetchRelevantInventory(message: string) {
-  const db = getAdminDb();
-  const keywords = message.toLowerCase().split(/\s+/).filter(k => k.length > 3);
-  
-  if (keywords.length === 0) return [];
-
-  // In a real production app, you might use vector search. 
-  // Here we do a simple keyword match on names and areas as a first pass.
-  // We limit to 3 projects to keep the prompt size small.
-  const snapshot = await db.collection('inventory_projects')
-    .limit(10) // Fetch a few to filter in memory
-    .get();
-
-  const allProjects = snapshot.docs.map(doc => doc.data());
-  
-  return allProjects.filter(p => {
-    const text = `${p.name} ${p.location?.area} ${p.developer} ${p.description?.short}`.toLowerCase();
-    return keywords.some(k => text.includes(k));
-  }).slice(0, 3);
-}
-
 const rateLimits = new Map<string, { count: number; expiresAt: number }>();
-const RATE_LIMIT_MAX = 15; // Increased slightly for RAG overhead
+const RATE_LIMIT_MAX = 10;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 
 function consumeRateLimit(key: string) {
@@ -68,21 +46,12 @@ export async function POST(req: NextRequest, { params: paramsPromise }: { params
     const body = await req.json();
     const payload = requestSchema.parse(body);
 
-    // 1. Fetch relevant project data (RAG)
-    const projects = await fetchRelevantInventory(payload.message);
-    const projectContext = projects.length > 0 
-      ? `Relevant Projects found in database:\n${projects.map(p => `- ${p.name} in ${p.location?.area}: Starting at ${p.price?.label}. ROI: ${p.performance?.roi}%. Handover: Q${p.handover?.quarter} ${p.handover?.year}`).join('\n')}`
-      : "No specific project matches found in the direct search. Refer to general market knowledge but be cautious.";
-
-    // 2. Build the history
     const historyText = (payload.history || [])
       .map((entry) => `${entry.role === 'user' ? 'User' : 'Agent'}: ${entry.text}`)
       .join('\n');
 
     const prompt = `
 Context: ${payload.context || 'web_widget'}.
-${projectContext}
-
 Conversation so far:
 ${historyText}
 
@@ -91,12 +60,7 @@ User (${params.botId}): ${payload.message}
 
     const { text } = await generateText({
       model: getGoogleModel(FLASH_MODEL),
-      system: `You are EntreSite's AI sales concierge. 
-               Use the "Relevant Projects" provided in the context as your primary source of truth. 
-               Be concise, professional, and high-end. 
-               Cite the specific ROI and handover dates from the provided data.
-               Always steer toward capturing name/contact if missing. 
-               If no projects are provided, speak generally about Dubai real estate but encourage the user to provide their requirements so you can find matches.`,
+      system: "You are EntreSite's AI sales concierge. Be concise, cite Dubai market data when possible, and always steer toward capturing name/contact if missing.",
       prompt,
     });
 
@@ -109,7 +73,6 @@ User (${params.botId}): ${payload.message}
         siteId: payload.siteId || null,
         userMessage: payload.message,
         agentReply: text,
-        matchedProjects: projects.map(p => p.id),
         createdAt: new Date().toISOString(),
         context: payload.context || 'web_widget',
       });

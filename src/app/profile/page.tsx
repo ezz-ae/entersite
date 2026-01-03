@@ -5,22 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useUser } from '@/firebase/provider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Settings, CreditCard, Bell, LogOut, Building, ShieldCheck, Camera } from 'lucide-react';
+import { User, Settings, CreditCard, Bell, LogOut, Building, ShieldCheck } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { user } = useUser();
   const [isEditing, setIsEditing] = useState(false);
-
-  const getInitials = (name?: string | null) => {
-    if (!name) return 'U';
-    const names = name.split(' ');
-    if (names.length > 1) {
-      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
-    }
-    return names[0][0].toUpperCase();
-  }
 
   return (
     <main className="min-h-screen bg-muted/20 py-12">
@@ -60,37 +50,32 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="flex items-center gap-6">
-                            <div className="relative group">
-                                <Avatar className="h-24 w-24">
-                                    <AvatarImage src={user?.photoURL || undefined} />
-                                    <AvatarFallback className="text-3xl bg-muted/50">{getInitials(user?.displayName)}</AvatarFallback>
-                                </Avatar>
-                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 rounded-full transition-opacity cursor-pointer">
-                                    <Camera className="h-8 w-8 text-white" />
-                                </div>
-                            </div>
+                            <Avatar className="h-20 w-20">
+                                <AvatarImage src="https://github.com/shadcn.png" />
+                                <AvatarFallback>JD</AvatarFallback>
+                            </Avatar>
                             <div>
-                                <p className="font-bold text-xl">{user?.displayName || "Your Name"}</p>
-                                <p className="text-sm text-muted-foreground">{user?.email || "your.email@example.com"}</p>
+                                <Button variant="outline" size="sm">Change Avatar</Button>
+                                <p className="text-xs text-muted-foreground mt-2">JPG, GIF or PNG. Max size of 800K</p>
                             </div>
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="firstName">First Name</Label>
-                                <Input id="firstName" defaultValue={user?.displayName?.split(' ')[0]} disabled={!isEditing} />
+                                <Input id="firstName" defaultValue="John" disabled={!isEditing} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="lastName">Last Name</Label>
-                                <Input id="lastName" defaultValue={user?.displayName?.split(' ').slice(1).join(' ')} disabled={!isEditing} />
+                                <Input id="lastName" defaultValue="Doe" disabled={!isEditing} />
                             </div>
                             <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="email">Email Address</Label>
-                                <Input id="email" defaultValue={user?.email || ''} disabled />
+                                <Input id="email" defaultValue="john.doe@example.com" disabled />
                             </div>
                             <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="bio">Bio</Label>
-                                <Input id="bio" placeholder="Tell us about yourself" disabled={!isEditing} />
+                                <Input id="bio" defaultValue="Real Estate Developer based in Dubai." disabled={!isEditing} />
                             </div>
                         </div>
 

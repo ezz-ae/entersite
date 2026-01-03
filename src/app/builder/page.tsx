@@ -18,7 +18,7 @@ import { getAuth } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { cn } from '@/lib/utils';
 import { getBlueprintTemplate } from '@/lib/onboarding-blueprints';
-import { subscribeToJobs, Job } from '@/lib/jobs';
+import { createJob, subscribeToJobs, Job } from '@/lib/jobs';
 import { ToastAction } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
 
@@ -105,7 +105,7 @@ function BuilderContent() {
                 const data = await response.json();
                 setPage(prev => ({ 
                     ...prev, 
-                    title: data.pageTitle || data.title || 'Institutional Launch',
+                    title: data.pageTitle || data.title || 'AI Generated Site',
                     blocks: data.blocks.map((b: any, i: number) => ({
                         ...b,
                         blockId: `\${b.type}-\${i}-\${Date.now()}`,
@@ -121,25 +121,6 @@ function BuilderContent() {
         }
     }, []);
 
-    // NEW: Directly apply generated data from the upload path
-    const handleGeneratedData = useCallback((data: any) => {
-        setIsStarted(true);
-        setPage(prev => ({
-            ...prev,
-            title: data.title || 'Institutional Build',
-            blocks: data.blocks.map((b: any, i: number) => ({
-                ...b,
-                blockId: `\${b.type}-\${i}-\${Date.now()}`,
-                order: i
-            })),
-            seo: data.seo || prev.seo
-        }));
-        toast({
-            title: "Asset Node Synchronized",
-            description: "Institutional data has been mapped to your build canvas.",
-        });
-    }, [toast]);
-
     const applyBlueprint = useCallback((id: string) => {
         const template = getBlueprintTemplate(id);
         if (template) {
@@ -148,6 +129,7 @@ function BuilderContent() {
         }
     }, []);
 
+    // Effect to handle loading an existing site
     useEffect(() => {
         if (siteIdParam && user) {
             loadSite(siteIdParam);
@@ -474,7 +456,6 @@ function BuilderContent() {
             <BuilderLandingPage 
                 onStartWithAI={handleStartWithAI} 
                 onChooseTemplate={() => setIsStarted(true)} 
-                onGeneratedData={handleGeneratedData}
             />
         );
     }

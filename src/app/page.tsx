@@ -25,14 +25,14 @@ export default function LandingPage() {
       {/* OS Status Ticker */}
       <section className="py-8 border-y border-white/5 bg-zinc-950 flex items-center justify-center overflow-hidden">
          <div className="flex gap-16 animate-marquee whitespace-nowrap">
-            <TickerItem label="System Status" status="Operational" />
-            <TickerItem label="Projects Loaded" status="3,754" />
+            <TickerItem label="Vertex Engine" status="Operational" />
+            <TickerItem label="Entrestate Data" status="3,754 Projects" />
             <TickerItem label="Meta Sync" status="Connected" />
-            <TickerItem label="AI Engine" status="Active" />
-            <TickerItem label="Data Region" status="Dubai" />
+            <TickerItem label="Imagen 3" status="Active" />
+            <TickerItem label="DIFC Node" status="Live" />
             {/* Duplicate for seamless marquee */}
-            <TickerItem label="System Status" status="Operational" />
-            <TickerItem label="Projects Loaded" status="3,754" />
+            <TickerItem label="Vertex Engine" status="Operational" />
+            <TickerItem label="Entrestate Data" status="3,754 Projects" />
             <TickerItem label="Meta Sync" status="Connected" />
          </div>
       </section>
@@ -69,7 +69,7 @@ function TickerItem({ label, status }: { label: string, status: string }) {
         <div className="flex items-center gap-4">
             <span className="text-xs font-bold text-zinc-500 uppercase tracking-[0.2em]">{label}</span>
             <div className="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
-            <span className="text-xs font-bold text-white">{status}</span>
+            <span className="text-xs font-mono text-white">{status}</span>
         </div>
     )
 }

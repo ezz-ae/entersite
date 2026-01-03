@@ -26,17 +26,15 @@ export function filterProjects(projects: ProjectData[], filters: ProjectSearchFi
       const matchesQuery =
         project.name.toLowerCase().includes(query) ||
         project.developer.toLowerCase().includes(query) ||
-        (project.location && project.location.city.toLowerCase().includes(query)) ||
-        (project.location && project.location.area.toLowerCase().includes(query));
+        project.location.city.toLowerCase().includes(query) ||
+        project.location.area.toLowerCase().includes(query);
       if (!matchesQuery) {
         return false;
       }
     }
 
-    if (filters.city && city !== 'all') {
-      if (!project.location || project.location.city.toLowerCase() !== city) {
-        return false;
-      }
+    if (filters.city && city !== 'all' && project.location.city.toLowerCase() !== city) {
+      return false;
     }
 
     if (developer && !project.developer.toLowerCase().includes(developer)) {
